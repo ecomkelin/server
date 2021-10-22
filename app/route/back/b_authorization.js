@@ -31,8 +31,8 @@ const loginFunc = async(req, res) => {
 		const match_res = await MdFilter.bcrypt_match_Prom(pwd, curUser.pwd);
 		if(match_res.status != 200) return res.status(200).json({status: 400, message: "[server] 密码不匹配"});
 
-		const accessToken = MdJwt.generateAccessToken(curUser);
-		const refreshToken = MdJwt.generateRefreshToken(curUser);
+		const accessToken = MdJwt.generateToken(curUser);
+		const refreshToken = MdJwt.generateToken(curUser, true);
 
 		curUser.at_last_login = Date.now();
 		// 存入到数据库的refreshToken 加密
@@ -58,15 +58,13 @@ const loginFunc = async(req, res) => {
 const logoutFunc = async(req, res) => {
 	console.log("/b1/logout");
 	try {
-		const refreshToken = MdJwt.obtain_token_from_headersToken(req.headers['authorization']);
-		if(!refreshToken) return res.json({status: 400, message: "[server] 还没有被授权, 请登陆"});
-		const refresh_res = await MdJwt.refreshToken_VerifyProm(refreshToken);
+		const refresh_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
 		if(refresh_res.status !== 200) return res.status(200).json({status: 200, message: refresh_res.message});
-		const payload = refresh_res.payload;
-		const curUser = await UserDB.findOne({_id: payload._id}, {refreshToken: 1});
-		if(!curUser) return res.status(200).json({status: 200, message: "[server] 未找到相应用户"});
-		curUser.refreshToken = null;
-		const objSave = await curUser.save();
+		const payload = refresh_res.data.payload;
+		const User = await UserDB.findOne({_id: payload._id}, {refreshToken: 1});
+		if(!User) return res.status(200).json({status: 200, message: "[server] 未找到相应用户"});
+		User.refreshToken = null;
+		const objSave = await User.save();
 
 		return res.status(200).json({status: 200, message: "[server] 成功从服务器登出"});
 	} catch(error) {
@@ -79,11 +77,9 @@ const logoutFunc = async(req, res) => {
 const isLoginFunc = async(req, res) => {
 	console.log("/b1/isLogin");
 	try {
-		const accessToken = MdJwt.obtain_token_from_headersToken(req.headers['authorization']);
-		if(!accessToken) res.json({status: 400, message: "[server] 还没有被授权, 请刷新token"});
-		const access_res = await MdJwt.accessToken_VerifyProm(accessToken);
+		const access_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
 		if(access_res.status === 401) return res.status(200).json(access_res);
-		const curUser = access_res.payload;
+		const curUser = access_res.data.payload;
 		if(!ConfUser.role_Arrs.includes(curUser.role)) return res.json({status: 400, message: "[server] 权限参数错误"});
 		
 		return res.status(200).json({status: 200, message: "[server] 登陆状态", data: {curUser}});
@@ -98,22 +94,21 @@ const isLoginFunc = async(req, res) => {
 const refreshtokenFunc = async(req, res) => {
 	console.log("/b1/refreshtoken");
 	try {
-		const reToken = MdJwt.obtain_token_from_headersToken(req.headers['authorization']);
-		if(!reToken) return res.json({status: 400, message: "[server] 还没有被授权, 请登陆"});
-		const refresh_res = await MdJwt.refreshToken_VerifyProm(reToken);
+		const refresh_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
 		if(refresh_res.status !== 200) return res.status(refresh_res.status).json(refresh_res);
-		const payload = refresh_res.payload;
-		const curUser = await UserDB.findOne({_id: payload._id});
-		if(!curUser) return res.json({status: 400, message: "[server] 授权错误, 请重新登录"});
-		const match_res = await MdFilter.bcrypt_match_Prom(reToken, curUser.refreshToken);
+		const payload = refresh_res.data.payload;
+		const reToken = refresh_res.data.token;
+		const User = await UserDB.findOne({_id: payload._id});
+		if(!User) return res.json({status: 400, message: "[server] 授权错误, 请重新登录"});
+		const match_res = await MdFilter.bcrypt_match_Prom(reToken, User.refreshToken);
 		if(match_res.status != 200) return res.status(200).json({status: 400, message: "[server] refreshToken 不匹配"});
 
-		const accessToken = MdJwt.generateAccessToken(payload);
-		const refreshToken = MdJwt.generateRefreshToken(curUser);
+		const accessToken = MdJwt.generateToken(payload);
+		const refreshToken = MdJwt.generateToken(User, true);
 		
-		curUser.at_last_login = Date.now();
-		curUser.refreshToken = await MdFilter.encrypt_tProm(refreshToken);
-		const objSave = await curUser.save();
+		User.at_last_login = Date.now();
+		User.refreshToken = await MdFilter.encrypt_tProm(refreshToken);
+		const objSave = await User.save();
 
 		return res.status(200).json({
 			status: 200,

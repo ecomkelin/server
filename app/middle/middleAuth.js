@@ -3,9 +3,8 @@ const MdJwt = require('./middleJwt.js');
 
 exports.is_Client = async(req, res, next) => {
 	try {
-		const accessToken = MdJwt.obtain_token_from_headersToken(req.headers['authorization']);
-		const access_res = await MdJwt.accessToken_VerifyProm(accessToken);
-		if(access_res.status === 200) req.curClient = access_res.payload;
+		const access_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
+		if(access_res.status === 200) req.curClient = access_res.data.payload;
 		return next();
 	} catch(error) {
 		console.log("is_Client", error);
@@ -15,10 +14,9 @@ exports.is_Client = async(req, res, next) => {
 
 exports.path_Client = async(req, res, next) => {
 	try {
-		const accessToken = MdJwt.obtain_token_from_headersToken(req.headers['authorization']);
-		const access_res = await MdJwt.accessToken_VerifyProm(accessToken);
+		const access_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
 		if(access_res.status === 401) return res.status(200).json(access_res);
-		req.curClient = access_res.payload;
+		req.curClient = access_res.data.payload;
 		return next();
 	} catch(error) {
 		console.log("path_Client", error);
@@ -28,9 +26,8 @@ exports.path_Client = async(req, res, next) => {
 
 exports.is_User = async(req, res, next) => {
 	try {
-		const accessToken = MdJwt.obtain_token_from_headersToken(req.headers['authorization']);
-		const access_res = await MdJwt.accessToken_VerifyProm(accessToken);
-		if(access_res.status === 200) req.curUser = access_res.payload;
+		const access_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
+		if(access_res.status === 200) req.curUser = access_res.data.payload;
 
 		return next();
 	} catch(error) {
@@ -41,11 +38,9 @@ exports.is_User = async(req, res, next) => {
 
 exports.path_User = async(req, res, next) => {
 	try {
-		const accessToken = MdJwt.obtain_token_from_headersToken(req.headers['authorization']);
-
-		const access_res = await MdJwt.accessToken_VerifyProm(accessToken);
+		const access_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
 		if(access_res.status === 401) return res.status(200).json(access_res);
-		req.curUser = access_res.payload;
+		req.curUser = access_res.data.payload;
 		return next();
 	} catch(error) {
 		// console.log("path_User", error);
@@ -55,11 +50,9 @@ exports.path_User = async(req, res, next) => {
 
 exports.path_ower = async(req, res, next) => {
 	try {
-		const accessToken = MdJwt.obtain_token_from_headersToken(req.headers['authorization']);
-
-		const access_res = await MdJwt.accessToken_VerifyProm(accessToken);
+		const access_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
 		if(access_res.status === 401) return res.status(200).json(access_res);
-		const curUser = access_res.payload;
+		const curUser = access_res.data.payload;
 		if(curUser.role != ConfUser.role_set.owner) return res.status(200).json({status: 401, message: '您需要此公司董事会权限'});
 		req.curUser = curUser;
 		return next();
@@ -71,11 +64,9 @@ exports.path_ower = async(req, res, next) => {
 
 exports.path_mger = async(req, res, next) => {
 	try {
-		const accessToken = MdJwt.obtain_token_from_headersToken(req.headers['authorization']);
-
-		const access_res = await MdJwt.accessToken_VerifyProm(accessToken);
+		const access_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
 		if(access_res.status === 401) return res.status(200).json(access_res);
-		const curUser = access_res.payload;
+		const curUser = access_res.data.payload;
 		if(curUser.role > ConfUser.role_set.manager) return res.status(200).json({status: 401, message: '您需要此公司管理员以上权限'});
 		req.curUser = curUser;
 		return next();
@@ -88,13 +79,12 @@ exports.path_mger = async(req, res, next) => {
 
 exports.path_sfer = async(req, res, next) => {
 	try {
-		const accessToken = MdJwt.obtain_token_from_headersToken(req.headers['authorization']);
-			const access_res = await MdJwt.accessToken_VerifyProm(accessToken);
-			if(access_res.status === 401) return res.status(200).json(access_res);
-			const curUser = access_res.payload;
-			if(curUser.role > ConfUser.role_set.staff) return res.status(200).json({status: 401, message: '您需要此公司员工以上权限'});
-			req.curUser = curUser;
-			return next();
+		const access_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
+		if(access_res.status === 401) return res.status(200).json(access_res);
+		const curUser = access_res.data.payload;
+		if(curUser.role > ConfUser.role_set.staff) return res.status(200).json({status: 401, message: '您需要此公司员工以上权限'});
+		req.curUser = curUser;
+		return next();
 	} catch(error) {
 		console.log("path_sfer", error);
 		return res.status(200).json({status: 401, message: "您没有权限"});
@@ -103,10 +93,9 @@ exports.path_sfer = async(req, res, next) => {
 
 exports.path_bser = async(req, res, next) => {
 	try {
-		const accessToken = MdJwt.obtain_token_from_headersToken(req.headers['authorization']);
-		const access_res = await MdJwt.accessToken_VerifyProm(accessToken);
+		const access_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
 		if(access_res.status === 401) return res.status(200).json(access_res);
-		const curUser = access_res.payload;
+		const curUser = access_res.data.payload;
 		if(curUser.role > ConfUser.role_set.boss) return res.status(200).json({status: 401, message: '您需要此公司分店老板权限'});
 		req.curUser = curUser;
 		return next();
@@ -119,10 +108,9 @@ exports.path_bser = async(req, res, next) => {
 // 总公司和分店的管理者权限
 exports.by_bser = async(req, res, next) => {
 	try {
-		const accessToken = MdJwt.obtain_token_from_headersToken(req.headers['authorization']);
-		const access_res = await MdJwt.accessToken_VerifyProm(accessToken);
+		const access_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
 		if(access_res.status === 401) return res.status(200).json(access_res);
-		const curUser = access_res.payload;
+		const curUser = access_res.data.payload;
 
 		if(curUser.role > ConfUser.role_set.manager && curUser.role != ConfUser.role_set.boss)
 			return res.status(200).json({status: 401, message: '您没有此公司管理权限'});

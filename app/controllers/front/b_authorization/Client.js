@@ -11,16 +11,14 @@ const ClientDB = require('../../../models/auth/Client');
 exports.logout = async(req, res) => {
 	console.log("/v1/logout");
 	try {
-		const refreshToken = MdJwt.obtain_token_from_headersToken(req.headers['authorization']);
-		if(!refreshToken) return res.json({status: 400, message: "[server] 还没有被授权, 请登陆"});
-		const refresh_res = await MdJwt.refreshToken_VerifyProm(refreshToken);
+		const refresh_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
 		if(refresh_res.status !== 200) return res.status(refresh_res.status).json(refresh_res);
-		const payload = refresh_res.payload;
-		const curClient = await ClientDB.findOne({_id: payload._id}, {refreshToken: 1});
-		if(!curClient) return res.status(200).json({status: 200, message: "[server] 未找到相应用户"});
-		// if(curClient.refreshToken !== refreshToken) return res.json({status: 400, message: "[server] 服务器未删除"});
-		curClient.refreshToken = null;
-		const objSave = await curClient.save();
+		const payload = refresh_res.data.payload;
+		const Client = await ClientDB.findOne({_id: payload._id}, {refreshToken: 1});
+		if(!Client) return res.status(200).json({status: 200, message: "[server] 未找到相应用户"});
+		// if(Client.refreshToken !== refreshToken) return res.json({status: 400, message: "[server] 服务器未删除"});
+		Client.refreshToken = null;
+		const objSave = await Client.save();
 		return res.status(200).json({status: 200, message: "[server] 成功从服务器登出"});
 	} catch(error) {
 		console.log("/v1/logout", error);
@@ -32,11 +30,9 @@ exports.logout = async(req, res) => {
 exports.isLogin = async(req, res) => {
 	console.log("/v1/isLogin");
 	try {
-		const accessToken = MdJwt.obtain_token_from_headersToken(req.headers['authorization']);
-		if(!accessToken) res.json({status: 400, message: "[server] 还没有被授权, 请刷新token"});
-		const access_res = await MdJwt.accessToken_VerifyProm(accessToken);
+		const access_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
 		if(access_res.status === 401) return res.status(200).json(access_res);
-		const curClient = access_res.payload;
+		const curClient = access_res.data.payload;
 		
 		return res.status(200).json({status: 200, message: "[server] 登陆状态", data: {curClient}});
 	} catch(error) {
@@ -50,12 +46,11 @@ exports.isLogin = async(req, res) => {
 exports.refreshtoken = async(req, res) => {
 	console.log("/v1/refreshtoken");
 	try {
-		const refreshToken = MdJwt.obtain_token_from_headersToken(req.headers['authorization']);
-		const refresh_res = await MdJwt.refreshToken_VerifyProm(refreshToken);
+		const refresh_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
 		if(refresh_res.status !== 200) return res.status(refresh_res.status).json(refresh_res);
 
-		const payload = refresh_res.payload;
-		const accessToken = MdJwt.generateAccessToken(payload);
+		const payload = refresh_res.data.payload;
+		const accessToken = MdJwt.generateToken(payload);
 		return res.status(200).json({
 			status: 200,
 			message: "[server] 刷新token成功",
@@ -142,8 +137,8 @@ exports.login = async(req, res) => {
 		let curClient = result_Exist.data.Client;
 
 		if(!curClient) return res.json({status: 400, message: "[server] 登陆失败"});
-		const accessToken = MdJwt.generateAccessToken(curClient);
-		const refreshToken = MdJwt.generateRefreshToken(curClient);
+		const accessToken = MdJwt.generateToken(curClient);
+		const refreshToken = MdJwt.generateToken(curClient, true);
 
 		curClient.at_last_login = Date.now();
 		curClient.refreshToken = refreshToken;

@@ -1,39 +1,42 @@
 const jwt = require('jsonwebtoken');
 
 /* ============================== 获取token ============================== */
-exports.obtain_token_from_headersToken = (headersToken) => {
-	if(!headersToken) return null;
+exports.obtain_headersInfo = (headersToken) => {
+	if(!headersToken) return {codePlat: null, token: null, is_refresh: null};
 	const hts = String(headersToken).split(" ");
-	if(hts && hts.length > 1) return hts[1];
-	return null;
+	if(hts.length === 1) return {codePlat: hts[0], token: null, is_refresh: null};
+	else if(hts.length === 2) return {codePlat: hts[0], token: hts[1], is_refresh: null};
+	else {
+		if(hts[2] == 're') return {codePlat: hts[0], token: hts[1], is_refresh: hts[2]};
+		return {codePlat: hts[0], token: hts[1], is_refresh: null};
+	}
 }
 
 /* ================================ 验证 ================================ */
-exports.accessToken_VerifyProm = (token)=> {
-	return new Promise((resolve) => {
-		jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (expired, payload) => {
-			if(expired) return resolve({status: 401, message: "[server] 授权过期 accessToken expired", expired});
-			return resolve({status: 200, payload});
-		})
-	})
-}
-exports.refreshToken_VerifyProm = (token)=> {
-	return new Promise((resolve) => {
-		jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (expired, payload) => {
-			if(expired) return resolve({status: 401, message: "[server] 授权过期 refreshToken expired", expired});
-			return resolve({status: 200, payload});
-		})
+exports.token_VerifyProm = (headersToken)=> {
+	return new Promise(async(resolve) => {
+		try {
+			const {token, is_refresh} = this.obtain_headersInfo(headersToken);
+			if(!token) return  resolve({status: 400, message: "[server] 请您传递 headers 空格后第第二个token信息"});
+			const token_secret = is_refresh ? process.env.REFRESH_TOKEN_SECRET:process.env.ACCESS_TOKEN_SECRET;
+			jwt.verify(token, token_secret, (expired, payload) => {
+				if(expired) return resolve({status: 401, message: "[server] token 过期", expired});
+				return resolve({status: 200, data: {token, is_refresh, payload}});
+			})
+		} catch(error) {
+			console.log(error);
+			return resolve({status: 500, message: '[server] token_VerifyProm Error'});
+		}
 	})
 }
 
+
 /* ================================ 签名 ================================ */
-exports.generateAccessToken = (obj)=> {
+exports.generateToken = (obj, is_refresh=null)=> {
 	const payload = generatePayload(obj);
-	return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {expiresIn: process.env.ACCESS_TOKEN_EX})
-}
-exports.generateRefreshToken = (obj)=> {
-	const payload = generatePayload(obj);
-	return jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, {expiresIn: process.env.REFRESH_TOKEN_EX})
+	const token_secret = is_refresh ? process.env.REFRESH_TOKEN_SECRET : process.env.ACCESS_TOKEN_SECRET;
+	const token_ex = is_refresh ? process.env.REFRESH_TOKEN_EX : process.env.ACCESS_TOKEN_EX;
+	return jwt.sign(payload, token_secret, {expiresIn: token_ex});
 }
 
 const generatePayload = (obj)=> {
