@@ -4,7 +4,7 @@ const ProdDB = require('../../../models/product/Prod');
 
 const _ = require('underscore');
 
-const vProd_path_Func = (pathObj, curClient, queryObj) => {
+const vProd_path_Func = (pathObj, payload, queryObj) => {
 	// pathObj.is_usable = 1;
 
 	if(!queryObj) return;
@@ -31,9 +31,9 @@ const dbProd = 'Prod';
 exports.vProds = async(req, res) => {
 	console.log("/v1/Prods");
 	try {
-		const curClient = req.curClient || req.ip;
+		const payload = req.payload || req.ip;
 		const GetDB_Filter = {
-			Identity: curClient,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: ProdDB,
 			path_Callback: vProd_path_Func,
@@ -51,10 +51,10 @@ exports.vProds = async(req, res) => {
 exports.vProd = async(req, res) => {
 	console.log("/v1/Prod");
 	try {
-		const curClient = req.curClient;
+		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: curClient,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: ProdDB,
 			path_Callback: vProd_path_Func,

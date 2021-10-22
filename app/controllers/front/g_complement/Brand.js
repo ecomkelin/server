@@ -2,7 +2,7 @@ const GetDB = require('../../_db/GetDB');
 const MdFilter = require('../../../middle/middleFilter');
 const BrandDB = require('../../../models/complement/Brand');
 
-const vBrand_path_Func = (pathObj, curClient, queryObj) => {
+const vBrand_path_Func = (pathObj, payload, queryObj) => {
 	pathObj.is_usable = 1;
 
 	if(!queryObj) return;
@@ -17,9 +17,9 @@ const dbBrand = 'Brand';
 exports.vBrands = async(req, res) => {
 	console.log("/v1/Brands");
 	try {
-		const curClient = req.curClient || req.ip;
+		const payload = req.payload || req.ip;
 		const GetDB_Filter = {
-			Identity: curClient,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: BrandDB,
 			path_Callback: vBrand_path_Func,
@@ -37,10 +37,10 @@ exports.vBrands = async(req, res) => {
 exports.vBrand = async(req, res) => {
 	console.log("/v1/Brand");
 	try {
-		const curClient = req.curClient;
+		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: curClient,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: BrandDB,
 			path_Callback: vBrand_path_Func,

@@ -8,8 +8,8 @@ const moment = require('moment');
 exports.vCardCreate = async(req, res) => {
 	console.log("/v1/CardCreate");
 	try{
-		const curClient = req.curClient;
-		if(MdSafe.fq_spanTimes1_Func(curClient._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 	 	
 	 	const org_Order = req.params.id;
 	 	if(!MdFilter.is_ObjectId_Func(org_Order)) return res.json({status: 400, message: "[server] 原订单 id错误"});
@@ -35,8 +35,8 @@ exports.vCardCreate = async(req, res) => {
 exports.vCard_proof = async(req, res) => {
 	console.log("/v1/Card_proof");
 	try{
-		const curClient = req.curClient;
-		if(MdSafe.fq_spanTimes1_Func(curClient._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
  
 		const chgSkus = [];
 		const obj = req.body.obj;

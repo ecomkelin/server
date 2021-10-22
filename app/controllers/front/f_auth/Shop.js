@@ -2,7 +2,7 @@ const GetDB = require('../../_db/GetDB');
 const MdFilter = require('../../../middle/middleFilter');
 const ShopDB = require('../../../models/auth/Shop');
 
-const vShop_path_Func = (pathObj, curClient, queryObj) => {
+const vShop_path_Func = (pathObj, payload, queryObj) => {
 	pathObj.is_usable = 1;
 
 	if(!queryObj) return;
@@ -24,7 +24,7 @@ const dbShop = 'Shop';
 exports.vShops = async(req, res) => {
 	console.log("/v1/Shops");
 	try {
-		const Identity = req.curClient || req.ip;
+		const Identity = req.payload || req.ip;
 		const GetDB_Filter = {
 			Identity,
 			queryObj: req.query,
@@ -43,7 +43,7 @@ exports.vShops = async(req, res) => {
 exports.vShop = async(req, res) => {
 	console.log("/v1/Shop");
 	try {
-		const Identity = req.curClient || req.ip;
+		const Identity = req.payload || req.ip;
 		const GetDB_Filter = {
 			id: req.params.id,
 			Identity,

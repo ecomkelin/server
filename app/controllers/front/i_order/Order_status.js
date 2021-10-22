@@ -8,8 +8,8 @@ const moment = require('moment');
 exports.vOrder_change_status = async(req, res) => {
 	console.log("/v1/Order_change_status");
 	try{
-		const curClient = req.curClient;
-		if(MdSafe.fq_spanTimes1_Func(curClient._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "请传递正确的数据 _id"});
@@ -19,11 +19,11 @@ exports.vOrder_change_status = async(req, res) => {
 
 		let action_prom = null;
 		if(action === ConfOrder.action.front.place) { // 下单
-			action_prom = await vOrder_status_place_Prom(id, curClient);
+			action_prom = await vOrder_status_place_Prom(id, payload);
 		} else if(action === ConfOrder.action.front.trash) {
-			action_prom = await vOrder_status_trash_Prom(id, curClient);
+			action_prom = await vOrder_status_trash_Prom(id, payload);
 		} else if(action === ConfOrder.action.front.cancel) {
-			action_prom = await vOrder_status_cancel_Prom(id, curClient);
+			action_prom = await vOrder_status_cancel_Prom(id, payload);
 		}
 		if(action_prom) return res.status(action_prom.status).json(action_prom);
 		return res.json({status: 400, message: "请传递您对订单的正确操作"}); 
@@ -36,13 +36,13 @@ exports.vOrder_change_status = async(req, res) => {
 exports.vOrder_proof = async(req, res) => {
 	console.log("/v1/Order_proof");
 	try{
-		const curClient = req.curClient;
-		if(MdSafe.fq_spanTimes1_Func(curClient._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
  
 		const id = req.params.id;
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "请传递正确的数据 _id"});
 
-		const pathObj = {_id: id, Client: curClient._id};
+		const pathObj = {_id: id, Client: payload._id};
 		// 找到所选订单
 
 		// 如果上次校准时间 大于2个小时 则可以重新校准
@@ -209,11 +209,11 @@ const vOrder_proof_Prom = (pathObj) => {
 
 
 // 确认下单
-const vOrder_status_place_Prom = async(id, curClient) => {
+const vOrder_status_place_Prom = async(id, payload) => {
 	console.log('v1/vOrder_status_place_Prom');
 	return new Promise(async(resolve) => {
 		try{
-			const pathObj = {_id: id, status: ConfOrder.status_obj.placing.num, Client: curClient._id};
+			const pathObj = {_id: id, status: ConfOrder.status_obj.placing.num, Client: payload._id};
 			const Order = await OrderDB.findOne(pathObj);
 			if(!Order) return resolve({status: 400, message: "没有找到此订单"});
 
@@ -273,10 +273,10 @@ const vOrder_status_place_Prom = async(id, curClient) => {
 
 
 
-const vOrder_status_cancel_Prom = async(id, curClient) => {
+const vOrder_status_cancel_Prom = async(id, payload) => {
 	return new Promise(async(resolve) => {
 		try{
-			const pathObj = {_id: id, status: ConfOrder.status_obj.placing.num, Client: curClient._id};
+			const pathObj = {_id: id, status: ConfOrder.status_obj.placing.num, Client: payload._id};
 			const Order = await OrderDB.findOne(pathObj);
 			if(!Order) return resolve({status: 400, message: "没有找到此订单"});
 
@@ -295,12 +295,12 @@ const vOrder_status_cancel_Prom = async(id, curClient) => {
 	})
 }
 
-const vOrder_status_trash_Prom = async(id, curClient) => {
+const vOrder_status_trash_Prom = async(id, payload) => {
 	return new Promise(async(resolve) => {
 		try{
 			const pathObj = {
 				_id: id,
-				Client: curClient._id,
+				Client: payload._id,
 				status: {$in: [ConfOrder.status_obj.completed.num, ...ConfOrder.status_confirms]},
 			};
 			const Order = await OrderDB.findOne(pathObj);

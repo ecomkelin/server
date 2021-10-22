@@ -32,9 +32,9 @@ exports.isLogin = async(req, res) => {
 	try {
 		const access_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
 		if(access_res.status === 401) return res.status(200).json(access_res);
-		const curClient = access_res.data.payload;
+		const payload = access_res.data.payload;
 		
-		return res.status(200).json({status: 200, message: "[server] 登陆状态", data: {curClient}});
+		return res.status(200).json({status: 200, message: "[server] 登陆状态", data: {payload}});
 	} catch(error) {
 		console.log("/v1/isLogin", error);
 		return res.status(500).json({status: 500, message: "[服务器错误: isLogin]"});
@@ -54,7 +54,7 @@ exports.refreshtoken = async(req, res) => {
 		return res.status(200).json({
 			status: 200,
 			message: "[server] 刷新token成功",
-			data: {accessToken, curClient: payload},
+			data: {accessToken, payload: payload},
 		});
 	} catch(error) {
 		console.log("/v1/refreshtoken", error);
@@ -75,8 +75,8 @@ exports.refreshtoken = async(req, res) => {
 exports.vRelSocial = async(req, res)=> {
 	console.log("/v1/vRelSocial");
 	try{
-		const curClient = req.curClient;
-		const Client = await ClientDB.findOne({_id: curClient._id});
+		const payload = req.payload;
+		const Client = await ClientDB.findOne({_id: payload._id});
 
 		// 从前端获取 登录类型 及第三方社交账号的 token
 		const login_type = req.body.login_type;
@@ -134,15 +134,15 @@ exports.login = async(req, res) => {
 	try{
 		const result_Exist = await obtain_Client_Prom(req.body.system, req.body.social);
 		if(result_Exist.status === 400) return res.json({status: 400, message: result_Exist.message});
-		let curClient = result_Exist.data.Client;
+		let payload = result_Exist.data.Client;
 
-		if(!curClient) return res.json({status: 400, message: "[server] 登陆失败"});
-		const accessToken = MdJwt.generateToken(curClient);
-		const refreshToken = MdJwt.generateToken(curClient, true);
+		if(!payload) return res.json({status: 400, message: "[server] 登陆失败"});
+		const accessToken = MdJwt.generateToken(payload);
+		const refreshToken = MdJwt.generateToken(payload, true);
 
-		curClient.at_last_login = Date.now();
-		curClient.refreshToken = refreshToken;
-		const objSave = await curClient.save();
+		payload.at_last_login = Date.now();
+		payload.refreshToken = refreshToken;
+		const objSave = await payload.save();
 
 		return res.status(200).json({
 			status: 200,
@@ -150,7 +150,7 @@ exports.login = async(req, res) => {
 			data: {
 				accessToken,
 				refreshToken,
-				curClient
+				payload
 			},
 		})
 	} catch(error) {
@@ -374,15 +374,15 @@ exports.vRegister = async(req, res) => {
 exports.vReActive = async(req, res) => {
 	console.log("/v1/reActive")
 	try{
-		const curClient = req.curClient;
-		const Client = await ClientDB.findOne({_id: curClient._id});
+		const payload = req.payload;
+		const Client = await ClientDB.findOne({_id: payload._id});
 		if(!Client) return res.json({status: 400, message: "[server] 没有找到此人"});
 		const pwd_match_res = await MdFilter.bcrypt_match_Prom(req.body.pwd, Client.pwd);
 		if(pwd_match_res.status != 200) return resolve({status: 400, message: "[server] 密码不匹配"});
 
 		let obj = null;
 		let to = null;
-		const pathSame = {_id: {"$ne": curClient._id}};
+		const pathSame = {_id: {"$ne": payload._id}};
 		if(req.body.email) {		// 邮箱注册
 			to = req.body.email;
 			obj = {email: to};

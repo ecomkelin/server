@@ -4,7 +4,7 @@ const MdJwt = require('./middleJwt.js');
 exports.is_Client = async(req, res, next) => {
 	try {
 		const access_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
-		if(access_res.status === 200) req.curClient = access_res.data.payload;
+		if(access_res.status === 200) req.payload = access_res.data.payload;
 		return next();
 	} catch(error) {
 		console.log("is_Client", error);
@@ -16,7 +16,7 @@ exports.path_Client = async(req, res, next) => {
 	try {
 		const access_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
 		if(access_res.status === 401) return res.status(200).json(access_res);
-		req.curClient = access_res.data.payload;
+		req.payload = access_res.data.payload;
 		return next();
 	} catch(error) {
 		console.log("path_Client", error);

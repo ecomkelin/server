@@ -6,11 +6,11 @@ const _ = require('underscore');
 exports.vBindPut = async(req, res) => {
 	console.log("/v1/BindPut");
 	try{
-		const curClient = req.curClient;
+		const payload = req.payload;
 
 		const id = req.params.id;		// 所要更改的vBind的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
-		const pathObj = {_id: id, Client: curClient._id};
+		const pathObj = {_id: id, Client: payload._id};
 
 		const Bind = await BindDB.findOne(pathObj);
 		if(!Bind) return res.json({status: 400, message: "[server] 没有找到此店铺信息, 请刷新重试"});
@@ -34,11 +34,11 @@ exports.vBindPut = async(req, res) => {
 exports.vBindDelete = async(req, res) => {
 	console.log("/v1/BindDelete");
 	try{
-		const curClient = req.curClient;
+		const payload = req.payload;
 		const id = req.params.id;		// 所要更改的vBind的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "请传递正确的数据 _id"});
 
-		const pathObj = {_id: id, Client: curClient._id};
+		const pathObj = {_id: id, Client: payload._id};
 
 		const Bind = await BindDB.findOne(pathObj);
 		if(!Bind) return res.json({status: 400, message: "[server] 没有找到此店铺信息, 请刷新重试"});
@@ -60,8 +60,8 @@ exports.vBindDelete = async(req, res) => {
 
 
 
-const vBind_path_Func = (pathObj, curClient, queryObj) => {
-	pathObj.Client = curClient._id;
+const vBind_path_Func = (pathObj, payload, queryObj) => {
+	pathObj.Client = payload._id;
 
 	if(!queryObj) return;
 }
@@ -70,9 +70,9 @@ const dbBind = 'Bind';
 exports.vBinds = async(req, res) => {
 	console.log("/v1/Binds");
 	try {
-		const curClient = req.curClient;
+		const payload = req.payload;
 		const GetDB_Filter = {
-			Identity: curClient,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: BindDB,
 			path_Callback: vBind_path_Func,
@@ -89,10 +89,10 @@ exports.vBinds = async(req, res) => {
 exports.vBind = async(req, res) => {
 	console.log("/v1/Bind");
 	try {
-		const curClient = req.curClient;
+		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: curClient,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: BindDB,
 			path_Callback: vBind_path_Func,

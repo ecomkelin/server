@@ -12,10 +12,10 @@ const dbClient = 'Client';
 exports.vClient = async(req, res) => {
 	console.log("/v1/Client");
 	try {
-		const curClient = req.curClient;
+		const payload = req.payload;
 		const GetDB_Filter = {
-			id: curClient._id,
-			Identity: curClient,
+			id: payload._id,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: ClientDB,
 			path_Callback: null,
@@ -34,9 +34,9 @@ exports.vClient = async(req, res) => {
 exports.vClientPut = async(req, res) => {
 	console.log("/v1/ClientPut");
 	try{
-		const curClient = req.curClient;
+		const payload = req.payload;
 
-		const pathObj = {_id: curClient._id};
+		const pathObj = {_id: payload._id};
 
 		const Client = await ClientDB.findOne(pathObj);
 		if(!Client) return res.json({status: 400, message: "[server] 没有找到此用户信息, 请刷新重试"});

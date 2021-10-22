@@ -3,7 +3,7 @@ const MdFilter = require('../../../middle/middleFilter');
 
 const CategDB = require('../../../models/complement/Categ');
 
-const vCategs_path_Func = (pathObj, curClient, queryObj) => {
+const vCategs_path_Func = (pathObj, payload, queryObj) => {
 	pathObj.is_usable = 1;
 
 	if(!queryObj) return;
@@ -13,7 +13,7 @@ const vCategs_path_Func = (pathObj, curClient, queryObj) => {
 		pathObj.level = 1;
 	}
 }
-const vCateg_path_Func = (pathObj, curClient, queryObj) => {
+const vCateg_path_Func = (pathObj, payload, queryObj) => {
 	pathObj.is_usable = 1;
 }
 
@@ -21,9 +21,9 @@ const dbCateg = 'Categ';
 exports.vCategs = async(req, res) => {
 	console.log("/v1/Categs");
 	try {
-		const curClient = req.curClient || req.ip;
+		const payload = req.payload || req.ip;
 		const GetDB_Filter = {
-			Identity: curClient,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: CategDB,
 			path_Callback: vCategs_path_Func,
@@ -40,10 +40,10 @@ exports.vCategs = async(req, res) => {
 exports.vCateg = async(req, res) => {
 	console.log("/v1/Categ");
 	try {
-		const curClient = req.curClient;
+		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: curClient,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: CategDB,
 			path_Callback: vCategs_path_Func,

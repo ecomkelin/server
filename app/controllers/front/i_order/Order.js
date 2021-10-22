@@ -17,8 +17,8 @@ const CitaDB = require('../../../models/address/Cita');
 exports.vOrderPost = async(req, res) => {
 	console.log("/v1/OrderPost");
 	try{
-		const curClient = req.curClient;
-		if(MdSafe.fq_spanTimes1_Func(curClient._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		// 判断 基本参数 是否正确
 		const obj_Order = req.body.obj;
@@ -53,7 +53,7 @@ exports.vOrderPost = async(req, res) => {
 		if(code_res.status !== 200) return resolve({status: 400, message: code_res.message});
 		obj_Order.code = code_res.data.code;
 		// obj_Order.shop 已赋值
-		obj_Order.Client = curClient._id;
+		obj_Order.Client = payload._id;
 		obj_Order.Firm = Shop.Firm;
 		obj_Order.status = ConfOrder.status_obj.placing.num;
 		obj_Order.type_Order = ConfOrder.type_Order_obj.sale.num;
@@ -230,13 +230,13 @@ const recu_codeOrderSame_Prom = (codePre, codeNum) => {
 exports.vOrderPut = async(req, res) => {
 	console.log("/v1/OrderPut_ship");
 	try{
-		const curClient = req.curClient;
-		if(MdSafe.fq_spanTimes1_Func(curClient._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;		// 所要更改的Order的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
 
-		const Order = await OrderDB.findOne({_id: id, Client: curClient._id, status: ConfOrder.status_obj.placing.num})
+		const Order = await OrderDB.findOne({_id: id, Client: payload._id, status: ConfOrder.status_obj.placing.num})
 			.populate({path: "Shop", select: "serve_Citas"});
 		if(!Order) return res.json({status: 400, message: "[server] 没有找到此产品信息, 请刷新重试"});
 
@@ -270,10 +270,10 @@ exports.vOrderPut = async(req, res) => {
 
 
 
-const vOrder_path_Func = (pathObj, curClient, queryObj) => {
+const vOrder_path_Func = (pathObj, payload, queryObj) => {
 	pathObj.is_hide_client = false;
 	// pathObj.status = { "$ne": ConfOrder.status_obj.cart.num};
-	pathObj.Client = curClient._id;
+	pathObj.Client = payload._id;
 
 	if(!queryObj) return;
 	if(queryObj.status) {
@@ -286,9 +286,9 @@ const dbOrder = 'Order';
 exports.vOrders = async(req, res) => {
 	console.log("/v1/Orders")
 	try {
-		const curClient = req.curClient || req.ip;
+		const payload = req.payload || req.ip;
 		const GetDB_Filter = {
-			Identity: curClient,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: OrderDB,
 			path_Callback: vOrder_path_Func,
@@ -306,10 +306,10 @@ exports.vOrders = async(req, res) => {
 exports.vOrder = async(req, res) => {
 	console.log("/v1/Order");
 	try {
-		const curClient = req.curClient;
+		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: curClient,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: OrderDB,
 			path_Callback: vOrder_path_Func,
