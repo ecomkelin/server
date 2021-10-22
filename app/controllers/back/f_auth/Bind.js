@@ -7,8 +7,8 @@ const _ = require('underscore');
 exports.BindPut = async(req, res) => {
 	console.log("/b1/BindPut");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;		// 所要更改的Bind的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
@@ -34,8 +34,8 @@ exports.BindPut = async(req, res) => {
 exports.BindDelete = async(req, res) => {
 	console.log("/b1/BindDelete");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;		// 所要更改的Bind的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "请传递正确的数据 _id"});
@@ -60,17 +60,17 @@ exports.BindDelete = async(req, res) => {
 
 
 const dbBind = "Bind";
-const Bind_path_Func = (pathObj, curUser, queryObj) => {
-	pathObj.Firm = curUser.Firm;
+const Bind_path_Func = (pathObj, payload, queryObj) => {
+	pathObj.Firm = payload.Firm;
 	if(!queryObj) return;
 }
 
 exports.Binds = async(req, res) => {
 	console.log("/b1/Binds");
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: BindDB,
 			path_Callback: Bind_path_Func,
@@ -87,10 +87,10 @@ exports.Binds = async(req, res) => {
 exports.Bind = async(req, res) => {
 	console.log("/b1/Bind");
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: BindDB,
 			path_Callback: Bind_path_Func,

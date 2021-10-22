@@ -7,8 +7,8 @@ const _ = require('underscore');
 exports.ClientPut = async(req, res) => {
 	console.log("/b1/ClientPut");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;		// 所要更改的Client的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
@@ -37,9 +37,9 @@ const dbClient = 'Client';
 exports.Clients = async(req, res) => {
 	console.log("/b1/Clients");
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: ClientDB,
 			path_Callback: null,
@@ -56,10 +56,10 @@ exports.Clients = async(req, res) => {
 exports.Client = async(req, res) => {
 	console.log("/b1/Client");
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: ClientDB,
 			path_Callback: null,

@@ -15,14 +15,14 @@ const _ = require('underscore');
 exports.AttrPost = async(req, res) => {
 	console.log("/b1/AttrPost");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const obj = req.body.obj;
 		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
 
 		if(!MdFilter.is_ObjectId_Func(obj.Prod)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
-		const Prod = await ProdDB.findOne({_id: obj.Prod, Firm: curUser.Firm}, {Attrs: 1});
+		const Prod = await ProdDB.findOne({_id: obj.Prod, Firm: payload.Firm}, {Attrs: 1});
 		if(!Prod) return res.json({status: 400, message: "[server] 没有找到此店铺信息, 请刷新重试"});
 
 		let errorInfo = null;
@@ -38,8 +38,8 @@ exports.AttrPost = async(req, res) => {
 		obj.options = MdFilter.Arr_toUpper_Func(obj.options);
 		obj.options = MdFilter.setArrays_Func(obj.options);
 
-		obj.Firm = curUser.Firm;
-		obj.User_crt = curUser._id;
+		obj.Firm = payload.Firm;
+		obj.User_crt = payload._id;
 		if(obj.sort) obj.sort = parseInt(obj.sort);
 
 		const _object = new AttrDB(obj);
@@ -60,18 +60,18 @@ exports.AttrPost = async(req, res) => {
 exports.AttrDelete = async(req, res) => {
 	console.log("/b1/AttrDelete");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
-		const Attr = await AttrDB.findOne({_id: id, Firm: curUser.Firm}, {nome: 1, Prod:1});
+		const Attr = await AttrDB.findOne({_id: id, Firm: payload.Firm}, {nome: 1, Prod:1});
 		if(!Attr) return res.json({status: 400, message: "[server] 没有找到此店铺信息, 请刷新重试"});
 
 		const Sku = await SkuDB.findOne({attrs: { $elemMatch: {nome: Attr.nome}}});
 		if(Sku) return res.json({status: 400, message: "[server] 请先删除商品中对应该属性的Product"});
 
-		const Prod = await ProdDB.findOne({_id: Attr.Prod, Firm: curUser.Firm});
+		const Prod = await ProdDB.findOne({_id: Attr.Prod, Firm: payload.Firm});
 		if(!Prod) return res.json({status: 400, message: "[server] 没有找到对应的 商品"});
 
 		const index = MdFilter.indexArr_Func(Prod.Attrs, id);
@@ -91,12 +91,12 @@ exports.AttrDelete = async(req, res) => {
 exports.AttrPut = async(req, res) => {
 	console.log("/b1/AttrPut");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
-		const Attr = await AttrDB.findOne({_id: id, Firm: curUser.Firm});
+		const Attr = await AttrDB.findOne({_id: id, Firm: payload.Firm});
 		if(!Attr) return res.json({status: 400, message: "[server] 没有找到此产品属性"});
 		
 		if(req.body.general) {
@@ -265,9 +265,9 @@ const Attr_general = async(res, obj, Attr) => {
 
 
 
-const Attr_path_Func = (pathObj, curUser, queryObj) => {
-	if(curUser) {
-		pathObj.Firm = curUser.Firm;
+const Attr_path_Func = (pathObj, payload, queryObj) => {
+	if(payload) {
+		pathObj.Firm = payload.Firm;
 	}
 	if(!queryObj) return;
 	pathObj.Prod = queryObj.Prod;
@@ -277,9 +277,9 @@ const dbAttr = 'Attr'
 exports.Attrs = async(req, res) => {
 	console.log("/b1/Attrs");
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: AttrDB,
 			path_Callback: Attr_path_Func,
@@ -297,10 +297,10 @@ exports.Attrs = async(req, res) => {
 exports.Attr = async(req, res) => {
 	console.log("/b1/Attr");
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: AttrDB,
 			path_Callback: Attr_path_Func,

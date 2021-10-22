@@ -10,7 +10,7 @@ const path = require('path');
 exports.mkPicture_prom = async(req, {img_Dir, field, is_Array}) => {
 	return new Promise((resolve, reject) => {
 		try {
-			const curUser = req.curUser;
+			const payload = req.payload;
 			const img_abs = path.join(__dirname, '../../public/upload'+img_Dir);
 			const form = formidable({ multiples: true, uploadDir: img_abs});
 			form.parse(req, (err, fields, files) => {
@@ -28,7 +28,7 @@ exports.mkPicture_prom = async(req, {img_Dir, field, is_Array}) => {
 				}
 				const warnMsg = {};
 				warnMsg.files = [];
-				multiplesPic_Func(resolve, obj, field, img_Dir, warnMsg, files, keys, curUser._id, lenFile, 0);
+				multiplesPic_Func(resolve, obj, field, img_Dir, warnMsg, files, keys, payload._id, lenFile, 0);
 			})
 		} catch(error) {
 			console.log("mkPicture_prom", error)
@@ -37,7 +37,7 @@ exports.mkPicture_prom = async(req, {img_Dir, field, is_Array}) => {
 	})
 }
 
-const multiplesPic_Func = (resolve, obj, field, img_Dir, warnMsg, files, keys, curUser_id, lenFile, n) => {
+const multiplesPic_Func = (resolve, obj, field, img_Dir, warnMsg, files, keys, payload_id, lenFile, n) => {
 	console.log('n', n)
 	if(n == lenFile) return resolve(obj);
 	const key = keys[n];
@@ -52,28 +52,28 @@ const multiplesPic_Func = (resolve, obj, field, img_Dir, warnMsg, files, keys, c
 		if(!imgArrs.includes(imgType)) {
 			this.rmPicture()
 			warnMsg.fileType = "只允许输入jpg png gif格式图片";
-			multiplesPic_Func(resolve, obj, field, img_Dir, warnMsg, files, keys, curUser_id, lenFile, n+1);
+			multiplesPic_Func(resolve, obj, field, img_Dir, warnMsg, files, keys, payload_id, lenFile, n+1);
 		} else {
-			const img_url = "/upload"+img_Dir+"/" + curUser_id + '-'+n+'-' + Date.now() + '.' + imgType;
+			const img_url = "/upload"+img_Dir+"/" + payload_id + '-'+n+'-' + Date.now() + '.' + imgType;
 			const newfilepath = pubSrc + img_url;
 
 			fs.rename(oldfliepath, newfilepath, err => {
 				if(err) {
 				console.log("multiplesPic_Func", err)
 					warnMsg.files.push("您传输的第"+n+"张图片错误");
-					multiplesPic_Func(resolve, obj, field, img_Dir, warnMsg, files, keys, curUser_id, lenFile, n+1);
+					multiplesPic_Func(resolve, obj, field, img_Dir, warnMsg, files, keys, payload_id, lenFile, n+1);
 				} else {
 					if(obj[field]) {
 						obj[field].push(img_url);
 					} else {
 						obj[field] = img_url;
 					}
-					multiplesPic_Func(resolve, obj, field, img_Dir, warnMsg, files, keys, curUser_id, lenFile, n+1);
+					multiplesPic_Func(resolve, obj, field, img_Dir, warnMsg, files, keys, payload_id, lenFile, n+1);
 				}
 			})
 		}
 	} else {
-		multiplesPic_Func(resolve, obj, field, img_Dir, warnMsg, files, keys, curUser_id, lenFile, n+1);
+		multiplesPic_Func(resolve, obj, field, img_Dir, warnMsg, files, keys, payload_id, lenFile, n+1);
 	}
 }
 

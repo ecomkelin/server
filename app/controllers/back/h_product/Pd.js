@@ -18,14 +18,14 @@ const _ = require('underscore');
 exports.PdDelete = async(req, res) => {
 	console.log("/b1/PdDelete")
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;		// 所要更改的Pd的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "请传递正确的数据 _id"});
 
 		const pathObj = {_id: id};
-		Pd_path_Func(pathObj, curUser);
+		Pd_path_Func(pathObj, payload);
 
 		const Pd = await PdDB.findOne(pathObj);
 		if(!Pd) return res.json({status: 400, message: "[server] 没有找到此产品信息, 请刷新重试"});
@@ -48,8 +48,8 @@ exports.PdDelete = async(req, res) => {
 exports.PdPost = async(req, res) => {
 	console.log("/b1/PdPost");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 		const obj = await MdFiles.mkPicture_prom(req, {img_Dir:"/Pd", field: "img_urls", is_Array: true});
 		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
 		let errorInfo = null;
@@ -57,7 +57,7 @@ exports.PdPost = async(req, res) => {
 			// 如果输入了 编号 则编号必须是唯一;
 			errorInfo = MdFilter.Stint_Match_Func(obj.code, StintPd.code);
 			if(!errorInfo) {
-				const objSame = await PdDB.findOne({'code': obj.code, Firm: curUser.Firm});
+				const objSame = await PdDB.findOne({'code': obj.code, Firm: payload.Firm});
 				if(objSame) return res.json({status: 400, message: '[server] 产品编号相同'});
 			}
 		}
@@ -74,12 +74,12 @@ exports.PdPost = async(req, res) => {
 		if(!MdFilter.is_ObjectId_Func(obj.Categ)) {
 			obj.Categ = null;
 		} else {
-			const Categ = await CategDB.findOne({_id: obj.Categ, Firm: curUser.Firm, level: 2});
+			const Categ = await CategDB.findOne({_id: obj.Categ, Firm: payload.Firm, level: 2});
 			if(!Categ) return res.json({status: 400, message: "[server] 您的二级分类不正确, 请输入正确的二级分类"});
 		}
 
-		obj.Firm = curUser.Firm;
-		obj.User_crt = curUser._id;
+		obj.Firm = payload.Firm;
+		obj.User_crt = payload._id;
 		const _object = new PdDB(obj);
 		const objSave = await _object.save();
 
@@ -93,28 +93,28 @@ exports.PdPost = async(req, res) => {
 exports.PdPut = async(req, res) => {
 	console.log("/b1/PdPut");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;		// 所要更改的Pd的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
 		const pathObj = {_id: id};
-		Pd_path_Func(pathObj, curUser);
+		Pd_path_Func(pathObj, payload);
 
 		const Pd = await PdDB.findOne(pathObj);
 		if(!Pd) return res.json({status: 400, message: "[server] 没有找到此产品信息, 请刷新重试"});
 
 		if(req.body.general) {
-			Pd_general(res, req.body.general, Pd, curUser);
+			Pd_general(res, req.body.general, Pd, payload);
 		} else if(req.body.put_img_url) {
-			Pd_put_img_url(res, req.body.put_img_url, Pd, curUser);
+			Pd_put_img_url(res, req.body.put_img_url, Pd, payload);
 		} else if(req.body.delete_img_urls) {
-			Pd_delete_img_urls(res, req.body.delete_img_urls, Pd, curUser);
+			Pd_delete_img_urls(res, req.body.delete_img_urls, Pd, payload);
 		} else {
 			// 判断是否用上传文件的形式 传递了数据
 			const obj = await MdFiles.mkPicture_prom(req, {img_Dir: "/Pd", field: "img_urls", is_Array: true});
 			if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
-			Pd_ImgPost(res, obj, Pd, curUser);
+			Pd_ImgPost(res, obj, Pd, payload);
 		}
 	} catch(error) {
 		console.log("/b1/PdPut", error);
@@ -122,7 +122,7 @@ exports.PdPut = async(req, res) => {
 	}
 }
 
-const Pd_general = async(res, obj, Pd, curUser) => {
+const Pd_general = async(res, obj, Pd, payload) => {
 	try {
 
 		let errorInfo = null;
@@ -131,7 +131,7 @@ const Pd_general = async(res, obj, Pd, curUser) => {
 			if(obj.code) {
 				errorInfo = MdFilter.Stint_Match_Func(obj.code, StintPd.code);
 				if(!errorInfo) {
-					const objSame = await PdDB.findOne({'code': obj.code, Firm: curUser.Firm});
+					const objSame = await PdDB.findOne({'code': obj.code, Firm: payload.Firm});
 					if(objSame) return res.json({status: 400, message: '[server] 产品编号相同'});
 					const code_UpdMany = await ProdDB.updateMany({Pd: Pd._id}, {code: obj.code});
 					Pd.code = obj.code;
@@ -143,7 +143,7 @@ const Pd_general = async(res, obj, Pd, curUser) => {
 		if(obj.nome && (obj.nome != Pd.nome)) {
 			errorInfo = MdFilter.Stint_Match_Func(obj.nome, StintPd.nome);
 			if(!errorInfo) {
-				const nome_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: curUser.Firm}, {nome: obj.nome});
+				const nome_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: payload.Firm}, {nome: obj.nome});
 				Pd.nome = obj.nome;
 			}
 		}
@@ -158,34 +158,34 @@ const Pd_general = async(res, obj, Pd, curUser) => {
 			if(!MdFilter.is_ObjectId_Func(obj.Nation)) return res.json({status: 400, message: '[server] 国家数据需要为 _id 格式'});
 			const Nation = await NationDB.findOne({_id: obj.Nation});
 			if(!Nation) return res.json({status: 400, message: '[server] 没有找到此国家信息'});
-			const Nation_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: curUser.Firm}, {Nation: obj.Nation});
+			const Nation_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: payload.Firm}, {Nation: obj.Nation});
 			Pd.Nation = obj.Nation;
 		}
 		if(obj.Brand && (obj.Brand != Pd.Brand)) {
 			if(!MdFilter.is_ObjectId_Func(obj.Brand)) return res.json({status: 400, message: '[server] 品牌数据需要为 _id 格式'});
 			const Brand = await BrandDB.findOne({_id: obj.Brand});
 			if(!Brand) return res.json({status: 400, message: '[server] 没有找到此品牌信息'});
-			const Brand_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: curUser.Firm}, {Brand: obj.Brand});
+			const Brand_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: payload.Firm}, {Brand: obj.Brand});
 			Pd.Brand = obj.Brand;
 		}
 
 		if(obj.is_usable_Firm && (obj.is_usable_Firm != Pd.is_usable_Firm)) {
 			if(obj.is_usable_Firm) obj.is_usable = true;
-			const usable_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: curUser.Firm}, {is_usable_Firm: obj.is_usable_Firm});
+			const usable_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: payload.Firm}, {is_usable_Firm: obj.is_usable_Firm});
 			Pd.is_usable_Firm = obj.is_usable_Firm;
 		}
 
 		if(obj.Categ) {
 			if(!MdFilter.is_ObjectId_Func(obj.Categ)) return res.json({status: 400, message: '[server] 请输入正确的分类'});
 			if(String(obj.Categ) !== String(Pd.Categ) ) {
-				const Categ = await CategDB.findOne({_id: obj.Categ, Firm: curUser.Firm, level: 2});
+				const Categ = await CategDB.findOne({_id: obj.Categ, Firm: payload.Firm, level: 2});
 				if(!Categ) return res.json({status: 400, message: "[server] 您的二级分类不正确, 请输入正确的二级分类"});
-				const Categ_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: curUser.Firm}, {Categ: obj.Categ});
+				const Categ_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: payload.Firm}, {Categ: obj.Categ});
 				Pd.Categ = obj.Categ;
 			}
 		}
 
-		Pd.User_upd = curUser._id;
+		Pd.User_upd = payload._id;
 
 		const objSave = await Pd.save();
 		return res.status(200).json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
@@ -194,7 +194,7 @@ const Pd_general = async(res, obj, Pd, curUser) => {
 		return res.status(500).json({status: 500, message: "[服务器错误: Pd_general]"});
 	}
 }
-const Pd_delete_img_urls = async(res, obj, Pd, curUser) => {
+const Pd_delete_img_urls = async(res, obj, Pd, payload) => {
 	try{
 		const img_urls = obj.img_urls
 		if(!img_urls || img_urls.length == 0) return res.json({status: 400, message: "[server] 请传递需要删除的图片名称"});
@@ -212,7 +212,7 @@ const Pd_delete_img_urls = async(res, obj, Pd, curUser) => {
 
 		const ProdUpdMany = await ProdDB.updateMany({Pd: Pd._id}, {img_urls: Pd.img_urls});
 
-		Pd.User_upd = curUser._id;
+		Pd.User_upd = payload._id;
 		const objSave = await Pd.save();
 		return res.status(200).json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
 	} catch(error) {
@@ -220,7 +220,7 @@ const Pd_delete_img_urls = async(res, obj, Pd, curUser) => {
 		return res.status(500).json({status: 500, message: "[服务器错误: Pd_delete_img_urls]"});
 	}
 }
-const Pd_put_img_url = async(res, obj, Pd, curUser) => {
+const Pd_put_img_url = async(res, obj, Pd, payload) => {
 	try{
 		obj.sort = parseInt(obj.sort);
 		const img_url = obj.img_url;
@@ -241,7 +241,7 @@ const Pd_put_img_url = async(res, obj, Pd, curUser) => {
 		return res.status(500).json({status: 500, message: "[服务器错误: Pd_put_img_url]"});
 	}
 }
-const Pd_ImgPost = async(res, obj, Pd, curUser) => {
+const Pd_ImgPost = async(res, obj, Pd, payload) => {
 	try {
 		if(!obj.img_urls || obj.img_urls.length == 0) return res.json({status: 400, message: "[server] 请传输图片"});
 		obj.img_urls.forEach(img_url => {
@@ -269,9 +269,9 @@ const Pd_ImgPost = async(res, obj, Pd, curUser) => {
 
 
 
-const Pd_path_Func = (pathObj, curUser, queryObj) => {
-	pathObj.Firm = curUser.Firm;
-	if(curUser.role >= ConfUser.role_set.boss) {
+const Pd_path_Func = (pathObj, payload, queryObj) => {
+	pathObj.Firm = payload.Firm;
+	if(payload.role >= ConfUser.role_set.boss) {
 		pathObj.is_usable_Firm = 1;
 		pathObj.is_usable = 1;
 	}
@@ -290,9 +290,9 @@ const dbPd = 'Pd';
 exports.Pds = async(req, res) => {
 	console.log("/b1/Pds");
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: PdDB,
 			path_Callback: Pd_path_Func,
@@ -311,10 +311,10 @@ exports.Pds = async(req, res) => {
 exports.Pd = async(req, res) => {
 	console.log("/b1/Pd");
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: PdDB,
 			path_Callback: Pd_path_Func,

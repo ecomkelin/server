@@ -19,8 +19,8 @@ const _ = require('underscore');
 exports.OrderSkuPost = async(req, res) => {
 	console.log("/b1/OrderPost");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 		// 判断前端给的参数是否 正确 并根据前端给的 _id 从数据库中找到到所需数据
 		const obj = req.body.obj;
 		if(isNaN(obj.quantity)) return res.json({status: 400, message: '[server] 请正确的输入产品出售数量'});
@@ -40,7 +40,7 @@ exports.OrderSkuPost = async(req, res) => {
 		obj.price_regular = Sku.price_regular;
 		obj.attrs = "";
 		if(Sku.attrs) Sku.attrs.forEach(attr => OrderSkuObj.attrs += `${attr.nome}:${attr.option},`);
-		obj.User = curUser._id;
+		obj.User = payload._id;
 		obj.Pd = Prod.Pd;
 		obj.Prod = Prod._id;
 		obj.Shop = Sku.Shop._id;
@@ -75,7 +75,7 @@ exports.OrderSkuPost = async(req, res) => {
 			OrderProdObj.nome = Sku.Prod.nome;
 			OrderProdObj.unit = Sku.Prod.unit;
 			OrderProdObj.Pd = Sku.Prod.Pd;
-			OrderProdObj.User = curUser._id;
+			OrderProdObj.User = payload._id;
 			OrderProdObj.Shop = obj.Shop;
 			OrderProdObj.Firm = obj.Firm;
 			OrderProdObj.OrderSkus = [];
@@ -111,14 +111,14 @@ exports.OrderSkuPost = async(req, res) => {
 exports.OrderSkuDelete = async(req, res) => {
 	console.log("/b1/vOrderSkuDelete");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;		// 所要更改的Order的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "请传递正确的数据 _id"});
 
 		const pathObj = {_id: id};
-		vOrderSku_path_Func(pathObj, curUser);
+		vOrderSku_path_Func(pathObj, payload);
 
 		const OrderSku = await OrderSkuDB.findOne(pathObj)
 			.populate([
@@ -191,13 +191,13 @@ exports.OrderSkuDelete_Prom = (id, OrderProd, Order) => {
 exports.OrderSkuPut = async(req, res) => {
 	console.log("/b1/OrderSkuPut");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;		// 所要更改的Order的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
 		const pathObj = {_id: id};
-		vOrderSku_path_Func(pathObj, curUser);
+		vOrderSku_path_Func(pathObj, payload);
 
 		const OrderSku = await OrderSkuDB.findOne(pathObj)
 			.populate([
@@ -247,9 +247,9 @@ exports.OrderSkuPut = async(req, res) => {
 
 
 
-const vOrderSku_path_Func = (pathObj, curUser, queryObj) => {
-	pathObj.Firm = curUser.Firm;
-	if(curUser.role > ConfUser.role_set.staff) pathObj.Shop = curUser.Shop;
+const vOrderSku_path_Func = (pathObj, payload, queryObj) => {
+	pathObj.Firm = payload.Firm;
+	if(payload.role > ConfUser.role_set.staff) pathObj.Shop = payload.Shop;
 
 	if(!queryObj) return;
 	if(MdFilter.is_ObjectId_Func(queryObj.Order) ) pathObj["Order"] = queryObj.Order;
@@ -261,9 +261,9 @@ exports.OrderSkus = async(req, res) => {
 	try {
 		if(!MdFilter.is_ObjectId_Func(req.query.Order)) return res.json({status: 400, message: "[server] 请告知服务器 查看哪个订单中的产品"});
 
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: OrderSkuDB,
 			path_Callback: vOrderSku_path_Func,

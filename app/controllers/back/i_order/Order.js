@@ -10,13 +10,13 @@ const CitaDB = require('../../../models/address/Cita');
 exports.OrderPut = async(req, res) => {
 	console.log("/b1/OrderPut");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;		// 所要更改的Order的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
 
-		const Order = await OrderDB.findOne({_id: id, User: curUser._id, status: ConfOrder.status_obj.placing.num})
+		const Order = await OrderDB.findOne({_id: id, User: payload._id, status: ConfOrder.status_obj.placing.num})
 			.populate({path: "Shop", select: "serve_Citas"});
 		if(!Order) return res.json({status: 400, message: "[server] 没有找到此产品信息, 请刷新重试"});
 
@@ -47,8 +47,8 @@ exports.OrderPut = async(req, res) => {
 exports.OrderDelete = async(req, res) => {
 	console.log("/b1/OrderDelete");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;		// 所要更改的Order的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
@@ -57,7 +57,7 @@ exports.OrderDelete = async(req, res) => {
 		if(req.query.force !== 'true') {
 			pathObj.is_hide_client = true;
 			pathObj.status = {'$in': ConfOrder.status_confirms};
-			if(curUser) pathObj.Shop = curUser.Shop;
+			if(payload) pathObj.Shop = payload.Shop;
 		}
 		const Order = await OrderDB.findOne(pathObj);
 		if(!Order) return res.json({status: 400, message: "[server] 没有找到此产品信息, 请刷新重试"});
@@ -79,11 +79,11 @@ exports.OrderDelete = async(req, res) => {
 
 
 
-const Order_path_Func = (pathObj, curUser, queryObj) => {
+const Order_path_Func = (pathObj, payload, queryObj) => {
 	// pathObj.status = { "$ne": ConfOrder.status_obj.cart.num};
-	pathObj.Firm = curUser.Firm;
-	if(curUser.role >= ConfUser.role_set.boss) {
-		pathObj.Shop = curUser.Shop;
+	pathObj.Firm = payload.Firm;
+	if(payload.role >= ConfUser.role_set.boss) {
+		pathObj.Shop = payload.Shop;
 	}
 
 	if(!queryObj) return;
@@ -92,7 +92,7 @@ const Order_path_Func = (pathObj, curUser, queryObj) => {
 		// if(arrs.length > 0) pathObj.status["$in"] = arrs;
 		if(arrs.length > 0) pathObj.status = {"$in": arrs};
 	}
-	if(queryObj.Shops && curUser.role < ConfUser.role_set.boss) {
+	if(queryObj.Shops && payload.role < ConfUser.role_set.boss) {
 		const arrs = MdFilter.getArrayFromString(queryObj.Shops);
 		if(arrs.length > 0) pathObj.Shop = {"$in": arrs};
 	}
@@ -102,9 +102,9 @@ exports.Orders = async(req, res) => {
 	console.log("/b1/Orders");
 	// console.log(req.query)
 	try {
-		const curUser = req.curUser || req.ip;
+		const payload = req.payload || req.ip;
 		const GetDB_Filter = {
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: OrderDB,
 			path_Callback: Order_path_Func,
@@ -121,10 +121,10 @@ exports.Orders = async(req, res) => {
 exports.Order = async(req, res) => {
 	console.log("/b1/Order");
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: OrderDB,
 			path_Callback: Order_path_Func,

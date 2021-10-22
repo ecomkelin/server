@@ -16,8 +16,8 @@ const _ = require('underscore');
 exports.BrandPost = async(req, res) => {
 	console.log("/b1/BrandPost");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 		const obj = await MdFiles.mkPicture_prom(req, {img_Dir: "/Brand", field: "img_url"});
 		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
 
@@ -32,10 +32,10 @@ exports.BrandPost = async(req, res) => {
 		// const Nation = await NationDB.findOne({_id: obj.Nation});
 		// if(!Nation) return res.json({status: 400, message: '[server] 没有找到您选择的国家信息'});
 
-		obj.Firm = curUser.Firm;
-		obj.User_crt = curUser._id;
+		obj.Firm = payload.Firm;
+		obj.User_crt = payload._id;
 
-		const objSame = await BrandDB.findOne({$or:[{'code': obj.code}, {'nome': obj.nome}], Firm: curUser.Firm});
+		const objSame = await BrandDB.findOne({$or:[{'code': obj.code}, {'nome': obj.nome}], Firm: payload.Firm});
 		if(objSame) return res.json({status: 400, message: '[server] 品牌编号或名称相同'});
 		const _object = new BrandDB(obj);
 		const objSave = await _object.save();
@@ -50,14 +50,14 @@ exports.BrandPost = async(req, res) => {
 exports.BrandDelete = async(req, res) => {
 	console.log("/b1/BrandDelete");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;		// 所要更改的Brand的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
 
 		const pathObj = {_id: id};
-		Brand_path_Func(pathObj, curUser);
+		Brand_path_Func(pathObj, payload);
 
 		const Brand = await BrandDB.findOne(pathObj);
 		if(!Brand) return res.json({status: 400, message: "[server] 没有找到此品牌"});
@@ -80,13 +80,13 @@ exports.BrandDelete = async(req, res) => {
 exports.BrandPut = async(req, res) => {
 	console.log("/b1/BrandPut");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;		// 所要更改的Brand的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
 		const pathObj = {_id: id};
-		Brand_path_Func(pathObj, curUser);
+		Brand_path_Func(pathObj, payload);
 
 		const Brand = await BrandDB.findOne(pathObj);
 		if(!Brand) return res.json({status: 400, message: "[server] 没有找到此品牌信息, 请刷新重试"});
@@ -101,14 +101,14 @@ exports.BrandPut = async(req, res) => {
 		if(obj.code && (obj.code = obj.code.replace(/^\s*/g,"").toUpperCase()) && (obj.code != Brand.code)) {
 			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.code, StintBrand.code);
 			if(!errorInfo) {
-				const objSame = await BrandDB.findOne({_id: {$ne: Brand._id}, code: obj.code, Firm: curUser.Firm});
+				const objSame = await BrandDB.findOne({_id: {$ne: Brand._id}, code: obj.code, Firm: payload.Firm});
 				if(objSame) return res.json({status: 400, message: '[server] 此品牌编号已被占用, 请查看'});
 			}
 		}
 		if(!errorInfo && obj.nome && (obj.nome != Brand.nome)) {
 			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.nome, StintBrand.nome);
 			if(!errorInfo) {
-				const objSame = await BrandDB.findOne({_id: {$ne: Brand._id}, nome: obj.nome, Firm: curUser.Firm});
+				const objSame = await BrandDB.findOne({_id: {$ne: Brand._id}, nome: obj.nome, Firm: payload.Firm});
 				if(objSame) return res.json({status: 400, message: '[server] 此品牌名称已被占用, 请查看'});
 			}
 		}
@@ -124,7 +124,7 @@ exports.BrandPut = async(req, res) => {
 			await MdFiles.rmPicture(Brand.img_url);
 		}
 
-		obj.User_upd = curUser._id;
+		obj.User_upd = payload._id;
 		const _object = _.extend(Brand, obj);
 
 		const objSave = await Brand.save();
@@ -142,9 +142,9 @@ exports.BrandPut = async(req, res) => {
 
 
 
-const Brand_path_Func = (pathObj, curUser, queryObj) => {
-	pathObj.Firm = curUser.Firm;
-	if(curUser.role > ConfUser.role_set.manager) {
+const Brand_path_Func = (pathObj, payload, queryObj) => {
+	pathObj.Firm = payload.Firm;
+	if(payload.role > ConfUser.role_set.manager) {
 		pathObj.is_usable = 1;
 	}
 
@@ -159,9 +159,9 @@ const dbBrand = 'Brand';
 exports.Brands = async(req, res) => {
 	console.log("/b1/Brands");
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: BrandDB,
 			path_Callback: Brand_path_Func,
@@ -178,10 +178,10 @@ exports.Brands = async(req, res) => {
 exports.Brand = async(req, res) => {
 	console.log("/b1/Brand");
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: BrandDB,
 			path_Callback: Brand_path_Func,

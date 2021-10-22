@@ -8,8 +8,8 @@ const LangDB = require('../../../models/auth/Lang');
 exports.Langs = async(req, res) => {
 	console.log("/b1/Langs");
 	try{
-		const curUser = req.curUser;
-		const Langs = await LangDB.find({Firm: curUser.Firm})
+		const payload = req.payload;
+		const Langs = await LangDB.find({Firm: payload.Firm})
 			.populate("langs.Lang")
 			.sort({"sort": -1, "updAt": -1});
 		// Langs.forEach((item) => {console.log("/b1/Langs", item); });
@@ -24,7 +24,7 @@ exports.Langs = async(req, res) => {
 exports.LangPost = async(req, res) => {
 	console.log("/b1/LangPost");
 	try{
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const obj = req.body.obj;
 		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
 		obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
@@ -33,11 +33,11 @@ exports.LangPost = async(req, res) => {
 		obj.langs.forEach((lang) => {
 			if(!lang.nome) lang.nome = '*';
 		})
-		const objSame = await LangDB.findOne({code: obj.code, Firm: curUser.Firm});
+		const objSame = await LangDB.findOne({code: obj.code, Firm: payload.Firm});
 		if(objSame) return res.json({status: 400, message: '[server] 语言编号相同'});
 		const _object = new LangDB(obj);
 		const objSave = await _object.save();
-		const Langs = await LangDB.find({_id: {"$ne": objSave._id}, Firm: curUser.Firm})
+		const Langs = await LangDB.find({_id: {"$ne": objSave._id}, Firm: payload.Firm})
 			.sort({"sort": -1, "updAt": -1});
 		for(let i=0; i<Langs.length; i++) {
 			const Lang = Langs[i];
@@ -54,10 +54,10 @@ exports.LangPost = async(req, res) => {
 exports.LangPut = async(req, res) => {
 	console.log("/b1/LangPut");
 	try{
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const id = req.params.id;		// 所要更改的Lang的id
 
-		const Lang = await LangDB.findOne({_id: id, Firm: curUser.Firm});
+		const Lang = await LangDB.findOne({_id: id, Firm: payload.Firm});
 		if(!Lang) return res.json({status: 400, message: "没有找到此语言信息, 请刷新重试"});
 
 		const field = req.body.field;	// 要改变的 key

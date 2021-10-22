@@ -54,7 +54,7 @@ exports.refreshtoken = async(req, res) => {
 		return res.status(200).json({
 			status: 200,
 			message: "[server] 刷新token成功",
-			data: {accessToken, payload: payload},
+			data: {accessToken, payload},
 		});
 	} catch(error) {
 		console.log("/v1/refreshtoken", error);

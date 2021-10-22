@@ -18,8 +18,8 @@ const _ = require('underscore');
 exports.ShopPost = async(req, res) => {
 	console.log("/b1/ShopPost");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 		let obj = req.body.obj;
 		if(!obj) obj = await MdFiles.mkPicture_prom(req, {img_Dir: "/Shop", field: "img_url"});
 		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
@@ -34,8 +34,8 @@ exports.ShopPost = async(req, res) => {
 		if(!MdFilter.is_ObjectId_Func(obj.Cita)) return res.json({status: 400, message: '[server] 请输入商店所在城市'});
 		const Cita = await CitaDB.findOne({_id: obj.Cita});
 		if(!Cita) return res.json({status: 400, message: '[server] 没有找到您选择的城市信息'});
-		obj.Firm = curUser.Firm;
-		obj.User_crt = curUser._id;
+		obj.Firm = payload.Firm;
+		obj.User_crt = payload._id;
 		obj.price_ship = 0;
 		obj.serve_Citas = [];
 		const serve_Cita = {};
@@ -44,7 +44,7 @@ exports.ShopPost = async(req, res) => {
 		obj.serve_Citas.push(serve_Cita);
 
 		// 分店的编号或者名称是否相同
-		const objSame = await ShopDB.findOne({$or:[{'code': obj.code}, {'nome': obj.nome}], Firm: curUser.Firm});
+		const objSame = await ShopDB.findOne({$or:[{'code': obj.code}, {'nome': obj.nome}], Firm: payload.Firm});
 		if(objSame) return res.json({status: 400, message: '[server] 店铺编号或名称相同'});
 		const _object = new ShopDB(obj);
 		const objSave = await _object.save();
@@ -60,14 +60,14 @@ exports.ShopPost = async(req, res) => {
 exports.ShopDelete = async(req, res) => {
 	console.log("/b1/ShopDelete");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;		// 所要更改的Shop的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "请传递正确的数据 _id"});
 
 		const pathObj = {_id: id};
-		Shop_path_Func(pathObj, curUser);
+		Shop_path_Func(pathObj, payload);
 
 		const Shop = await ShopDB.findOne(pathObj);
 		if(!Shop) return res.json({status: 400, message: "[server] 没有找到此店铺信息, 请刷新重试"});
@@ -92,31 +92,31 @@ exports.ShopDelete = async(req, res) => {
 exports.ShopPut = async(req, res) => {
 	console.log("/b1/ShopPut");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;		// 所要更改的Shop的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
 		const pathObj = {_id: id};
-		Shop_path_Func(pathObj, curUser);
+		Shop_path_Func(pathObj, payload);
 
 		const Shop = await ShopDB.findOne(pathObj);
 		if(!Shop) return res.json({status: 400, message: "[server] 没有找到此店铺信息, 请刷新重试"});
 
 		let put_prom = null;
 		if(req.body.general) {
-			Shop_general(res, req.body.general, Shop, curUser);
+			Shop_general(res, req.body.general, Shop, payload);
 		} else if(req.body.serveCitaPost) {
 			Shop_serveCitaPost(res, req.body.serveCitaPost, Shop);
 		} else if(req.body.serveCitaPut) {
 			Shop_serveCitaPut(res, req.body.serveCitaPut, Shop);
 		} else if(req.body.serveCitaDelete) {
-			Shop_serveCitaDelete(res, req.body.serveCitaDelete, Shop, curUser);
+			Shop_serveCitaDelete(res, req.body.serveCitaDelete, Shop, payload);
 		} else {
 			// 判断是否用上传文件的形式 传递了数据
 			const obj = await MdFiles.mkPicture_prom(req, {img_Dir: "/Shop", field: "img_url"});
 			if(!obj) return res.json({status: 400, message: "[server] 参数错误"});
-			Shop_general(res, obj, Shop, curUser);
+			Shop_general(res, obj, Shop, payload);
 		}
 	} catch(error) {
 		console.log("/b1/ShopPut", error);
@@ -124,21 +124,21 @@ exports.ShopPut = async(req, res) => {
 	}
 }
 
-const Shop_general = async(res, obj, Shop, curUser) => {
+const Shop_general = async(res, obj, Shop, payload) => {
 	try{
 		MdFilter.readonly_Func(obj);
 		let errorInfo = null;
 		if(obj.code && (obj.code = obj.code.replace(/^\s*/g,"").toUpperCase()) && (obj.code != Shop.code)) {
 			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.code, StintShop.code);
 			if(!errorInfo) {
-				const objSame = await ShopDB.findOne({_id: {$ne: Shop._id}, code: obj.code, Firm: curUser.Firm});
+				const objSame = await ShopDB.findOne({_id: {$ne: Shop._id}, code: obj.code, Firm: payload.Firm});
 				if(objSame) return res.json({status: 400, message: '[server] 此店铺编号已被占用, 请查看'});
 			}
 		}
 		if(!errorInfo && obj.nome && (obj.nome != Shop.nome)) {
 			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.nome, StintShop.nome);
 			if(!errorInfo) {
-				const objSame = await ShopDB.findOne({_id: {$ne: Shop._id}, nome: obj.nome, Firm: curUser.Firm});
+				const objSame = await ShopDB.findOne({_id: {$ne: Shop._id}, nome: obj.nome, Firm: payload.Firm});
 				if(objSame) return res.json({status: 400, message: '[server] 此店铺名称已被占用, 请查看'});
 			}
 		}
@@ -163,7 +163,7 @@ const Shop_general = async(res, obj, Shop, curUser) => {
 			await MdFiles.rmPicture(Shop.img_url);
 		}
 		
-		obj.User_upd = curUser._id;
+		obj.User_upd = payload._id;
 		const _object = _.extend(Shop, obj);
 
 		const objSave = await Shop.save();
@@ -244,13 +244,13 @@ const Shop_serveCitaDelete = async(res, obj, Shop) => {
 
 
 
-const Shop_path_Func = (pathObj, curUser, queryObj) => {
-	pathObj.Firm = curUser.Firm;
-	if(curUser.role > ConfUser.role_set.manager) {
+const Shop_path_Func = (pathObj, payload, queryObj) => {
+	pathObj.Firm = payload.Firm;
+	if(payload.role > ConfUser.role_set.manager) {
 		pathObj.is_usable = 1;
 	}
-	if(curUser.role >= ConfUser.role_set.boss) {
-		pathObj.Shop = curUser.Shop;
+	if(payload.role >= ConfUser.role_set.boss) {
+		pathObj.Shop = payload.Shop;
 	}
 
 	if(!queryObj) return;
@@ -272,9 +272,9 @@ const dbShop = 'Shop';
 exports.Shops = async(req, res) => {
 	console.log("/b1/Shops");
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: ShopDB,
 			path_Callback: Shop_path_Func,
@@ -292,10 +292,10 @@ exports.Shops = async(req, res) => {
 exports.Shop = async(req, res) => {
 	console.log("/b1/Shop");
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: ShopDB,
 			path_Callback: Shop_path_Func,

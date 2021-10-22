@@ -24,20 +24,20 @@ const loginFunc = async(req, res) => {
 		const pwd = String(req.body.pwd).replace(/^\s*/g,"");
 		if(!pwd || pwd.length == 0) return res.status(200).json({status: 400, message: "[server] 请您输入密码"});
 		const filter = {phonePre: 1, phone: 1, code: 1, pwd: 1, role: 1, nome: 1, Firm: 1, Shop: 1};
-		const curUser = await UserDB.findOne({code: code, is_usable: true}, filter);
+		const payload = await UserDB.findOne({code: code, is_usable: true}, filter);
 
-		if(!curUser) return res.status(200).json({status: 400, message: "[server] 用户名不正确"});
+		if(!payload) return res.status(200).json({status: 400, message: "[server] 用户名不正确"});
 
-		const match_res = await MdFilter.bcrypt_match_Prom(pwd, curUser.pwd);
+		const match_res = await MdFilter.bcrypt_match_Prom(pwd, payload.pwd);
 		if(match_res.status != 200) return res.status(200).json({status: 400, message: "[server] 密码不匹配"});
 
-		const accessToken = MdJwt.generateToken(curUser);
-		const refreshToken = MdJwt.generateToken(curUser, true);
+		const accessToken = MdJwt.generateToken(payload);
+		const refreshToken = MdJwt.generateToken(payload, true);
 
-		curUser.at_last_login = Date.now();
+		payload.at_last_login = Date.now();
 		// 存入到数据库的refreshToken 加密
-		curUser.refreshToken = await MdFilter.encrypt_tProm(refreshToken);
-		const objSave = await curUser.save();
+		payload.refreshToken = await MdFilter.encrypt_tProm(refreshToken);
+		const objSave = await payload.save();
 
 		return res.status(200).json({
 			status: 200,
@@ -45,7 +45,7 @@ const loginFunc = async(req, res) => {
 			data: {
 				accessToken,
 				refreshToken,
-				curUser
+				payload
 			},
 		})
 	} catch(error) {
@@ -79,10 +79,10 @@ const isLoginFunc = async(req, res) => {
 	try {
 		const access_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
 		if(access_res.status === 401) return res.status(200).json(access_res);
-		const curUser = access_res.data.payload;
-		if(!ConfUser.role_Arrs.includes(curUser.role)) return res.json({status: 400, message: "[server] 权限参数错误"});
+		const payload = access_res.data.payload;
+		if(!ConfUser.role_Arrs.includes(payload.role)) return res.json({status: 400, message: "[server] 权限参数错误"});
 		
-		return res.status(200).json({status: 200, message: "[server] 登陆状态", data: {curUser}});
+		return res.status(200).json({status: 200, message: "[server] 登陆状态", data: {payload}});
 	} catch(error) {
 		console.log("/b1/isLogin", error);
 		return res.status(500).json({status: 500, message: "[服务器错误: isLogin]"});
@@ -113,7 +113,7 @@ const refreshtokenFunc = async(req, res) => {
 		return res.status(200).json({
 			status: 200,
 			message: "[server] 刷新token成功",
-			data: {accessToken, refreshToken, curUser: payload}
+			data: {accessToken, refreshToken, payload}
 		});
 	} catch(error) {
 		console.log("/b1/refreshtoken", error);

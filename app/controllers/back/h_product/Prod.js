@@ -13,17 +13,17 @@ const _ = require('underscore');
 exports.ProdPost = async(req, res) => {
 	console.log("/b1/ProdPost");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		let obj = {};
 		let Pd = null;
 		if(req.body.Pd) {		// 从总公司同步
 			if(!MdFilter.is_ObjectId_Func(req.body.Pd)) return res.json({status: 400, message: '[server] 请输入需要同步的产品_id'});
-			Pd = await PdDB.findOne({_id: req.body.Pd, Firm: curUser.Firm});
+			Pd = await PdDB.findOne({_id: req.body.Pd, Firm: payload.Firm});
 			if(!Pd) return res.json({status: 400, message: '[server] 没有找到同步产品信息'});
 			
-			const objSame = await ProdDB.findOne({Pd: obj.Pd, Shop: obj.Shop, Firm: curUser.Firm});
+			const objSame = await ProdDB.findOne({Pd: obj.Pd, Shop: obj.Shop, Firm: payload.Firm});
 			if(objSame) return res.status(205).json({status: 200, message: '[server] 此商品之前已经被同步', data: {object: objSame}});
 			obj.Pd = Pd._id;
 			if(Pd.Categ) obj.Categ = Pd.Categ;
@@ -48,7 +48,7 @@ exports.ProdPost = async(req, res) => {
 			if(!errorInfo && obj.code) {
 				errorInfo = MdFilter.Stint_Match_Func(obj.code, StintPd.code);
 				if(!errorInfo) {
-					const objSame = await PdDB.findOne({'code': obj.code, Firm: curUser.Firm});
+					const objSame = await PdDB.findOne({'code': obj.code, Firm: payload.Firm});
 					if(objSame) return res.json({status: 400, message: '[server] 产品编号相同'});
 				}
 			}
@@ -69,20 +69,20 @@ exports.ProdPost = async(req, res) => {
 			return res.json({status: 400, message: "[server] 请传递正确的数据"});
 		}
 
-		if(curUser.role < ConfUser.role_set.boss) {
+		if(payload.role < ConfUser.role_set.boss) {
 			if(!MdFilter.is_ObjectId_Func(req.body.Shop)) return res.json({status: 400, message: '[server] 请输入商品所属分店'});
-			const Shop = await ShopDB.findOne({_id: req.body.Shop, Firm: curUser.Firm});
+			const Shop = await ShopDB.findOne({_id: req.body.Shop, Firm: payload.Firm});
 			if(!Shop) return res.json({status: 400, message: '[server] 没有找到该分店'});
 			obj.Shop = Shop._id;
 		} else {
-			obj.Shop = curUser.Shop;
+			obj.Shop = payload.Shop;
 		}
 
 		obj.is_usable = false;
 		obj.Skus = [];
 
-		obj.Firm = curUser.Firm;
-		obj.User_crt = curUser._id;
+		obj.Firm = payload.Firm;
+		obj.User_crt = payload._id;
 		const _object = new ProdDB(obj);
 
 		// 创建 obj_Sku
@@ -122,14 +122,14 @@ exports.ProdPost = async(req, res) => {
 exports.ProdDelete = async(req, res) => {
 	console.log("/b1/ProdDelete")
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "请传递正确的数据 _id"});
 
 		const pathObj = {_id: id};
-		Prod_path_Func(pathObj, curUser);
+		Prod_path_Func(pathObj, payload);
 
 		const Prod = await ProdDB.findOne(pathObj);
 		if(!Prod) return res.json({status: 400, message: "[server] 没有找到此商品信息, 请刷新重试"});
@@ -155,13 +155,13 @@ exports.ProdDelete = async(req, res) => {
 exports.ProdPut = async(req, res) => {
 	console.log("/b1/ProdPut");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
 		const pathObj = {_id: id};
-		Prod_path_Func(pathObj, curUser);
+		Prod_path_Func(pathObj, payload);
 
 		const Prod = await ProdDB.findOne(pathObj);
 		if(!Prod) return res.json({status: 400, message: "[server] 没有找到此商品信息, 请刷新重试"});
@@ -178,7 +178,7 @@ exports.ProdPut = async(req, res) => {
 		if(obj.is_usable == 1 || obj.is_usable == true || obj.is_usable == 'true') Prod.is_usable = true;
 		if(obj.is_usable == 0 || obj.is_usable == false || obj.is_usable == 'false') Prod.is_usable = false;
 
-		Prod.User_upd = curUser._id;
+		Prod.User_upd = payload._id;
 
 		const objSave = await Prod.save();
 		return res.status(200).json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
@@ -211,11 +211,11 @@ exports.ProdPut = async(req, res) => {
 
 
 
-const Prod_path_Func = (pathObj, curUser, queryObj) => {
-	pathObj.Firm = curUser.Firm;
+const Prod_path_Func = (pathObj, payload, queryObj) => {
+	pathObj.Firm = payload.Firm;
 
-	if(curUser.role >= ConfUser.role_set.boss) {
-		pathObj.Shop = curUser.Shop;
+	if(payload.role >= ConfUser.role_set.boss) {
+		pathObj.Shop = payload.Shop;
 	} else {
 		if(queryObj.Shops) {
 			const ids = MdFilter.getArray_ObjectId_Func(queryObj.Shops);
@@ -246,9 +246,9 @@ const Prod_path_Func = (pathObj, curUser, queryObj) => {
 const dbProd = 'Prod';
 exports.Prods = async(req, res) => {
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: ProdDB,
 			path_Callback: Prod_path_Func,
@@ -264,10 +264,10 @@ exports.Prods = async(req, res) => {
 
 exports.Prod = async(req, res) => {
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: ProdDB,
 			path_Callback: Prod_path_Func,

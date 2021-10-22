@@ -32,7 +32,7 @@ module.exports = (app) => {
 const NationPost = async(req, res) => {
 	console.log('/b1/NationPost');
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const obj = await MdFiles.mkPicture_prom(req, {img_Dir: "/Nation", field: "img_url"});
 		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
 
@@ -56,7 +56,7 @@ const NationPost = async(req, res) => {
 }
 const NationPut = async(req, res) => {
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const dbName = "Nation";
 		return res.json({status: 100});
 	} catch(error) {
@@ -66,7 +66,7 @@ const NationPut = async(req, res) => {
 }
 const NationDelete = async(req, res) => {
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const dbName = "Nation";
 		return res.json({status: 100});
 	} catch(error) {
@@ -77,7 +77,7 @@ const NationDelete = async(req, res) => {
 
 const AreaPost = async(req, res) => {
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const obj = await MdFiles.mkPicture_prom(req, {img_Dir: "/Area", field: "img_url"});
 		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
 
@@ -105,7 +105,7 @@ const AreaPost = async(req, res) => {
 }
 const AreaPut = async(req, res) => {
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const dbName = "Area";
 		return res.json({status: 100});
 	} catch(error) {
@@ -115,7 +115,7 @@ const AreaPut = async(req, res) => {
 }
 const AreaDelete = async(req, res) => {
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const dbName = "Area";
 		return res.json({status: 100});
 	} catch(error) {
@@ -126,7 +126,7 @@ const AreaDelete = async(req, res) => {
 
 const CitaPost = async(req, res) => {
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const obj = await MdFiles.mkPicture_prom(req, {img_Dir: "/Nation", field: "img_url"});
 		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
 
@@ -156,7 +156,7 @@ const CitaPost = async(req, res) => {
 const CitaPut = async(req, res) => {
 	console.log('/b1/CitaPut');
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 
 		const id = req.params.id;		// 所要更改的Cita的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
@@ -173,14 +173,14 @@ const CitaPut = async(req, res) => {
 		if(obj.code && (obj.code = obj.code.replace(/^\s*/g,"").toUpperCase()) && (obj.code != Cita.code)) {
 			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.code, StintCita.code);
 			if(!errorInfo) {
-				const objSame = await CitaDB.findOne({_id: {$ne: Cita._id}, code: obj.code, Firm: curUser.Firm});
+				const objSame = await CitaDB.findOne({_id: {$ne: Cita._id}, code: obj.code, Firm: payload.Firm});
 				if(objSame) return res.json({status: 400, message: '[server] 此城市编号已被占用, 请查看'});
 			}
 		}
 		if(!errorInfo && obj.nome && (obj.nome != Cita.nome)) {
 			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.nome, StintCita.nome);
 			if(!errorInfo) {
-				const objSame = await CitaDB.findOne({_id: {$ne: Cita._id}, nome: obj.nome, Firm: curUser.Firm});
+				const objSame = await CitaDB.findOne({_id: {$ne: Cita._id}, nome: obj.nome, Firm: payload.Firm});
 				if(objSame) return res.json({status: 400, message: '[server] 此城市名称已被占用, 请查看'});
 			}
 		}
@@ -196,7 +196,7 @@ const CitaPut = async(req, res) => {
 			await MdFiles.rmPicture(Cita.img_url);
 		}
 
-		obj.User_upd = curUser._id;
+		obj.User_upd = payload._id;
 		const _object = _.extend(Cita, obj);
 
 		const objSave = await _object.save();
@@ -208,7 +208,7 @@ const CitaPut = async(req, res) => {
 }
 const CitaDelete = async(req, res) => {
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const id = req.params.id;		// 所要更改的Cita的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
 		const Cita = await CitaDB.findOne({_id: id});

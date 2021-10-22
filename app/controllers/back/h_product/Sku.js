@@ -57,13 +57,13 @@ const includes_attrs_Func = (Attrs, attrs) => {	// 判断 Attrs 中是否包含�
 exports.SkuPost = async(req, res) => {
 	console.log("/b1/SkuPost");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		let obj = req.body.obj;
 		if(!obj) return res.json({status: 400, message: '[server] 请输入 obj 参数'});
 		if(!MdFilter.is_ObjectId_Func(obj.Prod)) return res.json({status: 400, message: '[server] 所属商品 _id'});
-		const Prod = await ProdDB.findOne({_id: obj.Prod, Firm: curUser.Firm})
+		const Prod = await ProdDB.findOne({_id: obj.Prod, Firm: payload.Firm})
 			.populate([{path: "Skus"}, {path: "Attrs", select: "nome options"}]);
 		if(!Prod) return res.json({status: 400, message: '[server] 没有找到同步产品信息'});
 
@@ -111,7 +111,7 @@ exports.SkuPost = async(req, res) => {
 			obj.allow_backorder = Sku_def.allow_backorder;
 		}
 
-		obj.User_crt = curUser._id;
+		obj.User_crt = payload._id;
 		const _object = new SkuDB(obj);
 
 		Prod.Skus.push(_object._id);
@@ -136,14 +136,14 @@ exports.SkuPost = async(req, res) => {
 exports.SkuDelete = async(req, res) => {
 	console.log("/b1/SkuDelete");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;		// 所要更改的Sku的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "请传递正确的数据 _id"});
 
 		const pathObj = {_id: id};
-		// Sku_path_Func(pathObj, curUser);
+		// Sku_path_Func(pathObj, payload);
 
 		const Sku = await SkuDB.findOne(pathObj);
 		if(!Sku) return res.json({status: 400, message: "[server] 没有找到此商品Product信息, 请刷新重试"});
@@ -171,17 +171,17 @@ exports.SkuDelete = async(req, res) => {
 exports.SkuPut = async(req, res) => {
 	console.log("/b1/SkuPut");
 	try{
-		const curUser = req.curUser;
-		if(MdSafe.fq_spanTimes1_Func(curUser._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
+		const payload = req.payload;
+		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		const id = req.params.id;		// 所要更改的Sku的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
 		const pathObj = {_id: id};
-		// Sku_path_Func(pathObj, curUser);
+		// Sku_path_Func(pathObj, payload);
 
 		const Sku = await SkuDB.findOne(pathObj);
 		if(!Sku) return res.json({status: 400, message: "[server] 没有找到此商品Product信息, 请刷新重试"});
-		const Prod = await ProdDB.findOne({_id: Sku.Prod, Firm: curUser.Firm})
+		const Prod = await ProdDB.findOne({_id: Sku.Prod, Firm: payload.Firm})
 			.populate([{path: "Skus", select: "attrs"}, {path: "Attrs", select: "nome options"}]);
 		if(!Prod) return res.json({status: 400, message: "[server] 没有找到相应的商品信息 "});
 
@@ -229,7 +229,7 @@ exports.SkuPut = async(req, res) => {
 			Sku.is_usable = false;
 		}
 		
-		Sku.User_upd = curUser._id;
+		Sku.User_upd = payload._id;
 
 		const objSave = await Sku.save();
 		if(!objSave) return res.json({status: 400, message: '[server] Product更改保存失败 '}); 
@@ -317,11 +317,11 @@ const Prod_save_post_Prom = (id) => {
 
 
 
-const Sku_path_Func = (pathObj, curUser, queryObj) => {
-	if(curUser) pathObj.Firm = curUser.Firm;
+const Sku_path_Func = (pathObj, payload, queryObj) => {
+	if(payload) pathObj.Firm = payload.Firm;
 
-	if(curUser && curUser.role >= ConfUser.role_set.boss) {
-		pathObj.Shop = curUser.Shop;
+	if(payload && payload.role >= ConfUser.role_set.boss) {
+		pathObj.Shop = payload.Shop;
 	} else {
 		if(queryObj.Shops) {
 			const ids = MdFilter.getArray_ObjectId_Func(queryObj.Shops);
@@ -336,9 +336,9 @@ const dbSku = 'Sku';
 exports.Skus = async(req, res) => {
 	console.log("/b1/Skus");
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: SkuDB,
 			path_Callback: Sku_path_Func,
@@ -355,10 +355,10 @@ exports.Skus = async(req, res) => {
 exports.Sku = async(req, res) => {
 	console.log("/b1/Sku");
 	try {
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: SkuDB,
 			path_Callback: Sku_path_Func,

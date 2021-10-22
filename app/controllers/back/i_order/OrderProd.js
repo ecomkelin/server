@@ -3,8 +3,8 @@ const MdFilter = require('../../../middle/middleFilter');
 const OrderProdDB = require('../../../models/order/OrderProd');
 
 
-const vOrderProd_path_Func = (pathObj, curUser, queryObj) => {
-	pathObj.User = curUser._id;
+const vOrderProd_path_Func = (pathObj, payload, queryObj) => {
+	pathObj.User = payload._id;
 
 	if(!queryObj) return;
 	if(MdFilter.is_ObjectId_Func(queryObj.Order) ) pathObj["Order"] = queryObj.Order;
@@ -16,9 +16,9 @@ exports.OrderProds = async(req, res) => {
 	try {
 		if(!MdFilter.is_ObjectId_Func(req.query.Order)) return res.json({status: 400, message: "[server] 请告知服务器 查看哪个订单中的产品"});
 
-		const curUser = req.curUser;
+		const payload = req.payload;
 		const GetDB_Filter = {
-			Identity: curUser,
+			Identity: payload,
 			queryObj: req.query,
 			objectDB: OrderProdDB,
 			path_Callback: vOrderProd_path_Func,

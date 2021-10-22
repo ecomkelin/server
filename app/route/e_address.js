@@ -21,7 +21,7 @@ const Nations_path_Func = (pathObj, Identity, queryObj) => {
 
 const Nations = async(req, res) => {
 	try {
-		const Identity = req.payload || req.curUser || req.ip;
+		const Identity = req.payload || req.ip;
 		const dbNation = 'Nation';
 		const GetDB_Filter = {
 			Identity: Identity,
@@ -45,7 +45,7 @@ const Areas_path_Func = (pathObj, Identity, queryObj) => {
 }
 const Areas = async(req, res) => {
 	try {
-		const Identity = req.payload || req.curUser || req.ip;
+		const Identity = req.payload || req.ip;
 		const dbArea = 'Area';
 		const GetDB_Filter = {
 			Identity: Identity,
@@ -69,7 +69,7 @@ const Citas_path_Func = (pathObj, Identity, queryObj) => {
 }
 const Citas = async(req, res) => {
 	try {
-		const Identity = req.payload || req.curUser || req.ip;
+		const Identity = req.payload || req.ip;
 		const dbCita = 'Cita';
 		const GetDB_Filter = {
 			Identity: Identity,
