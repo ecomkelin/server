@@ -1,0 +1,19 @@
+extends ../../aalayout/layout
+
+block content
+	.container.mt-3
+		nav(aria-label="breadcrumb")
+			ol.breadcrumb
+				li.breadcrumb-item: a(href="/adHome") Home
+				li.breadcrumb-item: a(href="/adUsers") 用户列表
+				li.breadcrumb-item.active(aria-current="page") 用户信息
+		.row
+			.col-12.text-right
+				include ./detail/upInfo
+				span &nbsp;
+				include ./detail/upCode
+				span &nbsp;
+				include ./detail/upPwd
+		include ./detail/thisInfo
+	input#Stint_User(type="hidden", value=Stint.User)
+	script(src="/js/ader/UserEdit.js")

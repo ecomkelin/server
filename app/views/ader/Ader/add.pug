@@ -1,0 +1,17 @@
+extends ../../aalayout/layout
+
+block content
+	.container.mt-5
+		form#qtzAdd(method="post", action="/AderPost")
+			.form-group.row
+				label.col-md-2.col-form-label(for="iptCode") 帐号
+				.col-md-6
+					input#iptCode.form-control(type="text", name="obj[code]")
+			.form-group.row
+				label.col-md-2.col-form-label(for="iptPwd") 密码
+				.col-md-6
+					input#iptPwd.form-control(type="text", name="obj[pwd]")
+			hr
+			.form-group.row
+				.offset-md-2.col-md-10
+					input.btn.btn-default(type="submit" value="提交")

@@ -1,0 +1,9 @@
+extends ./aalayout/layout
+
+block content
+	if error
+		-a;
+		include ./error
+	else
+		.container
+			h1 Home

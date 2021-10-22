@@ -1,0 +1,17 @@
+a.btn.btn-warning(href="#", data-toggle="modal", data-target="#upCode") 更改账号
+
+#upCode.modal.fade
+	.modal-dialog
+		.modal-content
+			form#adUserUpdCode-Form(method="post", action="/adUserPut/"+User._id)
+				.modal-header: h3 更改账号
+				.modal-body
+					.form-group.row
+						label.col-3.col-form-label(for="codeIpt")#codeLabel.text-info 帐号
+						.col-9
+							input#codeIpt.form-control(type="text", name="obj[code]" value=User.code)
+						.offset-3.col-9#codeOpt.text-danger(style="display:none")
+							span 用户账户长度[#{Stint.User.code.min}, #{Stint.User.code.max}]的英文字母或数字
+				.modal-footer
+					button.btn.btn-default(type="button" data-dismiss="modal") 取消
+					button.btn.btn-success(type="submit") 提交

@@ -1,0 +1,46 @@
+extends ../../aalayout/layout
+
+block content
+	.container
+		nav(aria-label="breadcrumb")
+			ol.breadcrumb
+				li.breadcrumb-item: a(href="/adHome") Home
+				li.breadcrumb-item: a(href="/adAreas") 大区列表
+				li.breadcrumb-item.active(aria-current="page") #{title}
+		hr
+		form#adAreaPost-Form(method="post", action="/adAreaPost")
+			.form-group.row
+				label.col-4.col-sm-2.col-form-label(for="codeIpt")#codeLabel.text-info 大区编号
+				.col-8.col-sm-6
+					input#codeIpt.form-control(type="text", name="obj[code]")
+				.offset-4.offset-sm-2.col-8.col-sm-6#codeOpt.text-danger(style="display:none")
+					span 大区编号长度范围: [#{Stint.Area.code.min} ~ #{Stint.Area.code.max}] 的英文字母
+			.form-group.row
+				label.col-4.col-sm-2.col-form-label(for="nomeIpt")#nomeLabel.text-info 大区名称
+				.col-8.col-sm-6
+					input#nomeIpt.form-control(type="text", name="obj[nome]")
+				.offset-4.offset-sm-2.col-8.col-sm-6#nomeOpt.text-danger(style="display:none")
+					span 请输入大区名称范围: [#{Stint.Area.nome.min} ~ #{Stint.Area.nome.max}] 个字符
+			.form-group.row
+				label.col-4.col-sm-2.col-form-label(for="NationIpt")#NationLabel.text-info 所属国家
+				.col-8.col-sm-6
+					select#NationIpt.form-control(name="obj[Nation]", data-style="btn-info")
+						each Nation in Nations
+							-a;
+							option(value=Nation._id) #{Nation.code}
+			.form-group.row
+				label.col-4.col-sm-2.col-form-label(for="is_usableIpt") 是否可用
+				.col-8.col-sm-6
+					select#is_usableIpt.form-control(name="obj[is_usable]", data-style="btn-info")
+						option(value="true") 可用
+						option(value="false") 禁用
+			.form-group.row
+				label.col-4.col-sm-2.col-form-label(for="sortIpt") 排序
+				.col-8.col-sm-6
+					input#sortIpt.form-control(type="number", name="obj[sort]", value=0)
+			hr
+			.form-group.row
+				.offset-sm-6.col-sm-2
+					input.btn.btn-success.btn-block(type="submit" value="提交")
+	input#Sting_Area(type="hidden", value=Stint.Area)
+	//- script(src="/js/ader/AreaEdit.js")

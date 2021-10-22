@@ -1,0 +1,11 @@
+extends ./aalayout/layout
+
+block content
+	.container.mt-5
+		.row
+			.col-9
+				h1 404
+			.col-3
+				button.btn.btn-warning(type="button", onclick="window.history.go(-1)") 返回
+		hr
+		p 错误操作，没有此路由. 请联系管理员

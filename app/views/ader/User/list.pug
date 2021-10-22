@@ -1,0 +1,44 @@
+extends ../../aalayout/layout
+
+block content
+	.container.mt-3
+		nav(aria-label="breadcrumb")
+			ol.breadcrumb
+				li.breadcrumb-item: a(href="/adHome") Home
+				li.breadcrumb-item.active(aria-current="page") 用户列表
+		.row
+			.col-12.text-right
+				button.mr-5.btn.btn-danger#toggle_del_Btn(type="button") -
+				a.btn.btn-warning(href="/adUserAdd") +
+		.row.mt-3
+			.col-12
+				table.table.table-hover.table-bordered
+					thead
+						tr
+							th 角色
+							th 账户
+							th 名字
+							th 是否可用
+							th 公司
+							th.del_show 删除
+					tbody
+						each User in Users
+							-a;
+							tr(class="User-id-"+User._id)
+								td #{Conf.User.role[User.role].cn}
+								td: a(href="/adUser/"+User._id) #{User.code}
+								td #{User.nome}
+								td
+									if User.is_usable
+										-a;
+										span 可用
+									else
+										span.text-warning 禁用
+								td
+									if User.Firm
+										-Firm = User.Firm;
+										span #{Firm.code} (#{Firm.nome})
+									else
+										span 所属公司数据错误
+								td.del_show
+									a.btn.btn-danger(href="/adUserDel/"+User._id) 删除

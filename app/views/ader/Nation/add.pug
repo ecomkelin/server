@@ -1,0 +1,45 @@
+extends ../../aalayout/layout
+
+block content
+	.container
+		nav(aria-label="breadcrumb")
+			ol.breadcrumb
+				li.breadcrumb-item: a(href="/adHome") Home
+				li.breadcrumb-item: a(href="/adNations") 国家列表
+				li.breadcrumb-item.active(aria-current="page") #{title}
+		hr
+		form#adNationPost-Form(method="post", action="/adNationPost")
+			.form-group.row
+				label.col-4.col-sm-2.col-form-label(for="codeIpt")#codeLabel.text-info 国家编号
+				.col-8.col-sm-6
+					input#codeIpt.form-control(type="text", name="obj[code]")
+				.offset-4.offset-sm-2.col-8.col-sm-6#codeOpt.text-danger(style="display:none")
+					span 国家编号长度为: #{Stint.Nation.code.trim} 的英文字母
+			.form-group.row
+				label.col-4.col-sm-2.col-form-label(for="nomeIpt")#nomeLabel.text-info 国家名称
+				.col-8.col-sm-6
+					input#nomeIpt.form-control(type="text", name="obj[nome]")
+				.offset-4.offset-sm-2.col-8.col-sm-6#nomeOpt.text-danger(style="display:none")
+					span 请输入国家名称范围: [#{Stint.Nation.nome.min} ~ #{Stint.Nation.nome.max}] 个字符
+			.form-group.row
+				label.col-4.col-sm-2.col-form-label(for="telIpt")#telLabel.text-info 国家区号
+				.col-8.col-sm-6
+					input#telIpt.form-control(type="text", name="obj[tel]", value="00")
+				.offset-4.offset-sm-2.col-8.col-sm-6#telOpt.text-danger(style="display:none")
+					span 国家区号长度为: #{Stint.Nation.tel.trim} 的英文字母
+			.form-group.row
+				label.col-4.col-sm-2.col-form-label(for="is_usableIpt") 是否可用
+				.col-8.col-sm-6
+					select#is_usableIpt.form-control(name="obj[is_usable]", data-style="btn-info")
+						option(value="true") 可用
+						option(value="false") 禁用
+			.form-group.row
+				label.col-4.col-sm-2.col-form-label(for="sortIpt") 排序
+				.col-8.col-sm-6
+					input#sortIpt.form-control(type="number", name="obj[sort]", value=0)
+			hr
+			.form-group.row
+				.offset-sm-6.col-sm-2
+					input.btn.btn-success.btn-block(type="submit" value="提交")
+	input#Sting_Nation(type="hidden", value=Stint.Nation)
+	//- script(src="/js/ader/NationEdit.js")

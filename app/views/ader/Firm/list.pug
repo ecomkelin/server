@@ -1,0 +1,41 @@
+extends ../../aalayout/layout
+
+block content
+	.container.mt-3
+		nav(aria-label="breadcrumb")
+			ol.breadcrumb
+				li.breadcrumb-item: a(href="/adHome") Home
+				li.breadcrumb-item.active(aria-current="page") 公司列表
+		.row
+			.col-12.text-right
+				btn.mr-5.btn.btn-danger#toggle_del_Btn(type="button") -
+				a.btn.btn-warning(href="/adFirmAdd") +
+
+		table.table.table-hover.table-bordered.mt-3
+			thead
+				tr
+					th 编号
+					th 名称
+					th 负责人
+					th 电话
+					th 地址
+					th 排序
+					th 是否可用
+					th.del_show 删除
+			tbody
+				each Firm in Firms
+					-a;
+					tr(class="Firm-id-"+Firm._id)
+						td: a.btn.btn-info(href="/adFirm/"+Firm._id) #{Firm.code}
+						td #{Firm.nome}
+						td #{Firm.resp}
+						td #{Firm.tel}
+						td #{Firm.addr}
+						td #{Firm.sort}
+						td
+							if Firm.is_usable
+								-a;
+								span 可用
+							else
+								span.text-warning 禁用
+						td.del_show: a.btn.btn-danger(href="/adFirmDel/"+Firm._id) 删除

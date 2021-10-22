@@ -1,0 +1,86 @@
+extends ../../aalayout/layout
+
+block content
+	.container.mt-3
+		nav(aria-label="breadcrumb")
+			ol.breadcrumb
+				li.breadcrumb-item: a(href="/adHome") Home
+				li.breadcrumb-item: a(href="/adFirms") 列表
+				li.breadcrumb-item.active(aria-current="page") 详情
+		.text-right
+			button.btn.btn-info#change_detail_update_Btn(type="button") change
+		.page_detail
+			table.mt-3.table.table-hover.bg-light
+				tr
+					td <strong>公司编号:</strong>
+					td #{Firm.code}
+				tr
+					td <strong>公司名称:</strong>
+					td #{Firm.nome}
+				tr
+					td <strong>是否可用:</strong>
+					td
+						if Firm.is_usable
+							-a;
+							span 可用
+						else
+							span.text-warning 禁用
+				tr
+					td <strong>负责人:</strong> 
+					td #{Firm.resp}
+				tr
+					td <strong>电话:</strong>
+					td #{Firm.tel}
+				tr
+					td <strong>地址:</strong>
+					td #{Firm.addr}
+				tr
+					td <strong>排序:</strong>
+					td #{Firm.sort}
+		.page_update(style="display:none")
+			form#adFirmPut-Form(method="post", action="/adFirmPut/"+Firm._id)
+				.form-group.row
+					label.col-4.col-sm-2.col-form-label(for="codeIpt")#codeLabel.text-info 公司编号
+					.col-8.col-sm-6
+						input#codeIpt.form-control(type="text", name="obj[code]", value=Firm.code)
+					.offset-4.offset-sm-2.col-8.col-sm-6#codeOpt.text-danger(style="display:none")
+						span 公司编号长度范围: [#{Stint.Firm.code.min} ~ #{Stint.Firm.code.max}] 的英文字母
+				.form-group.row
+					label.col-4.col-sm-2.col-form-label(for="nomeIpt")#nomeLabel.text-info 公司名称
+					.col-8.col-sm-6
+						input#nomeIpt.form-control(type="text", name="obj[nome]", value=Firm.nome)
+					.offset-4.offset-sm-2.col-8.col-sm-6#nomeOpt.text-danger(style="display:none")
+						span 请输入公司名称范围: [#{Stint.Firm.nome.min} ~ #{Stint.Firm.nome.max}] 个字符
+				.form-group.row
+					label.col-4.col-sm-2.col-form-label(for="respIpt") 负责人
+					.col-8.col-sm-6
+						input#respIpt.form-control(type="text", name="obj[resp]", value=Firm.resp)
+				.form-group.row
+					label.col-4.col-sm-2.col-form-label(for="addrIpt") 地址
+					.col-8.col-sm-6
+						input#addrIpt.form-control(type="text", name="obj[addr]", value=Firm.addr)
+				.form-group.row
+					label.col-4.col-sm-2.col-form-label(for="telIpt") 电话
+					.col-8.col-sm-6
+						input#telIpt.form-control(type="text", name="obj[tel]", value=Firm.tel)
+				.form-group.row
+					label.col-4.col-sm-2.col-form-label(for="is_usableIpt") 是否可用
+					.col-8.col-sm-6
+						select#is_usableIpt.form-control(name="obj[is_usable]", data-style="btn-info")
+							if Firm.is_usable
+								-a;
+								option(value="true", selected="selected") 可用
+								option(value="false") 禁用
+							else
+								option(value="true") 可用
+								option(value="false", selected="selected") 禁用
+				.form-group.row
+					label.col-4.col-sm-2.col-form-label(for="sortIpt") 排序
+					.col-8.col-sm-6
+						input#sortIpt.form-control(type="number", name="obj[sort]", value=Firm.sort)
+				hr
+				.form-group.row
+					.offset-sm-6.col-sm-2
+						input.btn.btn-success.btn-block(type="submit" value="提交")
+			input#Stint_Firm(type="hidden", value=Stint.Firm)
+			script(src="/js/ader/FirmEdit.js")

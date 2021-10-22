@@ -1,0 +1,49 @@
+a.btn.btn-warning(href="#", data-toggle="modal", data-target="#upInfo") 修改信息
+
+#upInfo.modal.fade
+	.modal-dialog
+		.modal-content
+			form#adUserUpdInfo-Form(method="post", action="/adUserPut/"+User._id)
+				.modal-header: h3 修改信息
+				.modal-body
+					.form-group.row
+						label.col-3.col-form-label(for="iptRl") 角色
+						.col-9
+							select#iptRl.form-control(name="obj[role]", data-style="btn-info")
+								each roleNum in Conf.User.role_Arrs
+									-a;
+									if roleNum == User.role
+										-a;
+										option(value=roleNum, selected="selected") #{Conf.User.role[roleNum].cn}
+									else
+										option(value=roleNum) #{Conf.User.role[roleNum].cn}
+					.form-group.row
+						label.col-3.col-form-label(for="is_usableIpt") 是否可用
+						.col-9
+							select#is_usableIpt.form-control(name="obj[is_usable]", data-style="btn-info")
+								if User.is_usable
+									-a;
+									option(value="true", selected="selected") 可用
+									option(value="false") 禁用
+								else
+									option(value="true") 可用
+									option(value="false", selected="selected") 禁用
+					//- .form-group.row
+						label.col-3.col-form-label(for="iptLang") 语言
+						.col-9
+							select#iptLang.form-control(name="obj[lang]", data-style="btn-info")
+								each Lang in Conf.Lang
+									-a;
+									if Lang.num == User.lang
+										-a;
+										option(value=Lang.num, selected="selected") #{Lang.val}
+									else
+										option(value=Lang.num) #{Lang.val}
+					.form-group.row
+						label.col-3.col-form-label(for="nomeIpt") 姓名
+						.col-9
+							input#nomeIpt.form-control(type="text", name="obj[nome]" value=User.nome)
+						.offset-3.col-9.col-form-label.text-danger
+				.modal-footer
+					button.btn.btn-default(type="button" data-dismiss="modal") 取消
+					button.btn.btn-success(type="submit") 提交

@@ -1,0 +1,22 @@
+{
+  "name": "LKL",
+  "description": "Simple system",
+  "main": "server.js",
+  "authors": [
+    "LIKELIN"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/FrozenFired/learnpro",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/libs"
+  ],
+  "dependencies": {
+    "jquery-timepicker-wvega": "^1.3.5",
+    "bootstrap": "^4.5.3",
+    "popper.js": "^2.6.0"
+  }
+}

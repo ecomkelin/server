@@ -1,0 +1,68 @@
+extends ../../aalayout/layout
+
+block content
+	.container.mt-3
+		nav(aria-label="breadcrumb")
+			ol.breadcrumb
+				li.breadcrumb-item: a(href="/adHome") Home
+				li.breadcrumb-item: a(href="/adUsers") 用户列表
+				li.breadcrumb-item.active(aria-current="page") 添加用户
+		hr
+		form#adUserPost-Form(method="post", action="/adUserPost", autocomplete="off")
+			.form-group.row
+				label.col-4.col-sm-2.col-form-label(for="phoneIpt")#phoneLabel.text-info 手机
+				.col-12.col-sm-6
+					.row
+						.col-4
+							input#phonePreIpt.form-control(type="number", name="obj[phonePre]", value='0039')
+						.col-8
+							input#phoneIpt.form-control(type="number", name="obj[phone]", value="3888676796")
+				.offset-4.offset-sm-2.col-8.col-sm-6#phonePreOpt.text-danger(style="display:none")
+					span 用户手机前缀长度必须为: #{Stint.User.phonePre.trim} 的数字
+				.offset-4.offset-sm-2.col-8.col-sm-6#phoneOpt.text-danger(style="display:none")
+					span 用户手机长度必须为: #{Stint.User.phone.trim} 的数字
+			.form-group.row
+				label.col-4.col-sm-2.col-form-label(for="codeIpt")#codeLabel.text-info 帐号
+				.col-8.col-sm-6
+					input#codeIpt.form-control(type="text", name="obj[code]")
+				.offset-4.offset-sm-2.col-8.col-sm-6#codeOpt.text-danger(style="display:none")
+					span 用户账户长度[#{Stint.User.code.min}, #{Stint.User.code.max}]的英文字母或数字
+			.form-group.row
+				label.col-4.col-sm-2.col-form-label(for="pwdIpt")#pwdLabel.text-info 密码
+				.col-8.col-sm-6
+					input#pwdIpt.form-control(type="text", name="obj[pwd]", value="111111")
+				.offset-4.offset-sm-2.col-8.col-sm-6#pwdOpt.text-danger(style="display:none")
+					span 用户密码长度[#{Stint.User.pwd.min}, #{Stint.User.pwd.max}]
+			.form-group.row
+				label.col-4.col-sm-2.col-form-label(for="FirmIpt")#FirmLabel.text-info 公司
+				.col-8.col-sm-6
+					select#FirmIpt.form-control(name="obj[Firm]", data-style="btn-info")
+						//- option(value=0) 请选择
+						each Firm in Firms
+							-a;
+							option(value=Firm._id) #{Firm.code}
+				.offset-4.offset-sm-2.col-8.col-sm-6#FirmOpt.text-danger(style="display:none") 请选择公司
+			.form-group.row
+				label.col-4.col-sm-2.col-form-label(for="is_usable")#is_usableLabel 是否可用
+				.col-8.col-sm-6
+					select#is_usable.form-control(name="obj[is_usable]", data-style="btn-info")
+						option(value="true") 可用
+						option(value="false") 禁用
+			//- .form-group.row
+				label.col-4.col-sm-2.col-form-label(for="langIpt") Language
+				.col-8.col-sm-6
+					select#langIpt.form-control(name="obj[lang]", data-style="btn-info")
+						each Lang in Conf.Lang
+							-a;
+							option(value=Lang.num) #{Lang.val}
+				.offset-4.col-8.col-form-label.text-danger
+			.form-group.row
+				label.col-4.col-sm-2.col-form-label(for="nomeIpt") 用户姓名
+				.col-8.col-sm-6
+					input#nomeIpt.form-control(type="text", name="obj[nome]")
+				.offset-4.col-8.col-form-label.text-danger
+			.form-group.row
+				.offset-sm-6.col-sm-2
+					input.btn.btn-success.btn-block(type="submit" value="添加")
+	input#Stint_User(type="hidden", value=Stint.User)
+	script(src="/js/ader/UserEdit.js")

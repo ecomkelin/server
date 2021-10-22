@@ -1,0 +1,45 @@
+extends ../../aalayout/layout
+
+block content
+	.container.mt-3
+		nav(aria-label="breadcrumb")
+			ol.breadcrumb
+				li.breadcrumb-item: a(href="/adHome") Home
+				li.breadcrumb-item.active(aria-current="page") 城市列表
+		.row
+			.col-12.text-right
+				btn.mr-5.btn.btn-danger#toggle_del_Btn(type="button") -
+				a.btn.btn-warning(href="/adCitaAdd") +
+
+		table.table.table-hover.table-bordered.text-center.mt-3
+			thead
+				tr
+					th(width="6%") 序号
+					th(width="6%") 编号
+					th 名称
+					th 所属大区
+					th 是否可用
+					th sort
+					th.del_show 删除
+			tbody
+				- let i = 0;
+				each Cita in Citas
+					- i++;
+					tr(class="Cita-id-"+Cita._id)
+						td #{i}
+						td #{Cita.code}
+						td #{Cita.nome}
+						td
+							if Cita.Area
+								- Area = Cita.Area;
+								span #{Area.code}
+							else
+								span 未分配
+						td
+							if Cita.is_usable
+								-a;
+								span 可用
+							else
+								span.text-warning 禁用
+						td #{Cita.sort}
+						td.del_show: a.btn.btn-danger(href="/adCitaDel/"+Cita._id) 删除

@@ -1,0 +1,22 @@
+a.btn.btn-warning(href="#", data-toggle="modal", data-target="#upPw") 重置密码
+
+#upPw.modal.fade
+	.modal-dialog
+		.modal-content
+			form#adUserUpdPwd-Form(method="post", action="/adUserPut/"+User._id)
+				.modal-header: h3 重置密码
+				.modal-body
+					.form-group.row
+						label.col-3.col-form-label(for="pwdIpt")#pwdLabel.text-info 密码
+						.col-9
+							input#pwdIpt.form-control(type="text", name="obj[pwd]")
+						.offset-3.col-9#pwdOpt.text-danger(style="display:none")
+							span 用户密码长度[#{Stint.User.pwd.min}, #{Stint.User.pwd.max}]
+					.form-group.row
+						label.col-3.col-form-label(for="pwdCheckIpt")#pwdCheckLabel.text-info 确认
+						.col-9
+							input#pwdCheckIpt.form-control(type="text")
+						.offset-3.col-9#pwdCheckOpt.text-danger(style="display:none") 要与密码相符
+				.modal-footer
+					button.btn.btn-default(type="button" data-dismiss="modal") 取消
+					button.btn.btn-success(type="submit") 提交

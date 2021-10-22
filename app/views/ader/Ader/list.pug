@@ -1,0 +1,17 @@
+extends ../../aalayout/layout
+
+block content
+	.container.mt-4
+		.row
+			table.table.table-hover.table-bordered
+				thead
+					tr
+						th 账户
+						th.text-right delete
+				tbody
+					each Ader in Aders
+						-a;
+						tr(class="Ader-id-"+Ader._id)
+							td #{Ader.code}
+							td.text-right
+								a.btn.btn-danger.del(href="/AderDel/"+Ader._id) delete

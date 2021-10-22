@@ -1,0 +1,45 @@
+extends ../../aalayout/layout
+
+block content
+	.container.mt-3
+		nav(aria-label="breadcrumb")
+			ol.breadcrumb
+				li.breadcrumb-item: a(href="/adHome") Home
+				li.breadcrumb-item.active(aria-current="page") 大区列表
+		.row
+			.col-12.text-right
+				btn.mr-5.btn.btn-danger#toggle_del_Btn(type="button") -
+				a.btn.btn-warning(href="/adAreaAdd") +
+
+		table.table.table-hover.table-bordered.text-center.mt-3
+			thead
+				tr
+					th(width="6%") 序号
+					th(width="6%") 编号
+					th 名称
+					th 所属国家
+					th 是否可用
+					th sort
+					th.del_show 删除
+			tbody
+				- let i = 0;
+				each Area in Areas
+					- i++;
+					tr(class="Area-id-"+Area._id)
+						td #{i}
+						td #{Area.code}
+						td #{Area.nome}
+						td
+							if Area.Nation
+								- Nation = Area.Nation;
+								span #{Nation.code}
+							else
+								span 未分配
+						td
+							if Area.is_usable
+								-a;
+								span 可用
+							else
+								span.text-warning 禁用
+						td #{Area.sort}
+						td.del_show: a.btn.btn-danger(href="/adAreaDel/"+Area._id) 删除

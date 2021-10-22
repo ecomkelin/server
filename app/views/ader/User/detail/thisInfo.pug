@@ -1,0 +1,36 @@
+table.mt-3.table.table-hover
+	tr
+		td: strong 账号:
+		td #{User.code}
+	if User.Firm
+		- Firm = User.Firm;
+		tr
+			td: strong 公司:
+			td #{Firm.code} [#{Firm.nome}]
+	tr
+		td: strong 角色:
+		td #{Conf.User.role[User.role].cn}
+	tr
+		td: strong 姓名:
+		td #{User.nome}
+	//- tr
+		td: strong 语言:
+		td 
+			- let lang = '';
+			each Lang in Conf.Lang
+				- lang = '';
+				if Lang.num == User.lang
+					- lang = Lang.val;
+					- break;
+			span #{lang}
+	tr
+		td: strong 是否可用:
+		td
+			if User.is_usable
+				-a;
+				span 可用
+			else
+				span.text-warning 禁用
+	tr
+		td: strong createAt:
+		td #{moment(User.at_crt).format('DD/MM/YYYY HH:mm:ss')}
