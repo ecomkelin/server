@@ -15,8 +15,8 @@ module.exports = (app) => {
 	app.get('/api/v1/Citas', Citas);
 };
 
-const Nations_path_Func = (pathObj, Identity, queryObj) => {
-	if(!Identity || !Identity.role) pathObj.is_usable = 1;
+const Nations_path_Func = (pathObj, payload, queryObj) => {
+	if(!payload || !payload.role) pathObj.is_usable = 1;
 }
 
 const Nations = async(req, res) => {
@@ -39,9 +39,9 @@ const Nations = async(req, res) => {
 }
 
 
-const Areas_path_Func = (pathObj, Identity, queryObj) => {
+const Areas_path_Func = (pathObj, payload, queryObj) => {
 	if(MdFilter.is_ObjectId_Func(queryObj.Nation)) pathObj["Nation"] = {'$eq': queryObj.Nation};
-	if(!Identity || !Identity.role) pathObj.is_usable = 1;
+	if(!payload || !payload.role) pathObj.is_usable = 1;
 }
 const Areas = async(req, res) => {
 	try {
@@ -63,9 +63,9 @@ const Areas = async(req, res) => {
 }
 
 
-const Citas_path_Func = (pathObj, Identity, queryObj) => {
+const Citas_path_Func = (pathObj, payload, queryObj) => {
 	if(MdFilter.is_ObjectId_Func(queryObj.Area)) pathObj["Area"] = {'$eq': queryObj.Area};
-	if(!Identity || !Identity.role) pathObj.is_usable = 1;
+	if(!payload || !payload.role) pathObj.is_usable = 1;
 }
 const Citas = async(req, res) => {
 	try {

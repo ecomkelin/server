@@ -139,8 +139,8 @@ exports.path_Func = (queryObj) => {
 }
 
 // mongodb 中的 select 限制 字段
-exports.select_func = (selectKeys, selectVal, dbName, Identity) => {
-	const sel = dbFilter.limitSelect(dbName, Identity)
+exports.select_func = (selectKeys, selectVal, dbName, payload) => {
+	const sel = dbFilter.limitSelect(dbName, payload)
 
 	const keys = this.getArrayFromString(selectKeys);
 

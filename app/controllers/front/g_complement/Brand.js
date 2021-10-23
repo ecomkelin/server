@@ -33,11 +33,10 @@ exports.vBrands = async(req, res) => {
 	}
 }
 
-
 exports.vBrand = async(req, res) => {
 	console.log("/v1/Brand");
 	try {
-		const payload = req.payload;
+		const payload = req.payload || req.ip;
 		const GetDB_Filter = {
 			id: req.params.id,
 			Identity: payload,
