@@ -21,10 +21,10 @@ const Nations_path_Func = (pathObj, payload, queryObj) => {
 
 const Nations = async(req, res) => {
 	try {
-		const Identity = req.payload || req.ip;
+		const payload = req.payload || req.ip;
 		const dbNation = 'Nation';
 		const GetDB_Filter = {
-			Identity: Identity,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: NationDB,
 			path_Callback: Nations_path_Func,
@@ -45,10 +45,10 @@ const Areas_path_Func = (pathObj, payload, queryObj) => {
 }
 const Areas = async(req, res) => {
 	try {
-		const Identity = req.payload || req.ip;
+		const payload = req.payload || req.ip;
 		const dbArea = 'Area';
 		const GetDB_Filter = {
-			Identity: Identity,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: AreaDB,
 			path_Callback: Areas_path_Func,
@@ -69,10 +69,10 @@ const Citas_path_Func = (pathObj, payload, queryObj) => {
 }
 const Citas = async(req, res) => {
 	try {
-		const Identity = req.payload || req.ip;
+		const payload = req.payload || req.ip;
 		const dbCita = 'Cita';
 		const GetDB_Filter = {
-			Identity: Identity,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: CitaDB,
 			path_Callback: Citas_path_Func,

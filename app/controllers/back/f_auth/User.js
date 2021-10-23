@@ -216,7 +216,7 @@ exports.Users = async(req, res) => {
 	try {
 		const payload = req.payload;
 		const GetDB_Filter = {
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: UserDB,
 			path_Callback: User_path_Func,
@@ -236,7 +236,7 @@ exports.User = async(req, res) => {
 		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: UserDB,
 			path_Callback: User_path_Func,

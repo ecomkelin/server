@@ -292,7 +292,7 @@ exports.Pds = async(req, res) => {
 	try {
 		const payload = req.payload;
 		const GetDB_Filter = {
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: PdDB,
 			path_Callback: Pd_path_Func,
@@ -314,7 +314,7 @@ exports.Pd = async(req, res) => {
 		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: PdDB,
 			path_Callback: Pd_path_Func,

@@ -20,7 +20,7 @@ exports.vSkus = async(req, res) => {
 
 		const payload = req.payload || req.ip;
 		const GetDB_Filter = {
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: SkuDB,
 			path_Callback: vSku_path_Func,
@@ -40,7 +40,7 @@ exports.vSku = async(req, res) => {
 		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: SkuDB,
 			path_Callback: vSku_path_Func,

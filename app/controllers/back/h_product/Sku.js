@@ -338,7 +338,7 @@ exports.Skus = async(req, res) => {
 	try {
 		const payload = req.payload;
 		const GetDB_Filter = {
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: SkuDB,
 			path_Callback: Sku_path_Func,
@@ -358,7 +358,7 @@ exports.Sku = async(req, res) => {
 		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: SkuDB,
 			path_Callback: Sku_path_Func,

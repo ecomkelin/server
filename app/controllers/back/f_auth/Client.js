@@ -39,7 +39,7 @@ exports.Clients = async(req, res) => {
 	try {
 		const payload = req.payload;
 		const GetDB_Filter = {
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: ClientDB,
 			path_Callback: null,
@@ -59,7 +59,7 @@ exports.Client = async(req, res) => {
 		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: ClientDB,
 			path_Callback: null,

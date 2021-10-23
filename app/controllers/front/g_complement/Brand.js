@@ -19,7 +19,7 @@ exports.vBrands = async(req, res) => {
 	try {
 		const payload = req.payload || req.ip;
 		const GetDB_Filter = {
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: BrandDB,
 			path_Callback: vBrand_path_Func,
@@ -39,7 +39,7 @@ exports.vBrand = async(req, res) => {
 		const payload = req.payload || req.ip;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: BrandDB,
 			path_Callback: vBrand_path_Func,

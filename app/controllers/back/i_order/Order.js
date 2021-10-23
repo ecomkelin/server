@@ -104,7 +104,7 @@ exports.Orders = async(req, res) => {
 	try {
 		const payload = req.payload || req.ip;
 		const GetDB_Filter = {
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: OrderDB,
 			path_Callback: Order_path_Func,
@@ -124,7 +124,7 @@ exports.Order = async(req, res) => {
 		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: OrderDB,
 			path_Callback: Order_path_Func,

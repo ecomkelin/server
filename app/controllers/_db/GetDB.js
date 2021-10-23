@@ -6,15 +6,15 @@ exports.db = (GetDB_Filter) => {
 	// console.log("/db")
 	return new Promise(async(resolve) => {
 		try{
-			const {id, Identity, queryObj, objectDB, path_Callback, dbName} = GetDB_Filter;
-			if(MdSafe.fq_spanTimes1_Func((Identity&&Identity._id)?Identity._id:Identity)) resolve({status: 400, message: "[server] 您刷新太过频繁"});
+			const {id, payload, queryObj, objectDB, path_Callback, dbName} = GetDB_Filter;
+			if(MdSafe.fq_spanTimes1_Func((payload&&payload._id)?payload._id:payload)) resolve({status: 400, message: "[server] 您刷新太过频繁"});
 			if(!id || !MdFilter.is_ObjectId_Func(id)) resolve({status: 400, message: "[server] 请传递正确的数据 _id"});
 
 			const pathObj = {_id: id};
-			if(path_Callback) path_Callback(pathObj, Identity, queryObj);
-			const selectObj = MdFilter.select_func(queryObj.selects, queryObj.selectVal, dbName, Identity);
+			if(path_Callback) path_Callback(pathObj, payload, queryObj);
+			const selectObj = MdFilter.select_func(queryObj.selects, queryObj.selectVal, dbName, payload);
 
-			const populateObjs = dbFilter.limitPopulate(queryObj.populateObjs, Identity);
+			const populateObjs = dbFilter.limitPopulate(queryObj.populateObjs, payload);
 
 			// console.log("/db", populateObjs)
 			const object = await objectDB.findOne(pathObj, selectObj)
@@ -29,7 +29,7 @@ exports.db = (GetDB_Filter) => {
 }
 
 /*
-	Identity: 身份
+	payload: 身份
 	queryObj: 前端传递的参数
 	objectDB: 传递的数据库模型
 	path_Callback: function;
@@ -38,8 +38,8 @@ exports.dbs = (GetDB_Filter) => {
 	// console.log("/dbs");
 	return new Promise(async(resolve) => {
 		try{
-			const {Identity, queryObj, objectDB, path_Callback, dbName} = GetDB_Filter;
-			if(MdSafe.fq_spanTimes1_Func((Identity&&Identity._id)?Identity._id:Identity)) resolve({status: 400, message: "[server] 您刷新太过频繁"});
+			const {payload, queryObj, objectDB, path_Callback, dbName} = GetDB_Filter;
+			if(MdSafe.fq_spanTimes1_Func((payload&&payload._id)?payload._id:payload)) resolve({status: 400, message: "[server] 您刷新太过频繁"});
 
 			// 确定数据的页码和每夜条目数
 			const {page, pagesize, skip} = MdFilter.page_Func(parseInt(queryObj.page), parseInt(queryObj.pagesize));
@@ -47,11 +47,11 @@ exports.dbs = (GetDB_Filter) => {
 			// 过一遍整体 path
 			const pathObj = MdFilter.path_Func(queryObj);
 			// 再过一遍 特殊 path
-			if(path_Callback) path_Callback(pathObj, Identity, queryObj);
+			if(path_Callback) path_Callback(pathObj, payload, queryObj);
 
-			const selectObj = MdFilter.select_func(queryObj.selects, queryObj.selectVal, dbName, Identity);
+			const selectObj = MdFilter.select_func(queryObj.selects, queryObj.selectVal, dbName, payload);
 
-			const populateObjs = dbFilter.limitPopulate(queryObj.populateObjs, Identity);
+			const populateObjs = dbFilter.limitPopulate(queryObj.populateObjs, payload);
 
 			const sortObj = MdFilter.sort_Func(queryObj.sortKey, parseInt(queryObj.sortVal), dbName);
 			// console.log('dbs', pathObj)

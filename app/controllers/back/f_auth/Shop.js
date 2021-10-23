@@ -274,7 +274,7 @@ exports.Shops = async(req, res) => {
 	try {
 		const payload = req.payload;
 		const GetDB_Filter = {
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: ShopDB,
 			path_Callback: Shop_path_Func,
@@ -295,7 +295,7 @@ exports.Shop = async(req, res) => {
 		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: ShopDB,
 			path_Callback: Shop_path_Func,

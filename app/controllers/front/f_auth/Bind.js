@@ -72,7 +72,7 @@ exports.vBinds = async(req, res) => {
 	try {
 		const payload = req.payload;
 		const GetDB_Filter = {
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: BindDB,
 			path_Callback: vBind_path_Func,
@@ -92,7 +92,7 @@ exports.vBind = async(req, res) => {
 		const payload = req.payload;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: BindDB,
 			path_Callback: vBind_path_Func,

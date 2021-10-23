@@ -263,7 +263,7 @@ exports.OrderSkus = async(req, res) => {
 
 		const payload = req.payload;
 		const GetDB_Filter = {
-			Identity: payload,
+			payload: payload,
 			queryObj: req.query,
 			objectDB: OrderSkuDB,
 			path_Callback: vOrderSku_path_Func,

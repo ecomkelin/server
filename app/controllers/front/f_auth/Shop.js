@@ -24,9 +24,9 @@ const dbShop = 'Shop';
 exports.vShops = async(req, res) => {
 	console.log("/v1/Shops");
 	try {
-		const Identity = req.payload || req.ip;
+		const payload = req.payload || req.ip;
 		const GetDB_Filter = {
-			Identity,
+			payload,
 			queryObj: req.query,
 			objectDB: ShopDB,
 			path_Callback: vShop_path_Func,
@@ -43,10 +43,10 @@ exports.vShops = async(req, res) => {
 exports.vShop = async(req, res) => {
 	console.log("/v1/Shop");
 	try {
-		const Identity = req.payload || req.ip;
+		const payload = req.payload || req.ip;
 		const GetDB_Filter = {
 			id: req.params.id,
-			Identity,
+			payload,
 			queryObj: req.query,
 			objectDB: ShopDB,
 			path_Callback: vShop_path_Func,
