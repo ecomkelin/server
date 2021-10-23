@@ -1,3 +1,4 @@
+0.0.06 	小修改
 0.0.05 	Identity 变为 payload
 0.0.04 	合并 back 和 front 的 authorization
 0.0.03 	curUser 变为 payload 并修正

@@ -65,7 +65,7 @@ exports.logout = async(req, res, objectDB) => {
 */
 exports.login = async(req, res, objectDB) => {
 	try{
-		const Obj_res = await obtain_Identity(req.body.system, req.body.social, objectDB);
+		const Obj_res = await obtain_payload(req.body.system, req.body.social, objectDB);
 		if(Obj_res.status === 400) return res.json({status: 400, message: Obj_res.message});
 		const payload = Obj_res.data.object;
 
@@ -94,7 +94,7 @@ exports.login = async(req, res, objectDB) => {
 // 获取用户信息
 // 1 账号(code,email,phone)密码登录
 // 2 第三方登录
-const obtain_Identity = (system_obj, social_obj, objectDB) => {
+const obtain_payload = (system_obj, social_obj, objectDB) => {
 	return new Promise(async(resolve) => {
 		try{
 			if(system_obj) {
@@ -308,9 +308,73 @@ exports.relSocial = async(req, res)=> {
 
 
 
+/* 重新激活 换手机号或邮箱时用的 */
+exports.reActive = async(req, res) => {
+	try{
+		const payload = req.payload;
+		const Client = await ClientDB.findOne({_id: payload._id});
+		if(!Client) return res.json({status: 400, message: "[server] 没有找到此人"});
+		const pwd_match_res = await MdFilter.bcrypt_match_Prom(req.body.pwd, Client.pwd);
+		if(pwd_match_res.status != 200) return res.json({status: 400, message: "[server] 密码不匹配"});
+
+		let obj = null;
+		let to = null;
+		const pathSame = {_id: {"$ne": payload._id}};
+		if(req.body.email) {		// 邮箱注册
+			to = req.body.email;
+			obj = {email: to};
+			pathSame.email = to;
+			Client.email = to;
+		} else {					// 手机注册
+			const phonePre = MdFilter.get_phonePre_Func(req.body.phonePre);
+			if(!phonePre) return res.json({status: 400, message: "[server] phonePre 错误"});
+			const phone = req.body.phone;
+			to = phonePre+phone;
+			obj = {phone: to};
+			pathSame.phone = to;
+			Client.phone = to;
+		}
+		const vrifyChecks_res = await verifyChecks_Prom(to, req.body.otp);	// 把注册邮箱或手机 连同验证码 验证
+		if(vrifyChecks_res.status !== 200) return res.json({status: 400, message: "[server] 验证不成功"});
+
+		// 如果验证成功 则检查数据库 是否已有其他此邮箱或手机的账户
+		const objSame = await ClientDB.findOne(pathSame);	
+		if(objSame) return res.json({status: 400, message: "[server] 此电话或邮箱已被注册"});
+		
+		objSave = await Client.save();
+		if(!objSave) return res.json({status: 400, message: "[server] 重新激活失败"});
+
+		return res.status(200).json({status: 200, data: {object: objSave}});
+	} catch(error) {
+		console.log("reActive", error)
+		return res.status(500).json({status: 500, message: "[服务器错误: Client]"});
+	}
+}
+// 检查 验证码 是否正确
+const verifyChecks_Prom = async(to, code) => {
+	return new Promise((resolve) => {
+		const accountSid = process.env.TWILIO_ACCOUNT_SID;
+		const authToken = process.env.TWILIO_AUTH_TOKEN;
+		const client = require('twilio')(accountSid, authToken);
+
+		client.verify.services(process.env.TWILIO_SERVICE_SID)
+		.verificationChecks
+		.create({to, code})
+		.then(async(verification_check) => {
+			resolve({status: 200, data: {status: verification_check.status}});
+		}).catch(error => {
+			console.log("verifyChecks", error);
+			resolve({status: 500, message: `Error: ${error}`});
+		});
+	})
+}
+
+
+
+
+
 /* 获取手机验证码 */
 exports.obtain_otp = async(req, res) => {
-	console.log("/v1/Obtain_otp");
 	let [to, channel] = [null, null];
 
 	if(req.body.email) {
@@ -342,73 +406,6 @@ exports.obtain_otp = async(req, res) => {
 		return res.json({status: 500, message: `Error: ${error}`})
 	});
 }
-
-
-/* 重新激活 换手机号或邮箱时用的 */
-exports.reActive = async(req, res) => {
-	try{
-		const payload = req.payload;
-		const Client = await ClientDB.findOne({_id: payload._id});
-		if(!Client) return res.json({status: 400, message: "[server] 没有找到此人"});
-		const pwd_match_res = await MdFilter.bcrypt_match_Prom(req.body.pwd, Client.pwd);
-		if(pwd_match_res.status != 200) return resolve({status: 400, message: "[server] 密码不匹配"});
-
-		let obj = null;
-		let to = null;
-		const pathSame = {_id: {"$ne": payload._id}};
-		if(req.body.email) {		// 邮箱注册
-			to = req.body.email;
-			obj = {email: to};
-			pathSame.email = to;
-			Client.email = to;
-		} else {					// 手机注册
-			const phonePre = MdFilter.get_phonePre_Func(req.body.phonePre);
-			if(!phonePre) return res.json({status: 400, message: "[server] phonePre 错误"});
-			const phone = req.body.phone;
-			to = phonePre+phone;
-			obj = {phone: to};
-			pathSame.phone = to;
-			Client.phone = to;
-		}
-		const vrifyChecks_res = await verifyChecks_Prom(to, req.body.otp);	// 把注册邮箱或手机 连同验证码 验证
-		if(vrifyChecks_res.status !== 200) return res.json({status: 400, message: "[server] 验证不成功"});
-
-		// 如果验证成功 则检查数据库 是否已有其他此邮箱或手机的账户
-		const objSame = await ClientDB.findOne(pathSame);	
-		if(objSame) return res.json({status: 400, message: "[server] 此电话或邮箱已被注册"});
-		
-		objSave = await Client.save();
-		if(!objSave) return res.json({status: 400, message: "[server] 重新激活失败"});
-
-		return res.status(200).json({status: 200, data: {object: objSave}});
-	} catch(error) {
-		console.log("/v1/reActive", error)
-		return res.status(500).json({status: 500, message: "[服务器错误: Client]"});
-	}
-}
-
-
-// 检查 验证码 是否正确
-const verifyChecks_Prom = async(to, code) => {
-	return new Promise((resolve) => {
-		const accountSid = process.env.TWILIO_ACCOUNT_SID;
-		const authToken = process.env.TWILIO_AUTH_TOKEN;
-		const client = require('twilio')(accountSid, authToken);
-
-		client.verify.services(process.env.TWILIO_SERVICE_SID)
-		.verificationChecks
-		.create({to, code})
-		.then(async(verification_check) => {
-			resolve({status: 200, data: {status: verification_check.status}});
-		}).catch(error => {
-			console.log("verifyChecks", error);
-			resolve({status: 500, message: `Error: ${error}`});
-		});
-	})
-}
-
-
-
 
 
 
