@@ -25,10 +25,10 @@ exports.vCardCreate = async(req, res) => {
 	 		})
 	 	if(!Order) return res.json({status: 400, message: "[server] 没有找到此订单信息"});
 
-	 	return res.status(200).json({status: 200, data: {object: Order, org_Order}});
+	 	return res.json({status: 200, data: {object: Order, org_Order}});
 	} catch(error) {
 		console.log("/v1/CardCreate", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
+		return res.json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
 	}
 }
 
@@ -49,9 +49,9 @@ exports.vCard_proof = async(req, res) => {
 			const Prod = await ProdDB.findOne({_id: OrderProd.Prod});
 
 		}
-		return res.status(200).json({status: 200, message: "[server] confirm 成功", data: {object: Order, changeObjs}});
+		return res.json({status: 200, message: "[server] confirm 成功", data: {object: Order, changeObjs}});
 	} catch(error) {
 		console.log("/v1/Card_proof", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
+		return res.json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
 	}
 }

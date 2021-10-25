@@ -14,10 +14,10 @@ exports.Langs = async(req, res) => {
 			.sort({"sort": -1, "updAt": -1});
 		// Langs.forEach((item) => {console.log("/b1/Langs", item); });
 		// return res.render("./user/ower/lang/list", {title: "语言管理", Langs});
-		return res.status(200).json({status: 200, data: {Langs}});
+		return res.json({status: 200, data: {Langs}});
 	} catch(error) {
 		console.log("/b1/Langs", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Langs]"});
+		return res.json({status: 500, message: "[服务器错误: Langs]"});
 	}
 }
 
@@ -44,10 +44,10 @@ exports.LangPost = async(req, res) => {
 			Lang.langs.push({Lang: objSave._id, nome: '*'});
 			await Lang.save();
 		}
-		return res.status(200).json({status: 200, message: "[server] 创建新成功"});
+		return res.json({status: 200, message: "[server] 创建新成功"});
 	} catch(error) {
 		console.log("/b1/LangPost", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: LangPost]"});
+		return res.json({status: 500, message: "[服务器错误: LangPost]"});
 	}
 }
 
@@ -79,9 +79,9 @@ exports.LangPut = async(req, res) => {
 		}
 
 		const objSave = await Lang.save();
-		return res.status(200).json({status: 200})
+		return res.json({status: 200})
 	} catch(error) {
 		console.log("/b1/LangPut", error);
-		return res.status(500).json({status: 500, message: error});
+		return res.json({status: 500, message: error});
 	}
 }

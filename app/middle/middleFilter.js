@@ -50,22 +50,30 @@ exports.bcrypt_match_Prom = (pwd, pwd_Bcrypt) => {
 	})
 }
 
-exports.Stint_Match_Func = (data, Stint_obj) => {
-	if(!data) return Stint_obj.errMsg.nullMsg;
-	data = data.replace(/^\s*/g,"");
-	if(!data) return Stint_obj.errMsg.nullMsg;
-	if(Stint_obj.regexp) {
-		const regexp = new RegExp(Stint_obj.regexp);
-		if(!regexp.test(data)) return Stint_obj.errMsg.regexpMsg;
-	}
-	if(Stint_obj.trim) {
-		if(data.length !== Stint_obj.trim) return Stint_obj.errMsg.trimMsg+Stint_obj.trim;
-	}
-	if(Stint_obj.min) {
-		if(data.length < Stint_obj.min) return Stint_obj.errMsg.minMsg+Stint_obj.min;
-	}
-	if(Stint_obj.max) {
-		if(data.length > Stint_obj.max) return Stint_obj.errMsg.maxMsg+Stint_obj.max;
+
+exports.Stint_Match_objs = (Stint_obj, obj, fields) => {
+	if(!Stint_obj) return 'Stint_Match_objs 请传递正确的参数 Stint_obj';
+	if(!obj) return 'Stint_Match_objs 请传递正确的参数 obj';
+	if(!(fields instanceof Array)) return 'Stint_Match_objs 请传递正确的参数 fields';
+
+	for(let i=0; i<fields.length; i++) {
+		const field = fields[i];
+		const Stint_field = Stint_obj[field];
+		let data = obj[field];
+		if(!Stint_field) return 'Stint_Match_objs 请传递正确的 Stint_field 参数';
+
+		if(!data) return Stint_field.errMsg.nullMsg;
+		data = data.replace(/^\s*/g,"");
+		if(!data) return Stint_field.errMsg.nullMsg;
+		if(Stint_field.regexp) {
+			const regexp = new RegExp(Stint_field.regexp);
+			if(!regexp.test(data)) return Stint_field.errMsg.regexpMsg;
+		}
+		if(Stint_field.trim && Stint_field.trim !== data.length) return Stint_field.errMsg.trimMsg+Stint_field.trim;
+
+		if(Stint_field.min && Stint_field.min > data.length) return Stint_field.errMsg.minMsg+Stint_field.min;
+
+		if(Stint_field.max &&  Stint_field.max < data.length) return Stint_field.errMsg.maxMsg+Stint_field.max;
 	}
 }
 

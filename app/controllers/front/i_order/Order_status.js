@@ -25,11 +25,11 @@ exports.vOrder_change_status = async(req, res) => {
 		} else if(action === ConfOrder.action.front.cancel) {
 			action_prom = await vOrder_status_cancel_Prom(id, payload);
 		}
-		if(action_prom) return res.status(action_prom.status).json(action_prom);
+		if(action_prom) return res.json(action_prom);
 		return res.json({status: 400, message: "请传递您对订单的正确操作"}); 
 	} catch(error) {
 		console.log("/v1/Order_change_status", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
+		return res.json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
 	}
 }
 
@@ -49,16 +49,16 @@ exports.vOrder_proof = async(req, res) => {
 		let changeObjs = [];
 
 		const proof_prom = await vOrder_proof_Prom(pathObj);
-		if(proof_prom.status !== 200) return res.status(proof_prom.status).json(proof_prom);
+		if(proof_prom.status !== 200) return res.json(proof_prom);
 		const Order = proof_prom.data.Order;
 		changeObjs = proof_prom.data.changeObjs;
 
 		const OrderSave = await Order.save();
 
-		return res.status(200).json({status: 200, message: "[server] confirm 成功", data: {object: Order, changeObjs}});
+		return res.json({status: 200, message: "[server] confirm 成功", data: {object: Order, changeObjs}});
 	} catch(error) {
 		console.log("/v1/Order_proof", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
+		return res.json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
 	}
 }
 
@@ -94,7 +94,7 @@ const vOrderSkuDelete_Prom = (id, OrderProd, Order) => {
 			return resolve({status: 200, message: "[server] 删除成功", data});
 		} catch(error) {
 			console.log("v1/OrderSkuDelete_Prom", error);
-			return res.status(500).json({status: 500, message: "[服务器错误: OrderDelete]"});
+			return res.json({status: 500, message: "[服务器错误: OrderDelete]"});
 		}
 	})
 }

@@ -31,10 +31,10 @@ const Nations = async(req, res) => {
 			dbName: dbNation,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log(error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Nations]"});
+		return res.json({status: 500, message: "[服务器错误: Nations]"});
 	}
 }
 
@@ -55,10 +55,10 @@ const Areas = async(req, res) => {
 			dbName: dbArea,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log(error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Areas]"});
+		return res.json({status: 500, message: "[服务器错误: Areas]"});
 	}
 }
 
@@ -79,9 +79,9 @@ const Citas = async(req, res) => {
 			dbName: dbCita,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log(error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Citas]"});
+		return res.json({status: 500, message: "[服务器错误: Citas]"});
 	}
 }

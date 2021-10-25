@@ -22,20 +22,15 @@ exports.UserPost = async(req, res) => {
 		const obj = req.body.obj;
 		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
 		// console.log(obj)
-		let errorInfo = null;
-		if(!obj.code) return res.json({status: 400, message: '[server] 请输入员工账户'});
-		obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
-		if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.code, StintUser.code);
-		if(!obj.pwd) return res.json({status: 400, message: '[server] 请输入密码'});
-		obj.pwd = obj.pwd.replace(/(\s*$)/g, "").replace( /^\s*/, '');
-		if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.pwd, StintUser.pwd);
+
+		const errorInfo = MdFilter.Stint_Match_objs(StintUser, obj, ['code', 'pwd']);
 		if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
 
 		const objSame = await UserDB.findOne({code: obj.code});
 		if(objSame) return res.json({status: 400, message: '[server] 用户编号相同'});
 
-		if(!obj.role) return res.status(403).json({status: 400, message: "[server] 请选择用户权限"});
-		if(payload.role >= obj.role) return res.status(403).json({status: 400, message: "[server] 您的权限不足"});
+		if(!obj.role) return res.json({status: 400, message: "[server] 请选择用户权限"});
+		if(payload.role >= obj.role) return res.json({status: 400, message: "[server] 您的权限不足"});
 		if(!ConfUser.role_Arrs.includes(parseInt(obj.role))) return res.json({status: 400, message: '[server] 用户权限参数错误'});
 		if(obj.role >= ConfUser.role_set.boss) {
 			if(!obj.Shop) return res.json({status: 400, message: '[server] 请选择用户的所属分店'});
@@ -56,11 +51,11 @@ exports.UserPost = async(req, res) => {
 
 		const _object = new UserDB(obj);
 		const objSave = await _object.save();
-		// console.log('UserPost end')
-		return res.status(200).json({status: 200, message: "[server] 创建新成功", data: {object: objSave}});
+		console.log('UserPost end')
+		return res.json({status: 200, message: "[server] 创建新成功", data: {object: objSave}});
 	} catch(error) {
 		console.log("/b1/UserPost", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: UserPost]: "+ error});
+		return res.json({status: 500, message: "[服务器错误: UserPost]: "+ error});
 	}
 }
 
@@ -88,7 +83,7 @@ exports.UserPut = async(req, res) => {
 		
 	} catch(error) {
 		console.log("/b1/UserPut", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: UserPut]"});
+		return res.json({status: 500, message: "[服务器错误: UserPut]"});
 	}
 }
 
@@ -98,8 +93,7 @@ const User_putPwd = async(res, obj, User, payload) => {
 		obj.pwd = obj.pwd.replace(/(\s*$)/g, "").replace( /^\s*/, '');
 		obj.pwdConfirm = obj.pwdConfirm.replace(/(\s*$)/g, "").replace( /^\s*/, '');
 		if(obj.pwd !== obj.pwdConfirm) return res.json({status: 400, message: '[server] 确认密码不一致'});
-		let errorInfo = null;
-		if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.pwd, StintUser.pwd);
+		const errorInfo = MdFilter.Stint_Match_objs(StintUser, obj, ['pwd']);
 		if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
 		if(payload.role >= User.role) {
 			if(!obj.pwdOrg) return res.json({status: 400, message: "[server] 请输入原密码, 如果忘记, 请联系管理员"});
@@ -109,10 +103,10 @@ const User_putPwd = async(res, obj, User, payload) => {
 		}
 		User.pwd = await MdFilter.encrypt_tProm(obj.pwd);
 		const objSave = await User.save();
-		return res.status(200).json({status: 200, data: {object: objSave}, message: '[server] 密码修改成功'});
+		return res.json({status: 200, data: {object: objSave}, message: '[server] 密码修改成功'});
 	} catch(error) {
 		console.log("/b1/User_putPwd", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: User_putPwd]"});
+		return res.json({status: 500, message: "[服务器错误: User_putPwd]"});
 	}
 }
 const User_general = async(res, obj, User, payload) => {
@@ -121,13 +115,11 @@ const User_general = async(res, obj, User, payload) => {
 		delete obj.at_last_login;
 		delete obj.refreshToken;
 
-		let errorInfo = null;
-
 		if(obj.code && (obj.code != User.code)) {
 			// 只有管理员以上可以更改
 			if(payload.role >= ConfUser.role_set.manager) return res.json({status: 400, message: '[server] 修改用户编号需要总公司管理权限'});
 			obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
-			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.code, StintUser.code);
+			const errorInfo = MdFilter.Stint_Match_objs(StintUser, obj, ['code']);
 			if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
 			const objSame = await UserDB.findOne({_id: {$ne: User._id}, code: obj.code})
 			if(objSame) return res.json({status: 400, message: '[server] 此用户账户已被占用, 请查看'});
@@ -157,10 +149,10 @@ const User_general = async(res, obj, User, payload) => {
 		const _object = _.extend(User, obj);
 
 		const objSave = await _object.save();
-		return res.status(200).json({status: 200, data: {object: objSave}, message: '[server] 修改成功'});
+		return res.json({status: 200, data: {object: objSave}, message: '[server] 修改成功'});
 	} catch(error) {
 		console.log("/b1/User_general", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: User_general]"});
+		return res.json({status: 500, message: "[服务器错误: User_general]"});
 	}
 }
 
@@ -178,13 +170,13 @@ exports.UserDelete = async(req, res) => {
 
 		const User = await UserDB.findOne(pathObj);
 		if(!User) return res.json({status: 400, message: "[server] 没有找到此用户信息, 请刷新重试"});
-		if(payload.role >= User.role) return res.status(403).json({status: 400, message: "[server] 您没有权限删除此用户"});
+		if(payload.role >= User.role) return res.json({status: 400, message: "[server] 您没有权限删除此用户"});
 
 		const objDel = await UserDB.deleteOne({_id: User._id});
-		return res.status(200).json({status: 200, message: '[server] 删除成功'})
+		return res.json({status: 200, message: '[server] 删除成功'})
 	} catch(error) {
 		console.log("/b1/UserDelete", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: UserDelete]"});
+		return res.json({status: 500, message: "[服务器错误: UserDelete]"});
 	}
 }
 
@@ -223,10 +215,10 @@ exports.Users = async(req, res) => {
 			dbName: dbUser,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/b1/Users", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Users]"});
+		return res.json({status: 500, message: "[服务器错误: Users]"});
 	}
 }
 
@@ -243,9 +235,9 @@ exports.User = async(req, res) => {
 			dbName: dbUser,
 		};
 		const db_res = await GetDB.db(GetDB_Filter);
-		return res.status(db_res.status).json(db_res);
+		return res.json(db_res);
 	} catch(error) {
 		console.log("/b1/User", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: User]"});
+		return res.json({status: 500, message: "[服务器错误: User]"});
 	}
 }

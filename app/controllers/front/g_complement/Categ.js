@@ -30,10 +30,10 @@ exports.vCategs = async(req, res) => {
 			dbName: dbCateg,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/v1/Categs", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vCategs]"});
+		return res.json({status: 500, message: "[服务器错误: vCategs]"});
 	}
 }
 
@@ -50,9 +50,9 @@ exports.vCateg = async(req, res) => {
 			dbName: dbCateg,
 		};
 		const db_res = await GetDB.db(GetDB_Filter);
-		return res.status(db_res.status).json(db_res);
+		return res.json(db_res);
 	} catch(error) {
 		console.log("/v1/Categ", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vCateg]"});
+		return res.json({status: 500, message: "[服务器错误: vCateg]"});
 	}
 }

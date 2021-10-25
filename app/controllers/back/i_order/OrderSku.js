@@ -97,10 +97,10 @@ exports.OrderSkuPost = async(req, res) => {
 			const OrderSku = await _OrderSku.save();
 			if(!OrderSku) return res.json({status: 400, message: '[server] 添加 Sku 时 Sku 保存 错误'});
 		}
-		return res.status(200).json({status: 200, message: "[server] 创建成功"});
+		return res.json({status: 200, message: "[server] 创建成功"});
 	} catch(error) {
 		console.log("/b1/OrderPost", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
+		return res.json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
 	}
 }
 
@@ -139,7 +139,7 @@ exports.OrderSkuDelete = async(req, res) => {
 		if(objDel.n !== 1) return res.json({status: 400, message: "[server] 删除失败"});
 
 		const del_res = await this.vOrderSkuDelete_Prom(id, OrderProd, Order);
-		return res.status(del_res.status).json(del_res);
+		return res.json(del_res);
 
 		// if(OrderProd.OrderSkus.length === 1) {
 		// 	const OrderProd_id = OrderProd._id;
@@ -155,11 +155,11 @@ exports.OrderSkuDelete = async(req, res) => {
 		// 	const OrderProdSave = await OrderProd.save()
 		// 	if(!OrderProdSave) return res.json({status: 400, message: "[server] 删除SKU 商品保存 失败"});
 		// }
-		// return res.status(200).json({status: 200, message: "[server] 删除成功"});
+		// return res.json({status: 200, message: "[server] 删除成功"});
 
 	} catch(error) {
 		console.log("/b1/vOrderSkuDelete", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: OrderDelete]"});
+		return res.json({status: 500, message: "[服务器错误: OrderDelete]"});
 	}
 }
 exports.OrderSkuDelete_Prom = (id, OrderProd, Order) => {
@@ -183,7 +183,7 @@ exports.OrderSkuDelete_Prom = (id, OrderProd, Order) => {
 			return resolve({status: 200, message: "[server] 删除成功"});
 		} catch(error) {
 			console.log("b1/OrderSkuDelete_Prom", error);
-			return res.status(500).json({status: 500, message: "[服务器错误: OrderDelete]"});
+			return res.json({status: 500, message: "[服务器错误: OrderDelete]"});
 		}
 	})
 }
@@ -220,16 +220,16 @@ exports.OrderSkuPut = async(req, res) => {
 			if(objDel.n !== 1) return res.json({status: 400, message: "[server] 删除失败"});
 
 			const del_res = await this.vOrderSkuDelete_Prom(id, OrderProd, Order);
-			return res.status(del_res.status).json(del_res);
+			return res.json(del_res);
 		} else {
 			OrderSku.quantity = quantity;
 			const objSave = await OrderSku.save();
 
-			return res.status(200).json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
+			return res.json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
 		}
 	} catch(error) {
 		console.log("/b1/OrderSkuPut", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vOrderSkuPut]"});
+		return res.json({status: 500, message: "[服务器错误: vOrderSkuPut]"});
 	}
 }
 
@@ -270,9 +270,9 @@ exports.OrderSkus = async(req, res) => {
 			dbName: dbOrderSku,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/b1/OrderSkus", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vOrderSkus]"});
+		return res.json({status: 500, message: "[服务器错误: vOrderSkus]"});
 	}
 }

@@ -25,9 +25,9 @@ exports.OrderProds = async(req, res) => {
 			dbName: dbOrderProd,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/b1/OrderProds", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vOrderProds]"});
+		return res.json({status: 500, message: "[服务器错误: vOrderProds]"});
 	}
 }

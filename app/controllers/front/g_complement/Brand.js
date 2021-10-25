@@ -26,10 +26,10 @@ exports.vBrands = async(req, res) => {
 			dbName: dbBrand,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/v1/Brands", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vBrands]"});
+		return res.json({status: 500, message: "[服务器错误: vBrands]"});
 	}
 }
 
@@ -46,9 +46,9 @@ exports.vBrand = async(req, res) => {
 			dbName: dbBrand,
 		};
 		const db_res = await GetDB.db(GetDB_Filter);
-		return res.status(db_res.status).json(db_res);
+		return res.json(db_res);
 	} catch(error) {
 		console.log("/v1/Brand", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vBrand]"});
+		return res.json({status: 500, message: "[服务器错误: vBrand]"});
 	}
 }

@@ -38,7 +38,6 @@ exports.mkPicture_prom = async(req, {img_Dir, field, is_Array}) => {
 }
 
 const multiplesPic_Func = (resolve, obj, field, img_Dir, warnMsg, files, keys, payload_id, lenFile, n) => {
-	console.log('n', n)
 	if(n == lenFile) return resolve(obj);
 	const key = keys[n];
 	if(files[key] && files[key].path) {

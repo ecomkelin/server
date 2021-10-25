@@ -36,10 +36,10 @@ exports.OrderPut = async(req, res) => {
 		}
 
 		const objSave = await Order.save();
-		return res.status(200).json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
+		return res.json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
 	} catch(error) {
 		console.log("/b1/OrderPut", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: OrderPut]"});
+		return res.json({status: 500, message: "[服务器错误: OrderPut]"});
 	}
 }
 
@@ -66,10 +66,10 @@ exports.OrderDelete = async(req, res) => {
 		OrderProdDB.deleteMany({Order: id});
 		await OrderDB.deleteOne({_id: id});
 
-		return res.status(200).json({status: 200, message: "[server] 删除成功"});
+		return res.json({status: 200, message: "[server] 删除成功"});
 	} catch(error) {
 		console.log("/b1/OrderPut", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: OrderPut]"});
+		return res.json({status: 500, message: "[服务器错误: OrderPut]"});
 	}
 }
 
@@ -111,10 +111,10 @@ exports.Orders = async(req, res) => {
 			dbName: dbOrder,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/b1/Orders", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Orders]"});
+		return res.json({status: 500, message: "[服务器错误: Orders]"});
 	}
 }
 
@@ -131,9 +131,9 @@ exports.Order = async(req, res) => {
 			dbName: dbOrder,
 		};
 		const db_res = await GetDB.db(GetDB_Filter);
-		return res.status(db_res.status).json(db_res);
+		return res.json(db_res);
 	} catch(error) {
 		console.log("/b1/Order", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Order]"});
+		return res.json({status: 500, message: "[服务器错误: Order]"});
 	}
 }

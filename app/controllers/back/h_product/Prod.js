@@ -24,7 +24,7 @@ exports.ProdPost = async(req, res) => {
 			if(!Pd) return res.json({status: 400, message: '[server] 没有找到同步产品信息'});
 			
 			const objSame = await ProdDB.findOne({Pd: obj.Pd, Shop: obj.Shop, Firm: payload.Firm});
-			if(objSame) return res.status(205).json({status: 200, message: '[server] 此商品之前已经被同步', data: {object: objSame}});
+			if(objSame) return res.json({status: 200, message: '[server] 此商品之前已经被同步', data: {object: objSame}});
 			obj.Pd = Pd._id;
 			if(Pd.Categ) obj.Categ = Pd.Categ;
 			obj.sort = Pd.sort;
@@ -44,17 +44,16 @@ exports.ProdPost = async(req, res) => {
 		} else if(req.body.obj) {		// 如果是单一店铺 则自己添加
 			obj = req.body.obj;
 
-			let errorInfo = null;
-			if(!errorInfo && obj.code) {
-				errorInfo = MdFilter.Stint_Match_Func(obj.code, StintPd.code);
-				if(!errorInfo) {
-					const objSame = await PdDB.findOne({'code': obj.code, Firm: payload.Firm});
-					if(objSame) return res.json({status: 400, message: '[server] 产品编号相同'});
-				}
+			if(obj.code) {
+				// 如果输入了 编号 则编号必须是唯一;  注意 Prod code 没有转大写
+				const errorInfo = MdFilter.Stint_Match_objs(StintProd, obj, ['code', 'nome']);
+				if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
+				const objSame = await ProdDB.findOne({'code': obj.code, Firm: payload.Firm});
+				if(objSame) return res.json({status: 400, message: '[server] 产品编号相同'});
+			} else {
+				const errorInfo = MdFilter.Stint_Match_objs(StintProd, obj, ['nome']);
+				if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
 			}
-
-			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.nome, StintPd.nome);
-			if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
 
 			if(!obj.price) return res.json({status: 400, message: '[server] 请输入产品默认价格'});
 			obj.price = obj.price_min = obj.price_max = parseFloat(obj.price);
@@ -109,10 +108,10 @@ exports.ProdPost = async(req, res) => {
 			await Pd.save();
 		}
 
-		return res.status(200).json({status: 200, message: "[server] 创建成功", data: {object: objSave}});
+		return res.json({status: 200, message: "[server] 创建成功", data: {object: objSave}});
 	} catch(error) {
 		console.log("/b1/ProdPost", error)
-		return res.status(500).json({status: 500, message: "[服务器错误: ProdPost]: "+ error});
+		return res.json({status: 500, message: "[服务器错误: ProdPost]: "+ error});
 	}
 }
 
@@ -143,10 +142,10 @@ exports.ProdDelete = async(req, res) => {
 		Pd.Prods.splice(index, 1);
 
 		const objDel = await ProdDB.deleteOne({_id: Prod._id});
-		return res.status(200).json({status: 200, message: "[server] 删除成功"});
+		return res.json({status: 200, message: "[server] 删除成功"});
 	} catch(error) {
 		console.log("/b1/ProdDelete", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: ProdDelete]"});
+		return res.json({status: 500, message: "[服务器错误: ProdDelete]"});
 	}
 }
 
@@ -177,14 +176,16 @@ exports.ProdPut = async(req, res) => {
 		}
 		if(obj.is_usable == 1 || obj.is_usable == true || obj.is_usable == 'true') Prod.is_usable = true;
 		if(obj.is_usable == 0 || obj.is_usable == false || obj.is_usable == 'false') Prod.is_usable = false;
+		if(!Prod.Pd) {	// 如果是单店 可以修改名称等 暂时没有做
 
+		}
 		Prod.User_upd = payload._id;
 
 		const objSave = await Prod.save();
-		return res.status(200).json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
+		return res.json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
 	} catch(error) {
 		console.log("/b1/ProdPut", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: ProdPut]"});
+		return res.json({status: 500, message: "[服务器错误: ProdPut]"});
 	}
 }
 
@@ -255,10 +256,10 @@ exports.Prods = async(req, res) => {
 			dbName: dbProd,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log(error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Prods]"});
+		return res.json({status: 500, message: "[服务器错误: Prods]"});
 	}
 }
 
@@ -274,9 +275,9 @@ exports.Prod = async(req, res) => {
 			dbName: dbProd,
 		};
 		const db_res = await GetDB.db(GetDB_Filter);
-		return res.status(db_res.status).json(db_res);
+		return res.json(db_res);
 	} catch(error) {
 		console.log(error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Prod]"});
+		return res.json({status: 500, message: "[服务器错误: Prod]"});
 	}
 }

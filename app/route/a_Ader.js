@@ -102,12 +102,9 @@ module.exports = (app) => {
 	app.post('/adNationPost', AderIsLogin, async(req, res) => {
 		try{
 			let obj = req.body.obj;
-			let errorInfo = null;
-			if(!obj.code) return res.redirect('/?error=adNationPost 请输入国家编号');
+			const errorInfo = MdFilter.Stint_Match_objs(Stint.Nation, obj, ['code', 'nome', 'tel']);
 			obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
-			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.code, Stint.Nation.code);
-			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.nome, Stint.Nation.nome);
-			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.tel, Stint.Nation.tel);
+			obj.nome = obj.nome.replace(/^\s*/g,"").toUpperCase();
 			if(errorInfo) return res.redirect('/?error=adNationPost,Error: '+errorInfo+'&reUrl=/adNationAdd');
 
 			const param = {
@@ -224,11 +221,9 @@ module.exports = (app) => {
 		try{
 			let obj = req.body.obj;
 
-			let errorInfo = null;
-			if(!obj.code) return res.redirect('/?error=adAreaPost 请输入区域中编号');
+			const errorInfo = MdFilter.Stint_Match_objs(Stint.Area, obj, ['code', 'nome']);
 			obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
-			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.code, Stint.Area.code);
-			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.nome, Stint.Area.nome);
+			obj.nome = obj.nome.replace(/^\s*/g,"").toUpperCase();
 			if(errorInfo) return res.redirect('/?error='+errorInfo+'&reUrl=/adAreaAdd');
 
 			if(obj.Nation) {
@@ -337,11 +332,9 @@ module.exports = (app) => {
 		try{
 			let obj = req.body.obj;
 
-			let errorInfo = null;
-			if(!obj.code) return res.redirect('/?error=adCitaPost 请输入城市中编号');
+			const errorInfo = MdFilter.Stint_Match_objs(Stint.Cita, obj, ['code', 'nome']);
 			obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
-			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.code, Stint.Cita.code);
-			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.nome, Stint.Cita.nome);
+			obj.nome = obj.nome.replace(/^\s*/g,"").toUpperCase();
 			if(errorInfo) return res.redirect('/?error='+errorInfo+'&reUrl=/adCitaAdd');
 
 			if(obj.Area) {
@@ -553,13 +546,9 @@ module.exports = (app) => {
 		try{
 			const obj = req.body.obj;
 
-			let errorInfo = null;
-			if(!obj.code) return res.redirect('/?error=adUserPost 请输入用户账号');
+			const errorInfo = MdFilter.Stint_Match_objs(Stint.User, obj, ['code', 'pwd', 'phone']);
 			obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
-			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.code, Stint.User.code);
 			obj.pwd = obj.pwd.replace(/^\s*/g,"").toUpperCase();
-			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.pwd, Stint.User.pwd);
-			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.phone, Stint.User.phone);
 			if(errorInfo) return res.redirect('/?error=没有找到此公司,请重新选择'+errorInfo+'&reUrl=/adUserAdd');
 
 			obj.pwd = await MdFilter.encrypt_tProm(obj.pwd);
@@ -605,7 +594,7 @@ module.exports = (app) => {
 			}
 			if(obj.code) {
 				obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
-				const errorInfo = MdFilter.Stint_Match_Func(obj.code, Stint.User.code);
+				const errorInfo = MdFilter.Stint_Match_objs(Stint.User, obj, ['code']);
 				if(errorInfo) return res.redirect('/?error=账号参数错误: '+errorInfo+'&reUrl=/adUser/'+id);
 
 				const objSame = await UserDB.findOne({'code': code})
@@ -615,7 +604,7 @@ module.exports = (app) => {
 				const objSave = await User.save();
 			} else if(obj.pwd) {
 				obj.pwd = obj.pwd.replace(/^\s*/g,"");
-				const errorInfo = MdFilter.Stint_Match_Func(obj.pwd, Stint.User.pwd);
+				const errorInfo = MdFilter.Stint_Match_objs(Stint.User, obj, ['pwd']);
 				if(errorInfo) return res.redirect('/?error=密码参数错误: '+errorInfo+'&reUrl=/adUser/'+id);
 
 				User.pwd = await MdFilter.encrypt_tProm(obj.pwd);

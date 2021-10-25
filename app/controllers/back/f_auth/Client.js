@@ -23,10 +23,10 @@ exports.ClientPut = async(req, res) => {
 		if(obj.sort && !isNaN(parseInt(obj.sort))) Client.sort = parseInt(obj.sort);
 
 		const objSave = await Client.save();
-		return res.status(200).json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
+		return res.json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
 	} catch(error) {
 		console.log("/b1/ClientPut", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: ClientPut]"});
+		return res.json({status: 500, message: "[服务器错误: ClientPut]"});
 	}
 }
 
@@ -46,10 +46,10 @@ exports.Clients = async(req, res) => {
 			dbName: dbClient,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/b1/Clients", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Clients]"});
+		return res.json({status: 500, message: "[服务器错误: Clients]"});
 	}
 }
 
@@ -66,9 +66,9 @@ exports.Client = async(req, res) => {
 			dbName: dbClient,
 		};
 		const db_res = await GetDB.db(GetDB_Filter);
-		return res.status(db_res.status).json(db_res);
+		return res.json(db_res);
 	} catch(error) {
 		console.log("/b1/Client", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Client]"});
+		return res.json({status: 500, message: "[服务器错误: Client]"});
 	}
 }

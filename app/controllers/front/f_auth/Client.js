@@ -24,10 +24,10 @@ exports.vClient = async(req, res) => {
 		const db_res = await GetDB.db(GetDB_Filter);
 		// console.log(db_res.data.object)
 		// console.log(db_res.data.object.addrs)
-		return res.status(db_res.status).json(db_res);
+		return res.json(db_res);
 	} catch(error) {
 		console.log("/v1/Client", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vClient]"});
+		return res.json({status: 500, message: "[服务器错误: vClient]"});
 	}
 }
 
@@ -47,7 +47,7 @@ exports.vClientPut = async(req, res) => {
 			let code = req.body.code;
 			if(code !== Client.code) {
 				code = code.replace(/^\s*/g,"").toUpperCase();
-				const errorInfo = MdFilter.Stint_Match_Func(code, StintClient.code);
+				const errorInfo = MdFilter.Stint_Match_objs(StintClient, req.body, ['code']);
 				if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
 
 				const objSame = await ClientDB.findOne({_id: {$ne: Client._id}, code})
@@ -63,8 +63,7 @@ exports.vClientPut = async(req, res) => {
 			if(!password.pwd) return res.json({status: 400, message: "[server] 请输入新密码"});
 			const pwd = password.pwd.replace(/(\s*$)/g, "").replace( /^\s*/, '');
 			// console.log('pwd', pwd)
-			const errorInfo = MdFilter.Stint_Match_Func(pwd, StintClient.pwd);
-			// console.log("errorInfo", errorInfo)
+			const errorInfo = MdFilter.Stint_Match_objs(StintClient, password, ['pwd']);
 			if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
 			if(!password.pwdOrg) return res.json({status: 400, message: "[server] 请输入原密码"});
 			const pwdOrg = password.pwdOrg.replace(/(\s*$)/g, "").replace( /^\s*/, '');
@@ -139,16 +138,16 @@ exports.vClientPut = async(req, res) => {
 			for(; i<Client.addrs.length; i++) {
 				if(String(Client.addrs[i]._id) === id) break;
 			}
-			if(i === Client.addrs.length) return res.status(200).json({status: 200, message: '[server] 没有找到此 id'});
+			if(i === Client.addrs.length) return res.json({status: 200, message: '[server] 没有找到此 id'});
 			if(i !== Client.addrs.length) Client.addrs.splice(i, 1);
 		} else {
 			return res.json({status: 400, message: '[server] 请查看 API 输入正确的修改参数'});
 		}
 
 		const objSave = await Client.save();
-		return res.status(200).json({status: 200, message: '[server] 修改成功', data: {object: objSave}});
+		return res.json({status: 200, message: '[server] 修改成功', data: {object: objSave}});
 	} catch(error) {
 		console.log("/v1/ClientPut", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: ClientPut]"});
+		return res.json({status: 500, message: "[服务器错误: ClientPut]"});
 	}
 }

@@ -21,12 +21,9 @@ exports.BrandPost = async(req, res) => {
 		const obj = await MdFiles.mkPicture_prom(req, {img_Dir: "/Brand", field: "img_url"});
 		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
 
-		let errorInfo = null;
-		if(!obj.code) return res.json({status: 400, message: '[server] 请输入品牌编号'});
-		obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
-		if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.code, StintBrand.code);
-		if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.nome, StintBrand.nome);
+		const errorInfo = MdFilter.Stint_Match_objs(StintBrand, obj, ['code', 'nome']);
 		if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
+		obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
 
 		// if(!MdFilter.is_ObjectId_Func(obj.Nation)) return res.json({status: 400, message: '[server] 请输入品牌所属国家'});
 		// const Nation = await NationDB.findOne({_id: obj.Nation});
@@ -40,10 +37,10 @@ exports.BrandPost = async(req, res) => {
 		const _object = new BrandDB(obj);
 		const objSave = await _object.save();
 
-		return res.status(200).json({status: 200, message: "[server] 创建成功", data: {object: objSave}});
+		return res.json({status: 200, message: "[server] 创建成功", data: {object: objSave}});
 	} catch(error) {
 		console.log("/b1/BrandPost", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: BrandPost]: "+ error});
+		return res.json({status: 500, message: "[服务器错误: BrandPost]: "+ error});
 	}
 }
 
@@ -68,10 +65,10 @@ exports.BrandDelete = async(req, res) => {
 
 		if(Brand.img_url && Brand.img_url.split("Brand").length > 1) await MdFiles.rmPicture(Brand.img_url);
 		const objDel = await BrandDB.deleteOne({_id: Brand._id});
-		return res.status(200).json({status: 200, message: "[server] 删除成功"});
+		return res.json({status: 200, message: "[server] 删除成功"});
 	} catch(error) {
 		console.log("/b1/BrandDelete", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: BrandDelete]"});
+		return res.json({status: 500, message: "[服务器错误: BrandDelete]"});
 	}
 }
 
@@ -94,23 +91,16 @@ exports.BrandPut = async(req, res) => {
 		let obj = req.body.general;
 		if(!obj) obj = await MdFiles.mkPicture_prom(req, {img_Dir: "/Brand", field: "img_url"});
 		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
-		MdFilter.readonly_Func(obj);
 
-		let errorInfo = null;
-		// (!errorInfo) && (obj.code) && (obj.code = obj.code.replace(/^\s*/g,"").toUpperCase()) && (obj.code != Brand.code) 
-		if(obj.code && (obj.code = obj.code.replace(/^\s*/g,"").toUpperCase()) && (obj.code != Brand.code)) {
-			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.code, StintBrand.code);
-			if(!errorInfo) {
-				const objSame = await BrandDB.findOne({_id: {$ne: Brand._id}, code: obj.code, Firm: payload.Firm});
-				if(objSame) return res.json({status: 400, message: '[server] 此品牌编号已被占用, 请查看'});
-			}
-		}
-		if(!errorInfo && obj.nome && (obj.nome != Brand.nome)) {
-			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.nome, StintBrand.nome);
-			if(!errorInfo) {
-				const objSame = await BrandDB.findOne({_id: {$ne: Brand._id}, nome: obj.nome, Firm: payload.Firm});
-				if(objSame) return res.json({status: 400, message: '[server] 此品牌名称已被占用, 请查看'});
-			}
+		if(!obj.code) obj.code = Brand.code;
+		if(!obj.nome) obj.nome = Brand.nome;
+		const errorInfo = MdFilter.Stint_Match_objs(StintBrand, obj, ['code', 'nome']);
+		if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
+		obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
+
+		if(obj.code !== Brand.code || obj.nome !== Brand.nome) {
+			const objSame = await BrandDB.findOne({_id: {$ne: Brand._id}, $or:[{'code': obj.code}, {'nome': obj.nome}], Firm: payload.Firm});
+			if(objSame) return res.json({status: 400, message: '[server] 此品牌编号已被占用, 请查看'});
 		}
 
 		if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
@@ -128,10 +118,10 @@ exports.BrandPut = async(req, res) => {
 		const _object = _.extend(Brand, obj);
 
 		const objSave = await Brand.save();
-		return res.status(200).json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
+		return res.json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
 	} catch(error) {
 		console.log("/b1/BrandPut", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: BrandPut]"});
+		return res.json({status: 500, message: "[服务器错误: BrandPut]"});
 	}
 }
 
@@ -168,10 +158,10 @@ exports.Brands = async(req, res) => {
 			dbName: dbBrand,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/b1/Brands", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Brands]"});
+		return res.json({status: 500, message: "[服务器错误: Brands]"});
 	}
 }
 
@@ -188,9 +178,9 @@ exports.Brand = async(req, res) => {
 			dbName: dbBrand,
 		};
 		const db_res = await GetDB.db(GetDB_Filter);
-		return res.status(db_res.status).json(db_res);
+		return res.json(db_res);
 	} catch(error) {
 		console.log("/b1/Brand", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Brand]"});
+		return res.json({status: 500, message: "[服务器错误: Brand]"});
 	}
 }

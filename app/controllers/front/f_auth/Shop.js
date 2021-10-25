@@ -33,10 +33,10 @@ exports.vShops = async(req, res) => {
 			dbName: dbShop,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/v1/Shops", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vShops]"});
+		return res.json({status: 500, message: "[服务器错误: vShops]"});
 	}
 }
 
@@ -53,9 +53,9 @@ exports.vShop = async(req, res) => {
 			dbName: dbShop,
 		};
 		const db_res = await GetDB.db(GetDB_Filter);
-		return res.status(db_res.status).json(db_res);
+		return res.json(db_res);
 	} catch(error) {
 		console.log("/v1/Shop", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vShop]"});
+		return res.json({status: 500, message: "[服务器错误: vShop]"});
 	}
 }

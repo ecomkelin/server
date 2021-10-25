@@ -41,10 +41,10 @@ exports.vProds = async(req, res) => {
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
 		// console.log('prods', dbs_res.data.objects[0])
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/v1/Prods", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vProds]"});
+		return res.json({status: 500, message: "[服务器错误: vProds]"});
 	}
 }
 
@@ -61,9 +61,9 @@ exports.vProd = async(req, res) => {
 			dbName: dbProd,
 		};
 		const db_res = await GetDB.db(GetDB_Filter);
-		return res.status(db_res.status).json(db_res);
+		return res.json(db_res);
 	} catch(error) {
 		console.log("/v1/Prod", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vProd]"});
+		return res.json({status: 500, message: "[服务器错误: vProd]"});
 	}
 }

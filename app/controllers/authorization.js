@@ -11,14 +11,14 @@ const ClientDB = require('../models/auth/Client');
 exports.refreshtoken = async(req, res, objectDB) => {
 	try {
 		const refresh_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
-		if(refresh_res.status !== 200) return res.status(refresh_res.status).json(refresh_res);
+		if(refresh_res.status !== 200) return res.json(refresh_res);
 		const payload = refresh_res.data.payload;
 		const reToken = refresh_res.data.token;
 		const object = await objectDB.findOne({_id: payload._id});
 		if(!object) return res.json({status: 400, message: "[server] 授权错误, 请重新登录"});
 
 		// const match_res = await MdFilter.bcrypt_match_Prom(reToken, object.refreshToken);
-		// if(match_res.status != 200) return res.status(200).json({status: 400, message: "[server] refreshToken 不匹配"});
+		// if(match_res.status != 200) return res.json({status: 400, message: "[server] refreshToken 不匹配"});
 		
 		const accessToken = MdJwt.generateToken(payload);
 		const refreshToken = MdJwt.generateToken(object, true);
@@ -27,14 +27,14 @@ exports.refreshtoken = async(req, res, objectDB) => {
 		object.refreshToken = await MdFilter.encrypt_tProm(refreshToken);
 		await object.save();
 
-		return res.status(200).json({
+		return res.json({
 			status: 200,
 			message: "[server] 刷新token成功",
 			data: {accessToken, refreshToken, payload},
 		});
 	} catch(error) {
 		console.log("/api/refreshtoken", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: refreshtoken]"});
+		return res.json({status: 500, message: "[服务器错误: refreshtoken]"});
 	}
 }
 
@@ -42,17 +42,17 @@ exports.refreshtoken = async(req, res, objectDB) => {
 exports.logout = async(req, res, objectDB) => {
 	try {
 		const refresh_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
-		if(refresh_res.status !== 200) return res.status(refresh_res.status).json(refresh_res);
+		if(refresh_res.status !== 200) return res.json(refresh_res);
 		const payload = refresh_res.data.payload;
 		const object = await objectDB.findOne({_id: payload._id}, {refreshToken: 1});
-		if(!object) return res.status(200).json({status: 200, message: "[server] 未找到相应用户"});
+		if(!object) return res.json({status: 200, message: "[server] 未找到相应用户"});
 		// if(object.refreshToken !== refreshToken) return res.json({status: 400, message: "[server] 服务器未删除"});
 		object.refreshToken = null;
 		const objSave = await object.save();
-		return res.status(200).json({status: 200, message: "[server] 成功从服务器登出"});
+		return res.json({status: 200, message: "[server] 成功从服务器登出"});
 	} catch(error) {
 		console.log("/v1/logout", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: logout]"});
+		return res.json({status: 500, message: "[服务器错误: logout]"});
 	}
 }
 
@@ -77,7 +77,7 @@ exports.login = async(req, res, objectDB) => {
 		payload.refreshToken = refreshToken;
 		const objSave = await payload.save();
 
-		return res.status(200).json({
+		return res.json({
 			status: 200,
 			message: "[server] 登录成功",
 			data: {
@@ -88,7 +88,7 @@ exports.login = async(req, res, objectDB) => {
 		})
 	} catch(error) {
 		console.log("/v1/login", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: login]"});
+		return res.json({status: 500, message: "[服务器错误: login]"});
 	}
 }
 // 获取用户信息
@@ -227,7 +227,7 @@ exports.register = async(req, res) => {
 		obj.code = code_result.data.code;
 
 		const pwd = req.body.pwd.replace(/(\s*$)/g, "").replace( /^\s*/, '');
-		const errorInfo = MdFilter.Stint_Match_Func(pwd, StintClient.pwd);
+		const errorInfo = MdFilter.Stint_Match_objs(StintClient, req.body, ['pwd']);
 		if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
 		obj.pwd = await MdFilter.encrypt_tProm(pwd);			// 密码加密
 
@@ -236,10 +236,10 @@ exports.register = async(req, res) => {
 		const _object = new ClientDB(obj);
 		objSave = await _object.save();
 		if(!objSave) return res.json({status: 400, message: "[server] 创建用户失败"});
-		return res.status(200).json({status: 200, data: {object: objSave}});
+		return res.json({status: 200, data: {object: objSave}});
 	} catch(error) {
 		console.log("/v1/register", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: register]"});
+		return res.json({status: 500, message: "[服务器错误: register]"});
 	}
 }
 
@@ -287,11 +287,11 @@ exports.relSocial = async(req, res)=> {
 		const objSave = await object.save();
 		if(!objSave) return status(400).json({status: 400, message: "[server] 保存错误"});
 
-		return res.status(200).json({status: 200, message: "[server] 成功"});
+		return res.json({status: 200, message: "[server] 成功"});
 
 	} catch(error) {
 		console.log("/v1/vRelSocial", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: login]"});
+		return res.json({status: 500, message: "[服务器错误: login]"});
 	}
 }
 
@@ -344,10 +344,10 @@ exports.reActive = async(req, res) => {
 		objSave = await Client.save();
 		if(!objSave) return res.json({status: 400, message: "[server] 重新激活失败"});
 
-		return res.status(200).json({status: 200, data: {object: objSave}});
+		return res.json({status: 200, data: {object: objSave}});
 	} catch(error) {
 		console.log("reActive", error)
-		return res.status(500).json({status: 500, message: "[服务器错误: Client]"});
+		return res.json({status: 500, message: "[服务器错误: Client]"});
 	}
 }
 // 检查 验证码 是否正确

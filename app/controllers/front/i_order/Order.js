@@ -159,10 +159,10 @@ exports.vOrderPost = async(req, res) => {
 			} 
 		}
 		// 返回给前端，  如果不正确 可以尝试 放到 crt_OrderProds_Fucn 中。 如果正确 要删掉 res 参数
-		return res.status(200).json({status: 200, data: {object: OrderSave}});
+		return res.json({status: 200, data: {object: OrderSave}});
 	} catch(error) {
 		console.log("/v1/OrderPost", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: OrderPost]"});
+		return res.json({status: 500, message: "[服务器错误: OrderPost]"});
 	}
 }
 
@@ -257,10 +257,10 @@ exports.vOrderPut = async(req, res) => {
 
 
 		const objSave = await Order.save();
-		return res.status(200).json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
+		return res.json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
 	} catch(error) {
 		console.log("/v1/OrderPut_ship", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vOrderPut_ship]"});
+		return res.json({status: 500, message: "[服务器错误: vOrderPut_ship]"});
 	}
 }
 
@@ -295,11 +295,11 @@ exports.vOrders = async(req, res) => {
 			dbName: dbOrder,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/v1/Orders", error)
 		console.log(error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vOrders]"});
+		return res.json({status: 500, message: "[服务器错误: vOrders]"});
 	}
 }
 
@@ -316,9 +316,9 @@ exports.vOrder = async(req, res) => {
 			dbName: dbOrder,
 		};
 		const db_res = await GetDB.db(GetDB_Filter);
-		return res.status(db_res.status).json(db_res);
+		return res.json(db_res);
 	} catch(error) {
 		console.log("/v1/Order", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vOrder]"});
+		return res.json({status: 500, message: "[服务器错误: vOrder]"});
 	}
 }

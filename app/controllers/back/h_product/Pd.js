@@ -38,10 +38,10 @@ exports.PdDelete = async(req, res) => {
 		}
 
 		const objDel = await PdDB.deleteOne({_id: Pd._id});
-		return res.status(200).json({status: 200, message: "[server] 删除成功"});
+		return res.json({status: 200, message: "[server] 删除成功"});
 	} catch(error) {
 		console.log("/b1/PdDelete", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: PdDelete]"});
+		return res.json({status: 500, message: "[服务器错误: PdDelete]"});
 	}
 }
 
@@ -52,17 +52,17 @@ exports.PdPost = async(req, res) => {
 		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 		const obj = await MdFiles.mkPicture_prom(req, {img_Dir:"/Pd", field: "img_urls", is_Array: true});
 		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
-		let errorInfo = null;
-		if(!errorInfo && obj.code) {
-			// 如果输入了 编号 则编号必须是唯一;
-			errorInfo = MdFilter.Stint_Match_Func(obj.code, StintPd.code);
-			if(!errorInfo) {
-				const objSame = await PdDB.findOne({'code': obj.code, Firm: payload.Firm});
-				if(objSame) return res.json({status: 400, message: '[server] 产品编号相同'});
-			}
+
+		if(obj.code) {
+			// 如果输入了 编号 则编号必须是唯一;  注意 Pd code 没有转大写
+			const errorInfo = MdFilter.Stint_Match_objs(StintPd, obj, ['code', 'nome']);
+			if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
+			const objSame = await PdDB.findOne({'code': obj.code, Firm: payload.Firm});
+			if(objSame) return res.json({status: 400, message: '[server] 产品编号相同'});
+		} else {
+			const errorInfo = MdFilter.Stint_Match_objs(StintPd, obj, ['nome']);
+			if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
 		}
-		if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.nome, StintPd.nome);
-		if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
 
 		if(!obj.price_regular) return res.json({status: 400, message: '[server] 请输入产品默认价格'});
 		obj.price_regular = parseFloat(obj.price_regular);
@@ -83,10 +83,10 @@ exports.PdPost = async(req, res) => {
 		const _object = new PdDB(obj);
 		const objSave = await _object.save();
 
-		return res.status(200).json({status: 200, message: "[server] 创建成功", data: {object: objSave}});
+		return res.json({status: 200, message: "[server] 创建成功", data: {object: objSave}});
 	} catch(error) {
 		console.log("/b1/PdPost", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: PdPost]: "+ error});
+		return res.json({status: 500, message: "[服务器错误: PdPost]: "+ error});
 	}
 }
 
@@ -118,36 +118,37 @@ exports.PdPut = async(req, res) => {
 		}
 	} catch(error) {
 		console.log("/b1/PdPut", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: PdPut]"});
+		return res.json({status: 500, message: "[服务器错误: PdPut]"});
 	}
 }
 
 const Pd_general = async(res, obj, Pd, payload) => {
 	try {
 
-		let errorInfo = null;
-		if(!errorInfo && obj.code && (obj.code != Pd.code)) {
-			obj.code = obj.code.replace(/^\s*/g,"");
-			if(obj.code) {
-				errorInfo = MdFilter.Stint_Match_Func(obj.code, StintPd.code);
-				if(!errorInfo) {
-					const objSame = await PdDB.findOne({'code': obj.code, Firm: payload.Firm});
-					if(objSame) return res.json({status: 400, message: '[server] 产品编号相同'});
-					const code_UpdMany = await ProdDB.updateMany({Pd: Pd._id}, {code: obj.code});
-					Pd.code = obj.code;
-				}
+		if(obj.code) {
+			obj.code = obj.code.replace(/^\s*/g,"");	// 注意 Pd code 没有转大写
+			if(obj.code && (obj.code != Pd.code)) {
+				const errorInfo = MdFilter.Stint_Match_objs(StintPd, obj, ['code']);
+				if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
+				const objSame = await PdDB.findOne({'code': obj.code, Firm: payload.Firm});
+				if(objSame) return res.json({status: 400, message: '[server] 产品编号相同'});
+				const code_UpdMany = await ProdDB.updateMany({Pd: Pd._id}, {code: obj.code});
+				Pd.code = obj.code;
 			} else {
-				Pd.code = '';
+				Pd.code = null;
 			}
 		}
-		if(obj.nome && (obj.nome != Pd.nome)) {
-			errorInfo = MdFilter.Stint_Match_Func(obj.nome, StintPd.nome);
-			if(!errorInfo) {
-				const nome_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: payload.Firm}, {nome: obj.nome});
+		if(obj.nome) {
+			obj.nome = obj.nome.replace(/^\s*/g,"");	// 注意 Pd nome 没有转大写
+			const errorInfo = MdFilter.Stint_Match_objs(StintPd, obj, ['nome']);
+			if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
+			if(obj.nome != Pd.nome) {
+				const objSame = await PdDB.findOne({'nome': obj.nome, Firm: payload.Firm});
+				if(objSame) return res.json({status: 400, message: '[server] 产品编号相同'});
+				const nome_UpdMany = await ProdDB.updateMany({Pd: Pd._id}, {nome: obj.nome});
 				Pd.nome = obj.nome;
 			}
 		}
-		if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
 
 		if(obj.price_regular) {
 			obj.price_regular = parseFloat(obj.price_regular);
@@ -188,10 +189,10 @@ const Pd_general = async(res, obj, Pd, payload) => {
 		Pd.User_upd = payload._id;
 
 		const objSave = await Pd.save();
-		return res.status(200).json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
+		return res.json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
 	} catch(error) {
 		console.log(error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Pd_general]"});
+		return res.json({status: 500, message: "[服务器错误: Pd_general]"});
 	}
 }
 const Pd_delete_img_urls = async(res, obj, Pd, payload) => {
@@ -214,10 +215,10 @@ const Pd_delete_img_urls = async(res, obj, Pd, payload) => {
 
 		Pd.User_upd = payload._id;
 		const objSave = await Pd.save();
-		return res.status(200).json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
+		return res.json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
 	} catch(error) {
 		console.log(error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Pd_delete_img_urls]"});
+		return res.json({status: 500, message: "[服务器错误: Pd_delete_img_urls]"});
 	}
 }
 const Pd_put_img_url = async(res, obj, Pd, payload) => {
@@ -235,10 +236,10 @@ const Pd_put_img_url = async(res, obj, Pd, payload) => {
 		const ProdUpdMany = await ProdDB.updateMany({Pd: Pd._id}, {img_urls: Pd.img_urls});
 
 		const objSave = await Pd.save();
-		return res.status(200).json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
+		return res.json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
 	} catch(error) {
 		console.log(error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Pd_put_img_url]"});
+		return res.json({status: 500, message: "[服务器错误: Pd_put_img_url]"});
 	}
 }
 const Pd_ImgPost = async(res, obj, Pd, payload) => {
@@ -251,10 +252,10 @@ const Pd_ImgPost = async(res, obj, Pd, payload) => {
 		const ProdUpdMany = await ProdDB.updateMany({Pd: Pd._id}, {img_urls: Pd.img_urls});
 
 		const objSave = await Pd.save();
-		return res.status(200).json({status: 200, message: "[server] 修改成功", data: {object: objSave, put_urls:obj.img_urls}, reference:{img_urls: obj.img_urls}});
+		return res.json({status: 200, message: "[server] 修改成功", data: {object: objSave, put_urls:obj.img_urls}, reference:{img_urls: obj.img_urls}});
 	} catch(error) {
 		console.log(error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Pd_ImgPost]"});
+		return res.json({status: 500, message: "[服务器错误: Pd_ImgPost]"});
 	}
 }
 
@@ -299,10 +300,10 @@ exports.Pds = async(req, res) => {
 			dbName: dbPd,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/b1/Pds", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Pds]"});
+		return res.json({status: 500, message: "[服务器错误: Pds]"});
 	}
 }
 
@@ -321,9 +322,9 @@ exports.Pd = async(req, res) => {
 			dbName: dbPd,
 		};
 		const db_res = await GetDB.db(GetDB_Filter);
-		return res.status(db_res.status).json(db_res);
+		return res.json(db_res);
 	} catch(error) {
 		console.log("/b1/Pd", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Pd]"});
+		return res.json({status: 500, message: "[服务器错误: Pd]"});
 	}
 }

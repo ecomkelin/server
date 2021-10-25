@@ -20,11 +20,10 @@ exports.CategPost = async(req, res) => {
 
 		const obj = await MdFiles.mkPicture_prom(req, {img_Dir: "/Categ", field: "img_url"});
 		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
-		let errorInfo = null;
-		if(!obj.code) return res.json({status: 400, message: '[server] 请输入分类编号'});
-		obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
-		if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.code, StintCateg.code);
+		
+		const errorInfo = MdFilter.Stint_Match_objs(StintCateg, obj, ['code']);
 		if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
+		obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
 
 		obj.Firm = payload.Firm;
 		obj.User_crt = payload._id;
@@ -51,7 +50,7 @@ exports.CategPost = async(req, res) => {
 				.populate({path: 'Categ_sons'})
 		}
 
-		return res.status(200).json({status: 200, message: "[server] 创建成功", data: {object}});
+		return res.json({status: 200, message: "[server] 创建成功", data: {object}});
 	} catch(error) {
 		console.log("/b1/CategPost", error);
 		return res.json({status: 500, message: "[服务器错误: CategPost]: "+ error});
@@ -88,7 +87,7 @@ exports.CategDelete = async(req, res) => {
 		const objDel = await CategDB.deleteOne({_id: Categ._id});
 		if(Categ_far) await Categ_far.save();
 
-		return res.status(200).json({status: 200, message: "[server] 删除成功"});
+		return res.json({status: 200, message: "[server] 删除成功"});
 	} catch(error) {
 		console.log("/b1/CategDelete", error);
 		return res.json({status: 500, message: "[服务器错误: CategDelete]"});
@@ -130,16 +129,17 @@ const Categ_general = async(res, obj, Categ, payload) => {
 		delete obj.level;
 		delete obj.Categ_sons;
 
-		let errorInfo = null;
-		// (!errorInfo) && (obj.code) && (obj.code = obj.code.replace(/^\s*/g,"").toUpperCase()) && (obj.code != Categ.code) 
-		if(obj.code && (obj.code = obj.code.replace(/^\s*/g,"").toUpperCase()) && (obj.code != Categ.code)) {
-			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.code, StintCateg.code);
-			if(!errorInfo) {
-				const objSame = await CategDB.findOne({_id: {$ne: Categ._id}, code: obj.code, Firm: payload.Firm});
-				if(objSame) return res.json({status: 400, message: '[server] 此分类编号已被占用, 请查看'});
-			}
-		}
+		if(!obj.code) obj.code = Categ.code;
+		const errorInfo = MdFilter.Stint_Match_objs(StintCateg, obj, ['code']);
 		if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
+		obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
+
+		// (!errorInfo) && (obj.code) && (obj.code = obj.code.replace(/^\s*/g,"").toUpperCase()) && (obj.code != Categ.code) 
+		if(obj.code !== Categ.code) {
+			const objSame = await CategDB.findOne({_id: {$ne: Categ._id}, code: obj.code, Firm: payload.Firm});
+			if(objSame) return res.json({status: 400, message: '[server] 此分类编号已被占用, 请查看'});
+		}
+
 		// 如果不是顶级分类 并且新的父分类与原父分类不同
 		if((Categ.level > 1) && (obj.Categ_far && obj.Categ_far != Categ.Categ_far)) {
 			// 新的父分类添加子分类 _id
@@ -173,10 +173,10 @@ const Categ_general = async(res, obj, Categ, payload) => {
 			object = await CategDB.findOne({_id: object.Categ_far})
 				.populate({path: 'Categ_sons'})
 		}
-		return res.status(200).json({status: 200, message: "[server] 修改成功", data: {object}});
+		return res.json({status: 200, message: "[server] 修改成功", data: {object}});
 	} catch(error) {
 		console.log(error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Categ_general]"});
+		return res.json({status: 500, message: "[服务器错误: Categ_general]"});
 	}
 }
 
@@ -220,10 +220,10 @@ exports.Categs = async(req, res) => {
 			dbName: dbCateg,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/b1/Categs", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Categs]"});
+		return res.json({status: 500, message: "[服务器错误: Categs]"});
 	}
 }
 
@@ -240,9 +240,9 @@ exports.Categ = async(req, res) => {
 			dbName: dbCateg,
 		};
 		const db_res = await GetDB.db(GetDB_Filter);
-		return res.status(db_res.status).json(db_res);
+		return res.json(db_res);
 	} catch(error) {
 		console.log("/b1/Categ", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Categ]"});
+		return res.json({status: 500, message: "[服务器错误: Categ]"});
 	}
 }

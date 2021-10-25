@@ -25,10 +25,9 @@ exports.AttrPost = async(req, res) => {
 		const Prod = await ProdDB.findOne({_id: obj.Prod, Firm: payload.Firm}, {Attrs: 1});
 		if(!Prod) return res.json({status: 400, message: "[server] 没有找到此店铺信息, 请刷新重试"});
 
-		let errorInfo = null;
-		obj.nome = obj.nome.replace(/^\s*/g,"").toUpperCase();
-		if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.nome, StintAttr.nome);
+		const errorInfo = MdFilter.Stint_Match_objs(StintAttr, obj, ['nome']);
 		if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
+		obj.nome = obj.nome.replace(/^\s*/g,"").toUpperCase();
 
 		const objSame = await AttrDB.findOne({Prod: obj.Prod, nome: obj.nome});
 		if(objSame) return res.json({status: 400, message: "[server] 此产品已有此属性"});
@@ -47,10 +46,10 @@ exports.AttrPost = async(req, res) => {
 
 		Prod.Attrs.push(objSave._id);
 		const ProdSave = await Prod.save();
-		return res.status(200).json({status: 200, message: '成功添加新的商品属性', data: {object: objSave}});
+		return res.json({status: 200, message: '成功添加新的商品属性', data: {object: objSave}});
 	} catch(error) {
 		console.log("/b1/AttrPost", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: AttrPost]"});
+		return res.json({status: 500, message: "[服务器错误: AttrPost]"});
 	}
 }
 
@@ -80,10 +79,10 @@ exports.AttrDelete = async(req, res) => {
 		if(!objSave) return res.json({status: 400, message: "[server] 对应的 商品 保存错误"});
 
 		const objDel = await AttrDB.deleteOne({_id: id});
-		return res.status(200).json({status: 200, message: '成功删除商品属性', data: {object: objSave}});
+		return res.json({status: 200, message: '成功删除商品属性', data: {object: objSave}});
 	} catch(error) {
 		console.log("/b1/AttrDelete", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: AttrDelete]"});
+		return res.json({status: 500, message: "[服务器错误: AttrDelete]"});
 	}
 }
 
@@ -113,7 +112,7 @@ exports.AttrPut = async(req, res) => {
 
 	} catch(error) {
 		console.log("/b1/AttrPut", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: AttrPut]"});
+		return res.json({status: 500, message: "[服务器错误: AttrPut]"});
 	}
 }
 const Attr_optionPost = async(res, obj, Attr) => {
@@ -220,21 +219,22 @@ const Attr_general = async(res, obj, Attr) => {
 	console.log("/Attr_general")
 	try{
 		if(obj.nome) {
-			let errorInfo = null;
 			obj.nome = obj.nome.replace(/^\s*/g,"").toUpperCase();
-			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.nome, StintAttr.nome);
-			if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
+			if(obj.nome !== Attr.nome) {
+				const errorInfo = MdFilter.Stint_Match_objs(StintAttr, obj, ['nome']);
+				if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
 
-			const objSame = await AttrDB.findOne({_id: {$ne: Attr._id}, Prod: obj.Prod, nome: obj.nome});
-			if(objSame) return res.json({status: 400, message: "[server] 此产品已有此属性"});
+				const objSame = await AttrDB.findOne({_id: {$ne: Attr._id}, Prod: obj.Prod, nome: obj.nome});
+				if(objSame) return res.json({status: 400, message: "[server] 此产品已有此属性"});
 
-			const nome_UpdMany = await SkuDB.updateMany(
-				{Prod: Attr.Prod, attrs: { $elemMatch: {nome: Attr.nome}}},
-				{ $set: { "attrs.$[elem].nome" : obj.nome } },
-				{ arrayFilters: [ { "elem.nome": Attr.nome } ] }
-			);
+				const Sku_Upd_nome = await SkuDB.updateMany(
+					{Prod: Attr.Prod, attrs: { $elemMatch: {nome: Attr.nome}}},
+					{ $set: { "attrs.$[elem].nome" : obj.nome } },
+					{ arrayFilters: [ { "elem.nome": Attr.nome } ] }
+				);
 
-			Attr.nome = obj.nome;
+				Attr.nome = obj.nome;
+			}
 		}
 		if(obj.sort && !isNaN(parseInt(obj.sort))) {
 			Attr.sort = parseInt(obj.sort);
@@ -286,10 +286,10 @@ exports.Attrs = async(req, res) => {
 			dbName: dbAttr,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/b1/Attrs", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Attrs]"});
+		return res.json({status: 500, message: "[服务器错误: Attrs]"});
 	}
 }
 
@@ -307,9 +307,9 @@ exports.Attr = async(req, res) => {
 			dbName: dbAttr,
 		};
 		const db_res = await GetDB.db(GetDB_Filter);
-		return res.status(db_res.status).json(db_res);
+		return res.json(db_res);
 	} catch(error) {
 		console.log("/b1/Attr", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Attr]"});
+		return res.json({status: 500, message: "[服务器错误: Attr]"});
 	}
 }

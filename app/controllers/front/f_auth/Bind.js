@@ -22,10 +22,10 @@ exports.vBindPut = async(req, res) => {
 		const _object = _.extend(Bind, obj);
 
 		const objSave = await Bind.save();
-		return res.status(200).json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
+		return res.json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
 	} catch(error) {
 		console.log("/v1/BindPut", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vBindPut]"});
+		return res.json({status: 500, message: "[服务器错误: vBindPut]"});
 	}
 }
 
@@ -44,10 +44,10 @@ exports.vBindDelete = async(req, res) => {
 		if(!Bind) return res.json({status: 400, message: "[server] 没有找到此店铺信息, 请刷新重试"});
 
 		const objDel = await BindDB.deleteOne({_id: id});
-		return res.status(200).json({status: 200, message: "[server] 删除成功"});
+		return res.json({status: 200, message: "[server] 删除成功"});
 	} catch(error) {
 		console.log("/v1/BindDelete", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vBindDelete]"});
+		return res.json({status: 500, message: "[服务器错误: vBindDelete]"});
 	}
 }
 
@@ -79,10 +79,10 @@ exports.vBinds = async(req, res) => {
 			dbName: dbBind,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/v1/Binds", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vBinds]"});
+		return res.json({status: 500, message: "[服务器错误: vBinds]"});
 	}
 }
 
@@ -99,9 +99,9 @@ exports.vBind = async(req, res) => {
 			dbName: dbBind,
 		};
 		const db_res = await GetDB.db(GetDB_Filter);
-		return res.status(db_res.status).json(db_res);
+		return res.json(db_res);
 	} catch(error) {
 		console.log("/v1/Bind", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: vBind]"});
+		return res.json({status: 500, message: "[服务器错误: vBind]"});
 	}
 }

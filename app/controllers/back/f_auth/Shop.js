@@ -23,13 +23,11 @@ exports.ShopPost = async(req, res) => {
 		let obj = req.body.obj;
 		if(!obj) obj = await MdFiles.mkPicture_prom(req, {img_Dir: "/Shop", field: "img_url"});
 		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
+
 		// 判断参数是否符合要求
-		let errorInfo = null;
-		if(!obj.code) return res.json({status: 400, message: '[server] 请输入商店编号'});
-		obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
-		if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.code, StintShop.code);
-		if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.nome, StintShop.nome);
+		const errorInfo = MdFilter.Stint_Match_objs(StintShop, obj, ['code', 'nome']);
 		if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
+		obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
 
 		if(!MdFilter.is_ObjectId_Func(obj.Cita)) return res.json({status: 400, message: '[server] 请输入商店所在城市'});
 		const Cita = await CitaDB.findOne({_id: obj.Cita});
@@ -49,10 +47,10 @@ exports.ShopPost = async(req, res) => {
 		const _object = new ShopDB(obj);
 		const objSave = await _object.save();
 		// console.log("/b1/ShopPost", objSave)
-		return res.status(200).json({status: 200, message: "[server] 创建成功", data: {object: objSave}});
+		return res.json({status: 200, message: "[server] 创建成功", data: {object: objSave}});
 	} catch(error) {
 		console.log("/b1/ShopPost", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: ShopPost]: "+ error});
+		return res.json({status: 500, message: "[服务器错误: ShopPost]: "+ error});
 	}
 }
 
@@ -80,10 +78,10 @@ exports.ShopDelete = async(req, res) => {
 
 		if(Shop.img_url && Shop.img_url.split("Shop").length > 1) await MdFiles.rmPicture(Shop.img_url);
 		const objDel = await ShopDB.deleteOne({_id: Shop._id});
-		return res.status(200).json({status: 200, message: "[server] 删除成功"});
+		return res.json({status: 200, message: "[server] 删除成功"});
 	} catch(error) {
 		console.log("/b1/ShopDelete", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: ShopDelete]"});
+		return res.json({status: 500, message: "[服务器错误: ShopDelete]"});
 	}
 }
 
@@ -120,29 +118,28 @@ exports.ShopPut = async(req, res) => {
 		}
 	} catch(error) {
 		console.log("/b1/ShopPut", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: ShopPut]"});
+		return res.json({status: 500, message: "[服务器错误: ShopPut]"});
 	}
 }
 
 const Shop_general = async(res, obj, Shop, payload) => {
 	try{
 		MdFilter.readonly_Func(obj);
-		let errorInfo = null;
-		if(obj.code && (obj.code = obj.code.replace(/^\s*/g,"").toUpperCase()) && (obj.code != Shop.code)) {
-			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.code, StintShop.code);
-			if(!errorInfo) {
-				const objSame = await ShopDB.findOne({_id: {$ne: Shop._id}, code: obj.code, Firm: payload.Firm});
-				if(objSame) return res.json({status: 400, message: '[server] 此店铺编号已被占用, 请查看'});
-			}
-		}
-		if(!errorInfo && obj.nome && (obj.nome != Shop.nome)) {
-			if(!errorInfo) errorInfo = MdFilter.Stint_Match_Func(obj.nome, StintShop.nome);
-			if(!errorInfo) {
-				const objSame = await ShopDB.findOne({_id: {$ne: Shop._id}, nome: obj.nome, Firm: payload.Firm});
-				if(objSame) return res.json({status: 400, message: '[server] 此店铺名称已被占用, 请查看'});
-			}
-		}
+
+		if(!obj.code) obj.code = Shop.code;
+		if(!obj.nome) obj.nome = Shop.nome;
+		const errorInfo = MdFilter.Stint_Match_objs(StintShop, obj, ['code', 'nome']);
 		if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
+		obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
+
+		if(obj.code !== Shop.code || obj.nome !== Shop.nome) {
+			const objSame = await ShopDB.findOne({
+				_id: {$ne: Shop._id},
+				Firm: payload.Firm,
+				$or:[{'code': obj.code}, {'nome': obj.nome}],
+			});
+			if(objSame) return res.json({status: 400, message: '[server] 此店铺编号已被占用, 请查看'});
+		}
 
 		if((obj.is_main == '1' || obj.is_main == 'true') && (Shop.is_main !== true)) {
 			const mainShop = await ShopDB.findOne({is_main: true});
@@ -167,10 +164,10 @@ const Shop_general = async(res, obj, Shop, payload) => {
 		const _object = _.extend(Shop, obj);
 
 		const objSave = await Shop.save();
-		return res.status(200).json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
+		return res.json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
 	} catch(error) {
 		console.log("/b1/Shop_general", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Shop_general]"});
+		return res.json({status: 500, message: "[服务器错误: Shop_general]"});
 	}
 }
 
@@ -188,10 +185,10 @@ const Shop_serveCitaPost = async(res, obj, Shop) => {
 		// k-e-l-i-n;
 		const object = await ShopDB.findOne({_id: objSave._id})
 			.populate({path: 'serve_Citas.Cita'});
-		return res.status(200).json({status: 200, message: '成功添加新的服务区', data: {object}});
+		return res.json({status: 200, message: '成功添加新的服务区', data: {object}});
 	} catch(error) {
 		console.log("/b1/Shop_serveCitaPost", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Shop_serveCitaPost]"});
+		return res.json({status: 500, message: "[服务器错误: Shop_serveCitaPost]"});
 	}
 }
 const Shop_serveCitaPut = async(res, obj, Shop) => {
@@ -209,10 +206,10 @@ const Shop_serveCitaPut = async(res, obj, Shop) => {
 		if(i === Shop.serve_Citas.length) return res.json({status: 400, message: '[server] 没有找到需要修改的服务区'});
 
 		const objSave = await Shop.save();
-		return res.status(200).json({status: 200, message: '成功修改服务区', data: {object: objSave}});
+		return res.json({status: 200, message: '成功修改服务区', data: {object: objSave}});
 	} catch(error) {
 		console.log("/b1/Shop_serveCitaPut", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Shop_serveCitaPut]"});
+		return res.json({status: 500, message: "[服务器错误: Shop_serveCitaPut]"});
 	}
 }
 const Shop_serveCitaDelete = async(res, obj, Shop) => {
@@ -222,10 +219,10 @@ const Shop_serveCitaDelete = async(res, obj, Shop) => {
 		Shop.serve_Citas.splice(Shop.serve_Citas.findIndex(serve_Cita => String(serve_Cita.Cita) == obj.Cita), 1);
 
 		const objSave = await Shop.save();
-		return res.status(200).json({status: 200, message: '成功删除服务区', data: {object: objSave}});
+		return res.json({status: 200, message: '成功删除服务区', data: {object: objSave}});
 	} catch(error) {
 		console.log("/b1/Shop_serveCitaPut", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Shop_serveCitaPut]"});
+		return res.json({status: 500, message: "[服务器错误: Shop_serveCitaPut]"});
 	}
 }
 
@@ -282,10 +279,10 @@ exports.Shops = async(req, res) => {
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
 		console.log(dbs_res.data.objects[0].code)
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/b1/Shops", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Shops]"});
+		return res.json({status: 500, message: "[服务器错误: Shops]"});
 	}
 }
 
@@ -302,9 +299,9 @@ exports.Shop = async(req, res) => {
 			dbName: dbShop,
 		};
 		const db_res = await GetDB.db(GetDB_Filter);
-		return res.status(db_res.status).json(db_res);
+		return res.json(db_res);
 	} catch(error) {
 		console.log("/b1/Shop", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Shop]"});
+		return res.json({status: 500, message: "[服务器错误: Shop]"});
 	}
 }

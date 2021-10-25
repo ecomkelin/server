@@ -123,10 +123,10 @@ exports.SkuPost = async(req, res) => {
 
 		Prod_save_post_Prom(Prod._id);
 
-		return res.status(200).json({status: 200, message: "[server] 创建成功", data: {object: objSave}});
+		return res.json({status: 200, message: "[server] 创建成功", data: {object: objSave}});
 	} catch(error) {
 		console.log("/b1/SkuPost", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: SkuPost]: "+ error});
+		return res.json({status: 500, message: "[服务器错误: SkuPost]: "+ error});
 	}
 }
 
@@ -159,10 +159,10 @@ exports.SkuDelete = async(req, res) => {
 		}
 
 		const objDel = await SkuDB.deleteOne({_id: id});
-		return res.status(200).json({status: 200, message: "[server] 删除成功"});
+		return res.json({status: 200, message: "[server] 删除成功"});
 	} catch(error) {
 		console.log("/b1/SkuDelete", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: SkuDelete]"});
+		return res.json({status: 500, message: "[服务器错误: SkuDelete]"});
 	}
 }
 
@@ -236,10 +236,10 @@ exports.SkuPut = async(req, res) => {
 
 		Prod_save_post_Prom(Prod._id);
 
-		return res.status(200).json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
+		return res.json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
 	} catch(error) {
 		console.log("/b1/SkuPut", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: SkuPut]"});
+		return res.json({status: 500, message: "[服务器错误: SkuPut]"});
 	}
 }
 
@@ -345,10 +345,10 @@ exports.Skus = async(req, res) => {
 			dbName: dbSku,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		return res.status(dbs_res.status).json(dbs_res);
+		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/b1/Skus", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Skus]"});
+		return res.json({status: 500, message: "[服务器错误: Skus]"});
 	}
 }
 
@@ -365,9 +365,9 @@ exports.Sku = async(req, res) => {
 			dbName: dbSku,
 		};
 		const db_res = await GetDB.db(GetDB_Filter);
-		return res.status(db_res.status).json(db_res);
+		return res.json(db_res);
 	} catch(error) {
 		console.log("/b1/Sku", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: Sku]"});
+		return res.json({status: 500, message: "[服务器错误: Sku]"});
 	}
 }

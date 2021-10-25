@@ -28,7 +28,7 @@ exports.Order_change_status = async(req, res) => {
 		return res.json({status: 400, message: "请传递您对订单的正确操作"});
 	} catch(error) {
 		console.log("/b1/Order_change_status", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
+		return res.json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
 	}
 }
 
@@ -41,10 +41,10 @@ const Order_status_confirm = async(req, res, id, payload) => {
 		Order.status = ConfOrder.status_obj.preparing.num;
 		Order.User_Oder = payload._id;
 		const OrderSave = await Order.save();
-		return res.status(200).json({status: 200, message: "[server] 成功接单"});
+		return res.json({status: 200, message: "[server] 成功接单"});
 	} catch(error) {
 		console.log("b1/Order_status_confirm", error);
-		return res.status(500).json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
+		return res.json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
 	}
 }
 
@@ -61,7 +61,7 @@ const Order_status_done = async(req, res, id, payload) => {
 
 	} catch(error) {
 		console.log("b1/Order_status_done",error);
-		return res.status(500).json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
+		return res.json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
 	}
 }
 
@@ -78,6 +78,6 @@ const Order_status_complete = async(req, res, id, payload) => {
 
 	} catch(error) {
 		console.log("b1/Order_status_complete",error);
-		return res.status(500).json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
+		return res.json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
 	}
 }
