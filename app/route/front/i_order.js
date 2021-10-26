@@ -39,6 +39,6 @@ module.exports = (app) => {
 		// }
 		console.log("success")
 		res.json({status: 200});
-	}
+	})
 
 };
