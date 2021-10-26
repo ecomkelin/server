@@ -5,6 +5,8 @@ const payment = require('../../controllers/front/i_order/payment');
 
 const MdAuth = require('../../middle/middleAuth');
 
+const stripe = require('stripe')(process.env.STRIPE_PRIVATE);
+const endpointSecret = process.env.STRIPE_WEBHOOK;
 const bodyParser = require("body-parser");
 
 module.exports = (app) => {
@@ -19,24 +21,28 @@ module.exports = (app) => {
 
 	app.post('/api/v1/create-checkout-session', MdAuth.path_Client, payment.stripePayment);
 	app.post('/api/v1/webhook', bodyParser.raw({type: 'application/json'}), async(req, res) => {
-		console.log("/v1/webhook");
+		console.log("/vcccc1/webhook");
+		console.log("/111");
 		const payload = req.body;
-		console.log('payload', payload);
+		// console.log('payload', payload);
 		const sig = req.headers['stripe-signature'];
-		console.log('sig', sig)
+		// console.log('sig', sig)
 
 		let event;
 		try {
 			event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
 		} catch(error) {
+			console.log("2222", error)
 			return res.json({status: 500, message: "[server] webhook Error"});
 		}
-		// if (event.type === 'checkout.session.completed') {
-		//   const session = event.data.object;
+		console.log('event', event)
+		console.log('event type', event.type)
+		if (event.type === 'checkout.session.completed') {
+		  const session = event.data.object;
 
-		//   // Fulfill the purchase...
-		//   console.log("Fulfilling order", session);
-		// }
+		  // Fulfill the purchase...
+		  console.log("Fulfilling order", session);
+		}
 		console.log("success")
 		res.json({status: 200});
 	})
