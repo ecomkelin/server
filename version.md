@@ -1,3 +1,4 @@
+0.0.10 	Strip 0
 0.0.07 	Stint_Match 优化 并去掉 res.status
 0.0.06 	小修改
 0.0.05 	Identity 变为 payload
