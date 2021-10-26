@@ -1,3 +1,4 @@
+0.0.11 	Strip 1
 0.0.10 	Strip 0
 0.0.07 	Stint_Match 优化 并去掉 res.status
 0.0.06 	小修改

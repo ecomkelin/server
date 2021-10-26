@@ -5,7 +5,7 @@ const MdFilter = require('../../../middle/middleFilter');
 const YOUR_DOMAIN = 'https://localhost:3000';
 
 const stripe = require('stripe')(process.env.STRIPE_PRIVATE);
-const endpointSecret = 'whsec_193BndKubQho0h2wKnsEBZRBBwxSSyhF';
+const endpointSecret = process.env.STRIPE_WEBHOOK;
 
 exports.webhook = async(req, res) => {
 	console.log("/v1/webhook");
