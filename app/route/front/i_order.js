@@ -9,6 +9,7 @@ const stripe = require('stripe')(process.env.STRIPE_PRIVATE);
 const endpointSecret = process.env.STRIPE_WEBHOOK;
 const bodyParser = require("body-parser");
 
+console.log(1111)
 module.exports = (app) => {
 	
 	/* ============================== Order ============================== */
@@ -22,7 +23,6 @@ module.exports = (app) => {
 	app.post('/api/v1/create-checkout-session', MdAuth.path_Client, payment.stripePayment);
 	app.post('/api/v1/webhook', bodyParser.raw({type: 'application/json'}), async(req, res) => {
 		console.log("/vcccc1/webhook");
-		console.log("/111");
 		const payload = req.body;
 		// console.log('payload', payload);
 		const sig = req.headers['stripe-signature'];
