@@ -1,3 +1,4 @@
+0.0.15 	Strip 5
 0.0.14 	Strip 4
 0.0.13 	Strip 3
 0.0.12 	Strip 2

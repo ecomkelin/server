@@ -210,7 +210,7 @@ const vOrder_proof_Prom = (pathObj) => {
 
 // 确认下单
 const vOrder_status_place_Prom = async(id, payload) => {
-	console.log('v1/vOrder_status_place_Prom');
+	console.log('v1/vOrder_status_place');
 	return new Promise(async(resolve) => {
 		try{
 			const pathObj = {_id: id, status: ConfOrder.status_obj.placing.num, Client: payload._id};

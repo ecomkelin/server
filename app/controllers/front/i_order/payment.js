@@ -10,23 +10,21 @@ const endpointSecret = process.env.STRIPE_WEBHOOK;
 
 exports.webhook = async(req, res) => {
 	console.log("/vcccc1/webhook");
-	console.log("/111");
 	const payload = req.body;
-	// console.log('payload', payload);
-	const sig = req.headers['stripe-signature'];
-	// console.log('sig', sig)
+	// console.log('payload', payload.type);
 
-	let event;
-	try {
-		event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
-	} catch(error) {
-		console.log("2222", error)
-		return res.json({status: 500, message: "[server] webhook Error"});
-	}
-	console.log('event', event)
-	console.log('event type', event.type)
-	if (event.type === 'checkout.session.completed') {
-	  const session = event.data.object;
+	// const sig = req.headers['stripe-signature'];
+	// let event;
+	// try {
+	// 	event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
+	// } catch(error) {
+	// 	return res.json({status: 500, message: "[server] webhook Error"});
+	// }
+	// console.log('event', event)
+	// console.log('event type', event.type)
+	
+	if (payload.type === 'checkout.session.completed') {
+	  const session = payload.data.object;
 
 	  // Fulfill the purchase...
 	  console.log("Fulfilling order", session);
@@ -34,6 +32,7 @@ exports.webhook = async(req, res) => {
 	console.log("success")
 	res.json({status: 200});
 }
+
 exports.stripePayment = async(req, res) => {
 	console.log("/v1/create-checkout-session")
 	try{
