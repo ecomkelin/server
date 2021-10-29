@@ -9,12 +9,24 @@ module.exports = (app) => {
 	app.get('/api/b1/Stint', apiStint);
 	// app.get('/api/b1/Stint/:code', apiStint_code);
 
+
+
+
 	app.get('/api/v1/ConfOrder', apiConfOrder);
 	app.get('/api/v1/ConfUser', apiConfUser);
 	app.get('/api/v1/get_social_AppId', get_social_AppId);
 	app.get('/api/v1/Stint', apiStint);
 	// app.get('/api/v1/Stint/:code', apiStint_code);
+
+	app.get('/api/v1/get_payment_clientId', get_payment_clientId);
 };
+
+const get_payment_clientId = (req, res) => {
+	console.log("/v1/get_payment_clientId")
+	const paypal_client_id = process.env.PAYPAL_CLIENT_ID || null;
+	return res.json({status: 200, data: {paypal_client_id}})
+}
+
 const get_social_AppId = (req, res)=> {
 	const data = {
 		"google": process.env.GOOGLE_APPID,

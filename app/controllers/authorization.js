@@ -19,7 +19,7 @@ exports.refreshtoken = async(req, res, objectDB) => {
 
 		// const match_res = await MdFilter.bcrypt_match_Prom(reToken, object.refreshToken);
 		// if(match_res.status != 200) return res.json({status: 400, message: "[server] refreshToken 不匹配"});
-		
+
 		const accessToken = MdJwt.generateToken(payload);
 		const refreshToken = MdJwt.generateToken(object, true);
 
@@ -130,7 +130,6 @@ const obtain_payload = (system_obj, social_obj, objectDB) => {
 				// 获取第三方的 唯一标识 user_id
 				const user_id = social_res.data.user_id;
 				if(!user_id) return resolve({status: 400, message: "[server] 没有找到 user_id 请联系后端"});
-
 
 				/* ==================== 如果第三方授权成功 ==================== */
 				// 查看是否已登录过系统
