@@ -17,5 +17,6 @@ module.exports = (app) => {
 	require('./front/g_complement')(app);
 	require('./front/h_product')(app);
 	require('./front/i_order')(app);
+	require('./front/p_payment')(app);
 
 };

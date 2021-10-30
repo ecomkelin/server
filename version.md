@@ -1,3 +1,4 @@
+0.0.21 	paypal 1
 0.0.20 	paypal 0
 0.0.15 	Strip 5
 0.0.14 	Strip 4

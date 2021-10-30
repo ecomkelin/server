@@ -44,11 +44,12 @@ exports.CategPost = async(req, res) => {
 		}
 
 		let object = await _object.save();
-		// kelin 为了 react 的 二级分类
+		/* kelin 为了 react 的 二级分类 */
 		if(object.level === 2) {
 			object = await CategDB.findOne({_id: object.Categ_far})
 				.populate({path: 'Categ_sons'})
 		}
+		/* kelin 为了 react 的 二级分类 */
 
 		return res.json({status: 200, message: "[server] 创建成功", data: {object}});
 	} catch(error) {

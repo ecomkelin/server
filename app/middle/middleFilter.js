@@ -50,6 +50,10 @@ exports.bcrypt_match_Prom = (pwd, pwd_Bcrypt) => {
 	})
 }
 
+exports.jsonError = (res, errorInfo) => {
+	console.log(errorInfo);
+	res.json({status: 400, message: `[server] ${errorInfo}`});
+}
 
 exports.Stint_Match_objs = (Stint_obj, obj, fields) => {
 	if(!Stint_obj) return 'Stint_Match_objs 请传递正确的参数 Stint_obj';
