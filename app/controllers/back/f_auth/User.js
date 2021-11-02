@@ -25,10 +25,15 @@ exports.UserPost = async(req, res) => {
 
 		const errorInfo = MdFilter.Stint_Match_objs(StintUser, obj, ['code', 'pwd']);
 		if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
+		obj.code = obj.code.replace(/^\s*/g,"").toUpperCase()
 
 		const objSame = await UserDB.findOne({code: obj.code});
 		if(objSame) return res.json({status: 400, message: '[server] 用户编号相同'});
 
+		if(payload.role === ConfUser.role_set.boss) {
+			obj.Shop = payload.Shop;
+			obj.role = ConfUser.role_set.worker;
+		}
 		if(!obj.role) return res.json({status: 400, message: "[server] 请选择用户权限"});
 		if(payload.role >= obj.role) return res.json({status: 400, message: "[server] 您的权限不足"});
 		if(!ConfUser.role_Arrs.includes(parseInt(obj.role))) return res.json({status: 400, message: '[server] 用户权限参数错误'});
@@ -39,9 +44,6 @@ exports.UserPost = async(req, res) => {
 			if(!Shop) return res.json({status: 400, message: '[server] 没有找到您选择的分店信息'});
 		} else {
 			obj.Shop = null;
-		}
-		if(payload.role >= ConfUser.role_set.boss) {
-			obj.Shop = payload.Shop;
 		}
 
 		obj.pwd = await MdFilter.encrypt_tProm(obj.pwd);

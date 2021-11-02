@@ -24,8 +24,9 @@ exports.Order_change_status = async(req, res) => {
 			Order_status_done(req, res, id, payload);
 		} else if(action === ConfOrder.action.back.complete) {
 			Order_status_complete(req, res, id, payload);
+		} else {
+			return res.json({status: 400, message: "请传递您对订单的正确操作"});
 		}
-		return res.json({status: 400, message: "请传递您对订单的正确操作"});
 	} catch(error) {
 		console.log("/b1/Order_change_status", error);
 		return res.json({status: 500, message: "[服务器错误: OrderPost]: "+ error});
@@ -34,6 +35,12 @@ exports.Order_change_status = async(req, res) => {
 
 const Order_status_confirm = async(req, res, id, payload) => {
 	try{
+		console.log(id)
+		// const Order1 = await OrderDB.findOne({_id: id});
+		// console.log(111, Order1.status)
+		// console.log(111, ConfOrder.status_obj.responding.num)
+		// console.log(222, Order1.Shop)
+		// console.log(222, Order1.payload.Shop)
 		const pathObj = {_id: id, status: ConfOrder.status_obj.responding.num, Shop: payload.Shop};
 		const Order = await OrderDB.findOne(pathObj);
 		if(!Order) return res.json({status: 400, message: "没有找到此订单"});

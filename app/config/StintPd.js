@@ -1,5 +1,5 @@
 module.exports = {
-	code: {regexp: '^[0-9]*$', min: 7, max: 13, errMsg: {
+	code: {regexp: '^[0-9]*$', min: 3, max: 25, errMsg: {
 		nullMsg: '产品条形码不能为空',
 		regexpMsg: '产品条形码只能由数字组成',
 		minMsg: '产品条形码的位数不能小于: ',

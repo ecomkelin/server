@@ -68,7 +68,6 @@ exports.login = async(req, res, objectDB) => {
 		const Obj_res = await obtain_payload(req.body.system, req.body.social, objectDB);
 		if(Obj_res.status === 400) return res.json({status: 400, message: Obj_res.message});
 		const payload = Obj_res.data.object;
-
 		if(!payload) return res.json({status: 400, message: "[server] 登陆失败"});
 		const accessToken = MdJwt.generateToken(payload);
 		const refreshToken = MdJwt.generateToken(payload, true);
@@ -76,7 +75,6 @@ exports.login = async(req, res, objectDB) => {
 		payload.at_last_login = Date.now();
 		payload.refreshToken = refreshToken;
 		const objSave = await payload.save();
-
 		return res.json({
 			status: 200,
 			message: "[server] 登录成功",

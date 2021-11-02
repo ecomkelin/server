@@ -18,7 +18,6 @@ exports.mkPicture_prom = async(req, {img_Dir, field, is_Array}) => {
 				// 接受 body信息 obj 的具体信息是 fields中的obj存储的信息
 				const obj = (fields.obj) ? JSON.parse(fields.obj) : {};
 				if(is_Array) obj[field] = [];
-
 				if(!files) return resolve(obj);	// 如果没有传递正确的 file文件 则直接返回
 				let lenFile = 0;
 				let keys = [];
@@ -51,6 +50,7 @@ const multiplesPic_Func = (resolve, obj, field, img_Dir, warnMsg, files, keys, p
 		if(!imgArrs.includes(imgType)) {
 			this.rmPicture()
 			warnMsg.fileType = "只允许输入jpg png gif格式图片";
+			console.log(warnMsg.fileType);
 			multiplesPic_Func(resolve, obj, field, img_Dir, warnMsg, files, keys, payload_id, lenFile, n+1);
 		} else {
 			const img_url = "/upload"+img_Dir+"/" + payload_id + '-'+n+'-' + Date.now() + '.' + imgType;
@@ -58,7 +58,7 @@ const multiplesPic_Func = (resolve, obj, field, img_Dir, warnMsg, files, keys, p
 
 			fs.rename(oldfliepath, newfilepath, err => {
 				if(err) {
-				console.log("multiplesPic_Func", err)
+					console.log("multiplesPic_Func", err)
 					warnMsg.files.push("您传输的第"+n+"张图片错误");
 					multiplesPic_Func(resolve, obj, field, img_Dir, warnMsg, files, keys, payload_id, lenFile, n+1);
 				} else {

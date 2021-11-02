@@ -170,10 +170,26 @@ const Pd_general = async(res, obj, Pd, payload) => {
 			Pd.Brand = obj.Brand;
 		}
 
-		if(obj.is_usable_Firm && (obj.is_usable_Firm != Pd.is_usable_Firm)) {
-			if(obj.is_usable_Firm) obj.is_usable = true;
-			const usable_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: payload.Firm}, {is_usable_Firm: obj.is_usable_Firm});
-			Pd.is_usable_Firm = obj.is_usable_Firm;
+		if(obj.is_usable) {
+			if(obj.is_usable == '1' || obj.is_usable == 'true') {
+				Pd.is_usable = true;
+			} else {
+				Pd.is_usable = false;
+			}
+		}
+
+		// is_usable_Firm 控制已经被同步的商品 不可用. 如果 is_usable_Firm 为 false, is_usable 一定为 false
+		if(obj.is_usable_Firm) {
+			if(obj.is_usable_Firm == '1' || obj.is_usable_Firm == 'true') {
+				obj.is_usable_Firm = true;
+			} else {
+				obj.is_usable_Firm = false;
+			}
+			if(obj.is_usable_Firm != Pd.is_usable_Firm) {
+				Pd.is_usable_Firm = obj.is_usable_Firm;
+				const usable_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: payload.Firm}, {is_usable_Firm: obj.is_usable_Firm});
+				Pd.is_usable_Firm = obj.is_usable_Firm;
+			}
 		}
 
 		if(obj.Categ) {

@@ -21,9 +21,13 @@ exports.BrandPost = async(req, res) => {
 		const obj = await MdFiles.mkPicture_prom(req, {img_Dir: "/Brand", field: "img_url"});
 		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
 
+		if(!obj.code) obj.code = obj.nome;
 		const errorInfo = MdFilter.Stint_Match_objs(StintBrand, obj, ['code', 'nome']);
 		if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
 		obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
+
+		const objSame = await BrandDB.findOne({$or:[{'code': obj.code}, {'nome': obj.nome}], Firm: payload.Firm});
+		if(objSame) return res.json({status: 400, message: '[server] 品牌编号或名称相同'});
 
 		// if(!MdFilter.is_ObjectId_Func(obj.Nation)) return res.json({status: 400, message: '[server] 请输入品牌所属国家'});
 		// const Nation = await NationDB.findOne({_id: obj.Nation});
@@ -32,8 +36,6 @@ exports.BrandPost = async(req, res) => {
 		obj.Firm = payload.Firm;
 		obj.User_crt = payload._id;
 
-		const objSame = await BrandDB.findOne({$or:[{'code': obj.code}, {'nome': obj.nome}], Firm: payload.Firm});
-		if(objSame) return res.json({status: 400, message: '[server] 品牌编号或名称相同'});
 		const _object = new BrandDB(obj);
 		const objSave = await _object.save();
 
