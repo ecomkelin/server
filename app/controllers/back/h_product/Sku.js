@@ -60,7 +60,8 @@ exports.SkuPost = async(req, res) => {
 		const payload = req.payload;
 		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
-		let obj = req.body.obj;
+		let obj = req.body.general;
+		console.log(req.body)
 		if(!obj) return res.json({status: 400, message: '[server] 请输入 obj 参数'});
 		if(!MdFilter.is_ObjectId_Func(obj.Prod)) return res.json({status: 400, message: '[server] 所属商品 _id'});
 		const Prod = await ProdDB.findOne({_id: obj.Prod, Firm: payload.Firm})

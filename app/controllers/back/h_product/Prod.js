@@ -19,13 +19,15 @@ exports.ProdPost = async(req, res) => {
 		let obj = {};
 		let Pd = null;
 		if(req.body.Pd) {		// 从总公司同步
-			if(!MdFilter.is_ObjectId_Func(req.body.Pd)) return res.json({status: 400, message: '[server] 请输入需要同步的产品_id'});
-			Pd = await PdDB.findOne({_id: req.body.Pd, Firm: payload.Firm});
+			const Pd_id = req.body.Pd;
+			if(!MdFilter.is_ObjectId_Func(Pd_id)) return res.json({status: 400, message: '[server] 请输入需要同步的产品_id'});
+			Pd = await PdDB.findOne({_id: Pd_id, Firm: payload.Firm});
 			if(!Pd) return res.json({status: 400, message: '[server] 没有找到同步产品信息'});
-			
-			const objSame = await ProdDB.findOne({Pd: obj.Pd, Shop: obj.Shop, Firm: payload.Firm});
-			if(objSame) return res.json({status: 200, message: '[server] 此商品之前已经被同步', data: {object: objSame}});
+
+			const objSame = await ProdDB.findOne({Pd: Pd_id, Shop: payload.Shop, Firm: payload.Firm});
+			if(objSame) return res.json({status: 400, message: '[server] 此商品之前已经被同步', data: {object: objSame}});
 			obj.Pd = Pd._id;
+			obj.Shop = payload.Shop;
 			if(Pd.Categ) obj.Categ = Pd.Categ;
 			obj.sort = Pd.sort;
 

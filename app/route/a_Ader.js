@@ -628,6 +628,29 @@ module.exports = (app) => {
 			return res.redirect('/?error=adUserDel,Error: '+error+'&reUrl=/adUsers');
 		}
 	});
+
+	app.get('/excel', async(req, res) => {
+		console.log("Ader excel");
+		try{
+			const path = require('path');
+			const XLSX = require('xlsx');
+			const wb = XLSX.readFile(path.join(__dirname, './test.xlsx'));
+			const shtName = wb.SheetNames;
+			console.log(shtName);
+			// const wb = XLSX.utils.book_new();
+			// wb.SheetNames = ["test1", '2'];
+			// const ws = wb.Sheets;
+
+			// console.log("ws", ws);
+			// console.log("wb", wb);
+
+			// return XLSX.writeFile(wb, 'out.xlsb');
+
+			return res.render('./index', {title: 'Excel'});
+		} catch(error) {
+			return res.redirect('/?error=adUserDel,Error: '+error+'&reUrl=/adUsers');
+		}
+	});
 }
 
 const AderIsLogin = function(req, res, next) {
