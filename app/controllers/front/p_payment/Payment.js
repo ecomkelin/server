@@ -151,6 +151,11 @@ exports.stripePayment = async(req, res) => {
 		const success_url = req.body.success_url;
 		const cancel_url = req.body.cancel_url;
 		if(!success_url || !cancel_url) return res.json({status: 400, message: "[server] 请传递付款成功和失败的跳转url"});
+		const preStr = "https://"
+		for(let i=0; i<preStr.length; i++) {
+			if(success_url[i] !== preStr[i] || cancel_url[i] !== preStr[i]) return res.json({status: 400, message: "[server] 跳转url必须以 https:// 开头"});
+		}
+
 		const items_res = await getSkus_Prom(OrderId, payload);
 		if(items_res.status !== 200) return res.json(items_res);
 		const {Shop, order_items} = items_res.data;
@@ -169,14 +174,16 @@ exports.stripePayment = async(req, res) => {
 		})
 		// if(!Shop.stripe_key_private) return res.json({status: 400, message: "[server] 本商店没有写入 strip 的 key Private"});
 		// const stripe = require('stripe')(Shop.stripe_key_private);
-
+		console.log(1)
 		const Stripe = require('stripe')(process.env.STRIPE_PRIVATE);
 
+		console.log(2)
 		const email = payload.email;
 		const customer = await Stripe.customers.create({
 			email,
 		});
 
+		console.log(3)
 		const stripeSession = await Stripe.checkout.sessions.create({
 			line_items,
 			shipping_rates: ["shr_1JpCbzJIPg2MUXJXFTAgCaFt"],
@@ -196,6 +203,7 @@ exports.stripePayment = async(req, res) => {
 			},
 			customer: customer.id,
 		});
+		console.log(4)
 		return res.json({status: 200, data: {url: stripeSession.url}});
 	} catch(error) {
 		console.log("stripePayment error", error);
