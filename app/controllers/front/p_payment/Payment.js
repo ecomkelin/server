@@ -3,7 +3,6 @@ const OrderDB = require('../../../models/order/Order');
 
 const ConfOrder = require('../../../config/ConfOrder');
 const MdFilter = require('../../../middle/middleFilter');
-const YOUR_DOMAIN = 'https://localhost:3000';
 
 
 
@@ -57,8 +56,8 @@ exports.paypalPayment =  async (req, res) => {
 			intent: "CAPTURE",
 			purchase_units,
 			application_context: {
-				return_url: `${YOUR_DOMAIN}/order/${OrderId}`,
-			    cancel_url: `${YOUR_DOMAIN}/order/${OrderId}?error=1`,
+				return_url: `${process.env.YOUR_DOMAIN}/order/${OrderId}`,
+			    cancel_url: `${process.env.YOUR_DOMAIN}/order/${OrderId}?error=1`,
 			},
 		});
 		console.log(5)
@@ -204,8 +203,8 @@ exports.stripePayment = async(req, res) => {
 			// },
 			payment_method_types: ['card', 'sofort'],
 			mode: 'payment',
-			success_url: `${YOUR_DOMAIN}/order/${OrderId}`,
-			cancel_url: `${YOUR_DOMAIN}/order/${OrderId}?error=1`,
+			success_url: `${process.env.YOUR_DOMAIN}/order/${OrderId}`,
+			cancel_url: `${process.env.YOUR_DOMAIN}/order/${OrderId}?error=1`,
 			metadata: {
 				OrderId,
 				stripe_key_private: '',

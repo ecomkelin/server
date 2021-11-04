@@ -634,25 +634,48 @@ module.exports = (app) => {
 		try{
 			const path = require('path');
 			const XLSX = require('xlsx');
-			const wb = XLSX.readFile(path.join(__dirname, './test.xlsx'));
-			const shtName = wb.SheetNames;
-			console.log(shtName);
-			// const wb = XLSX.utils.book_new();
-			// wb.SheetNames = ["test1", '2'];
-			// const ws = wb.Sheets;
 
-			// console.log("ws", ws);
-			// console.log("wb", wb);
+			const json = [
+				{"big Title": "title big1"},
+				{"littleTitle": "title little1"},
+				{"little Title": "title little2"},
+				{"big Title": "title big2"},
+				{Name: 'name_01', Age: 21, Address: 'address_01'},
+				{Name: 'name_02', Age: 22, Address: 'address_02'},
+				{Name: 'name_03', Age: 23, Address: 'address_03'},
+				{Name: 'name_04', Age: 24, Address: 'address_04'},
+			];
+			const ws = XLSX.utils.json_to_sheet(json);
+			const keys = Object.keys(ws).sort();
+			const ref = keys[1]+':'+keys[keys.length -1];
+			const wb = {
+				SheetNames: ['order'],
+				Sheets: {
+					'order': Object.assign({},ws, {'!ref': ref})
+				}
+			};
 
-			// return XLSX.writeFile(wb, 'out.xlsb');
+			console.log(wb)
+			XLSX.writeFile(wb, path.join(__dirname, './out.xlsx'));
 
 			return res.render('./index', {title: 'Excel'});
 		} catch(error) {
+			console.log(error)
 			return res.redirect('/?error=adUserDel,Error: '+error+'&reUrl=/adUsers');
 		}
 	});
 }
-
+const readExcel = () => {
+	const path = require('path');
+	const XLSX = require('xlsx');
+	const wb = XLSX.readFile(path.join(__dirname, './test.xlsx'));
+	const SheetNames = wb.SheetNames;
+	console.log(SheetNames);
+	const ws = wb.Sheets[SheetNames[0]]
+	console.log("ws", ws);
+	const data = XLSX.utils.sheet_to_json(ws);
+	console.log("data", data)
+}
 const AderIsLogin = function(req, res, next) {
 	let curAder = req.session.curAder;
 	if(!curAder) {

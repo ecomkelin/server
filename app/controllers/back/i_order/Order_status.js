@@ -64,7 +64,7 @@ const Order_status_done = async(req, res, id, payload) => {
 		Order.status = ConfOrder.status_obj.shipping.num;
 		Order.User_Pker = payload._id;
 		const OrderSave = await Order.save();
-		return res.json({status: 400, message: "[server] 配货完成"});
+		return res.json({status: 200, message: "[server] 配货完成"});
 
 	} catch(error) {
 		console.log("b1/Order_status_done",error);
@@ -81,7 +81,7 @@ const Order_status_complete = async(req, res, id, payload) => {
 		Order.status = ConfOrder.status_obj.completed.num;
 		Order.User_Dver = payload._id;
 		const OrderSave = await Order.save();
-		return res.json({status: 400, message: "[server] 配送完成"});
+		return res.json({status: 200, message: "[server] 配送完成"});
 
 	} catch(error) {
 		console.log("b1/Order_status_complete",error);
