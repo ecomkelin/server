@@ -5,7 +5,6 @@ const ConfOrder = require('../../../config/ConfOrder');
 const MdFilter = require('../../../middle/middleFilter');
 
 
-
 const paypal = require("@paypal/checkout-server-sdk");
 const payPalClient = require('./paypal/payPalClient');
 
@@ -17,13 +16,10 @@ exports.paypalPayment =  async (req, res) => {
 		const items_res = await getSkus_Prom(OrderId, payload);
 		if(items_res.status !== 200) return res.json(items_res);
 		const {order_items, Order} = items_res.data;
-		console.log(1)
-		console.log(order_items)
 
 		const total = order_items.reduce((sum, item) => {
 			return sum + item.price * item.quantity
 		}, 0);
-		console.log(2, total)
 		const items = order_items.map(item => {
 			return {
 				name: item.desp,
@@ -48,29 +44,19 @@ exports.paypalPayment =  async (req, res) => {
 			items,
 		}];
 
-		console.log(3, purchase_units)
 		const request = new paypal.orders.OrdersCreateRequest();
-		console.log(4)
 		request.prefer("return=representation")
 		request.requestBody({
 			intent: "CAPTURE",
 			purchase_units,
-			application_context: {
-				return_url: `${process.env.YOUR_DOMAIN}/order/${OrderId}`,
-			    cancel_url: `${process.env.YOUR_DOMAIN}/order/${OrderId}?error=1`,
-			},
 		});
-		console.log(5)
 		const order = await payPalClient.client().execute(request);
-		console.log(6)
 		if(!order) return resolve({status: 400, message: "[server] paypalClient.execute Error"});
 
-		console.log(7)
 		Order.paypal_orderId = order.result.id;
 		const OrderSave = await Order.save();
 		if(!OrderSave) return resolve({status: 400, message: "[server] paypalClient OrderSave Error"});
 
-		console.log(8)
 		return res.json({status: 200, data: {id: order.result.id}});
 	} catch (e) {
 		console.log("paypaylPayment error:   -------", e)
@@ -84,23 +70,17 @@ exports.paypalCheckout = async(req, res) => {
 		const paypal_orderId = req.body.paypal_orderId;
 		const OrderId = req.body.OrderId;
 
-		console.log(1)
 		const Order = await OrderDB.findOne({_id: OrderId});
 		if(!Order) return res.json({status: 400, message: "[server] 没有找到此订单"});
-		console.log(2)
 		if(Order.paypal_orderId !== paypal_orderId) return res.json({status: 400, message: "[server] 付款信息不是此订单的"});
 
 		const checkRequest = new paypal.orders.OrdersCaptureRequest(paypal_orderId);
 		checkRequest.requestBody({});
 		
-		console.log(3)
 		const checkOrder = await payPalClient.client().execute(checkRequest);
-		console.log(checkOrder);
 		Order.status = ConfOrder.status_obj.responding.num;
-		console.log(4)
 		const OrderSave = await Order.save();
 		if(!OrderSave) return res.json({status: 400, message: "[server] paypalCheckout OrderSave Error"});
-		console.log(5)
 		return res.json({ status: 200 })
 	} catch (error) {
 		console.log("paypalCheckout error:   -------", error);
@@ -157,7 +137,6 @@ exports.webhook = async(req, res) => {
 			Order.is_paid = true;
 			const OrderSave = await Order.save();
 		}
-		console.log("success")
 		return res.json({status: 200});
 	} catch(error) {
 		return res.json({status: 500, message: "[server] webhook Error"});
@@ -169,6 +148,9 @@ exports.stripePayment = async(req, res) => {
 	try{
 		const payload = req.payload;
 		const OrderId = req.body.OrderId;
+		const success_url = req.body.success_url;
+		const cancel_url = req.body.cancel_url;
+		if(!success_url || !cancel_url) return res.json({status: 400, message: "[server] 请传递付款成功和失败的跳转url"});
 		const items_res = await getSkus_Prom(OrderId, payload);
 		if(items_res.status !== 200) return res.json(items_res);
 		const {Shop, order_items} = items_res.data;
@@ -203,8 +185,10 @@ exports.stripePayment = async(req, res) => {
 			// },
 			payment_method_types: ['card', 'sofort'],
 			mode: 'payment',
-			success_url: `${process.env.YOUR_DOMAIN}/order/${OrderId}`,
-			cancel_url: `${process.env.YOUR_DOMAIN}/order/${OrderId}?error=1`,
+			success_url,
+			cancel_url,
+			// success_url: `${process.env.YOUR_DOMAIN}/order/${OrderId}`,
+			// cancel_url: `${process.env.YOUR_DOMAIN}/order/${OrderId}?error=1`,
 			metadata: {
 				OrderId,
 				stripe_key_private: '',
