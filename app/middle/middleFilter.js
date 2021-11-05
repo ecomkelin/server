@@ -79,6 +79,7 @@ exports.Stint_Match_objs = (Stint_obj, obj, fields) => {
 
 		if(Stint_field.max &&  Stint_field.max < data.length) return Stint_field.errMsg.maxMsg+Stint_field.max;
 	}
+	return null;
 }
 
 
