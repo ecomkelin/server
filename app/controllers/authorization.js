@@ -268,6 +268,9 @@ exports.relSocial = async(req, res)=> {
 		} else if(login_type === "google") {
 			// console.log("/v1/vRelSocial", "google");
 			social_res = await googleAuth_Prom(Client_accessToken);
+		} else if(login_type === "wx") {
+			// console.log("/v1/vRelSocial", "weixin");
+			social_res = await weixinAuth_Prom(Client_accessToken);
 		} else {
 			return res.json({status: 400, message: "[server] 系统还没有此社交媒体关联"});
 		}
@@ -462,13 +465,12 @@ const weixinAuth_Prom = async(Client_accessToken) => {
 	console.log("/v1/weixinAuth");
 	return new Promise(async(resolve) => {
 		try {
-			console.log("code", Client_accessToken);
+			// console.log("code1", Client_accessToken);
 			if(!Client_accessToken) return resolve({status: 400, message: "[server weixinAuth] 请传入 客户facebook 对应的 accessToken"});
-			// const url = `https://api.weixin.qq.com/sns/oauth2/access_token?appid=${process.env.WX_APPID}&secret=${process.env.WX_APPSECRET}&code=${Client_accessToken}&grant_type=authorization_code`;
-			const url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${process.env.WX_APPID}&redirect_uri=&response_type=code&scope=snsapi_base&state=#wechat_redirect`;
+			const url = `https://api.weixin.qq.com/sns/jscode2session?appid=${process.env.WX_APPID}&secret=${process.env.WX_APPSECRET}&js_code=${Client_accessToken}&grant_type=authorization_code`;
 			const response = await axios.get(url);
-			console.log("status", response);
-			// return resolve({status:200, data: {object: response.data.data, user_id: response.data.data.user_id}});
+			// console.log("status", response.data);
+			return resolve({status:200, data: {object: response.data, user_id: response.data.openid}});
 		} catch(error) {
 			console.log("/v1/weixinAuth", error);
 			return resolve({status: 500, message: `[server weixinAuth] Error: ${error}`});
