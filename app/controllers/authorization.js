@@ -123,6 +123,8 @@ const obtain_payload = (system_obj, social_obj, objectDB) => {
 				} else if(login_type === "google") {
 					// console.log("google");
 					social_res = await googleAuth_Prom(Client_accessToken);
+				} else if(login_type === "wx") {
+					social_res = await weixinAuth_Prom(Client_accessToken);
 				}
 				if(social_res.status !== 200) return resolve({status: social_res.status, message: social_res.message});
 				// 获取第三方的 唯一标识 user_id
@@ -453,6 +455,23 @@ const facebookAuth_Prom = async(Client_accessToken) => {
 		} catch(error) {
 			console.log("/v1/facebookAuth", error);
 			return resolve({status: 500, message: `[server facebookAuth] Error: ${error}`});
+		}
+	})
+}
+const weixinAuth_Prom = async(Client_accessToken) => {
+	console.log("/v1/weixinAuth");
+	return new Promise(async(resolve) => {
+		try {
+			console.log("code", Client_accessToken);
+			if(!Client_accessToken) return resolve({status: 400, message: "[server weixinAuth] 请传入 客户facebook 对应的 accessToken"});
+			// const url = `https://api.weixin.qq.com/sns/oauth2/access_token?appid=${process.env.WX_APPID}&secret=${process.env.WX_APPSECRET}&code=${Client_accessToken}&grant_type=authorization_code`;
+			const url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${process.env.WX_APPID}&redirect_uri=&response_type=code&scope=snsapi_base&state=#wechat_redirect`;
+			const response = await axios.get(url);
+			console.log("status", response);
+			// return resolve({status:200, data: {object: response.data.data, user_id: response.data.data.user_id}});
+		} catch(error) {
+			console.log("/v1/weixinAuth", error);
+			return resolve({status: 500, message: `[server weixinAuth] Error: ${error}`});
 		}
 	})
 }

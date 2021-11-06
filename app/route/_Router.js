@@ -1,6 +1,6 @@
 module.exports = (app) => {
 	app.get('/', (req, res) => {
-		return res.render('./index', {title: 'Green City', error: req.query.error, reUrl: req.query.reUrl});
+		return res.render('./index', {title: process.env.SYSTEMNAME, error: req.query.error, reUrl: req.query.reUrl});
 	});
 	require('./a_Ader')(app);
 	require('./c_Conf')(app);

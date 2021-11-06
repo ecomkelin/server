@@ -32,7 +32,7 @@ const dbSchema = new Schema({
 	at_upd: Date,									// 最近更新时间	自动
 	at_crt: Date,									// 创建时间		只读
 	Firm: {type: ObjectId, ref: 'Firm'},			// 所属公司		只读
-})
+});
 dbSchema.pre('save', function(next) {
 	if(this.isNew) {
 		this.at_upd = this.at_crt = Date.now();

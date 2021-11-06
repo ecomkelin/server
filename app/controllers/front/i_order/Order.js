@@ -20,7 +20,6 @@ exports.vOrderPost = async(req, res) => {
 		const payload = req.payload;
 		if(MdSafe.fq_spanTimes1_Func(payload._id)) return MdFilter.jsonError(res, "您刷新太过频繁");
 
-		console.log(req.body);
 		// 判断 基本参数 是否正确
 		const obj_Order = req.body.obj;
 		if(!obj_Order) return res.json({status: 400, message: "[server] 请传递正确的obj数据"});
@@ -30,24 +29,27 @@ exports.vOrderPost = async(req, res) => {
 		delete obj_Order._id;
 
 		if(!MdFilter.is_ObjectId_Func(obj_Order.Shop)) return res.json({status: 400, message: "[server] 请传递正确的 Shop _id 信息"});
-		const Shop = await ShopDB.findOne({_id: obj_Order.Shop, is_usable: 1}, {code:1, serve_Cita: 1, Firm: 1});
+		const Shop = await ShopDB.findOne({_id: obj_Order.Shop, is_usable: 1}, {code:1, serve_Citas: 1, Firm: 1})
+			.populate({path: 'serve_Citas.Cita'});
 		if(!Shop) return res.json({status: 400, message: "[server] 没有找到此商店信息"});
 
 		// 订单的送货方式
 		if(obj_Order.type_ship == ConfOrder.type_ship_obj.sClient.num) {
 			obj_Order.ship_info = null;
 		} else if(obj_Order.type_ship == ConfOrder.type_ship_obj.sShop.num) {
-			// 判断送货城市 是否在商店服务范围
 			if(!obj_Order.ship_info) return MdFilter.jsonError(res, "请传递 ship_info")
-			if(!obj_Order.ship_info.Cita) return MdFilter.jsonError(res, "请传递 ship_info 中的城市")
-	
+
+			if(!obj_Order.ship_info.Client_nome) return MdFilter.jsonError(res, "请传递 客户名称");
+			if(!obj_Order.ship_info.phone) return MdFilter.jsonError(res, "请传递 电话号码");
+			// 判断送货城市 是否在商店服务范围
+			if(!obj_Order.ship_info.Cita_code) return MdFilter.jsonError(res, "请传递 ship_info 中的城市");
 			let i=0;
 			for(; i<Shop.serve_Citas.length; i++) {
 				const serve_Cita = Shop.serve_Citas[i];
-				if(obj_Order.ship_info.Cita === String(serve_Cita.Cita)) break;
+				if(obj_Order.ship_info.Cita_code === String(serve_Cita.Cita.code)) break;
 			}
 			if(i === Shop.serve_Citas.length) return res.json({status: 400, message: "[server] 此城市不在服务区"});
-			const Cita = await CitaDB.findOne({_id: obj_Order.ship_info.Cita}, {code: 1, nome:1});
+			const Cita = await CitaDB.findOne({code: obj_Order.ship_info.Cita_code}, {code: 1, nome:1});
 			if(!Cita) return res.json({status: 400, message: "[server] 没有找到此城市"});
 			obj_Order.ship_info.city = Cita.code;
 		} else {

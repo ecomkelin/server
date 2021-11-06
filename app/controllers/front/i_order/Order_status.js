@@ -20,9 +20,9 @@ exports.vOrder_change_status = async(req, res) => {
 		let action_prom = null;
 		if(action === ConfOrder.action.front.place) { // 下单
 			action_prom = await vOrder_status_place_Prom(id, payload);
-		} else if(action === ConfOrder.action.front.trash) {
+		} else if(action === ConfOrder.action.front.trash) {	// 客户删除订单, 客户不可见
 			action_prom = await vOrder_status_trash_Prom(id, payload);
-		} else if(action === ConfOrder.action.front.cancel) {
+		} else if(action === ConfOrder.action.front.cancel) {	// 客户取消订单
 			action_prom = await vOrder_status_cancel_Prom(id, payload);
 		}
 		if(action_prom) return res.json(action_prom);
@@ -219,7 +219,7 @@ const vOrder_status_place_Prom = async(id, payload) => {
 
 			let OrderSave = null;
 			let message = '';
-			const timeSpan = Order.at_confirm - Date.now();
+			const timeSpan = Date.now() - Order.at_confirm;
 			if(timeSpan > 15*60*1000) {
 				// 如果待下单的订单 在15分钟内未下单 则订单自动进入取消状态(前台可以提示超时未下单 取消);
 				Order.code += '-60';

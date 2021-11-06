@@ -769,7 +769,7 @@ module.exports = (app) => {
 					obj.img_urls.push('/upload/Pd/'+img_url);
 				}
 
-				const _object = new BrandDB(obj);
+				const _object = new PdDB(obj);
 				const objSave = await _object.save();
 			}
 			return res.redirect('/adHome');
