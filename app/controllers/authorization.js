@@ -142,12 +142,10 @@ const obtain_payload = (system_obj, social_obj, objectDB) => {
 					const result_code = await generate_codeClient_Prom();
 					if(result_code.status !== 200) return resolve({status: 400, message: result_code.message});
 					const obj = {};
-					obj.socials = [
-						{
-							social_type: login_type,
-							social_id: user_id
-						}
-					];
+					obj.socials = [{
+						social_type: login_type,
+						social_id: user_id
+					}];
 					obj.code = result_code.data.code;
 					obj.is_usable = true;
 					const _object = new objectDB(obj);

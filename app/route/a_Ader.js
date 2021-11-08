@@ -51,6 +51,7 @@ module.exports = (app) => {
 	app.post('/AderPost', async(req, res) => {
 		try{
 			const obj = req.body.obj
+			obj.code = obj.code.replace(/(\s*$)/g, "").replace( /^\s*/, '').toUpperCase();;
 			obj.pwd = obj.pwd.replace(/(\s*$)/g, "").replace( /^\s*/, '');
 			obj.pwd = await MdFilter.encrypt_tProm(obj.pwd);
 
@@ -700,7 +701,7 @@ module.exports = (app) => {
 	app.post('/excel_Pd', postForm, async(req, res) => {
 		console.log("Ader Pd excel");
 		if(!P_Brands) P_Brands = await BrandDB.find();
-		if(!P_Categs) P_Categs = await P_Categs.find();
+		if(!P_Categs) P_Categs = await CategDB.find({level: 2});
 		if(!BP_Nations) BP_Nations = await NationDB.find();
 		try{
 			const Firm = req.body.obj.Firm;
@@ -766,7 +767,7 @@ module.exports = (app) => {
 				obj.img_urls = [];
 				for(let j=10; j<15; j++) {
 					const img_url = String(arr[j]).replace(/(\s*$)/g, "").replace( /^\s*/, '');
-					obj.img_urls.push('/upload/Pd/'+img_url);
+					if(img_url) obj.img_urls.push('/upload/Pd/'+img_url);
 				}
 
 				const _object = new PdDB(obj);
