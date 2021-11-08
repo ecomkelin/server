@@ -656,14 +656,16 @@ module.exports = (app) => {
 				const arr = arrs[i];
 				const obj = {};
 				obj.code = String(arr[1]).replace(/(\s*$)/g, "").replace( /^\s*/, '');
+				console.log("code", obj.code)
 				obj.nome = String(arr[2]).replace(/(\s*$)/g, "").replace( /^\s*/, '');
+				console.log("nome", obj.nome)
 				if(obj.code === 'undefined' || obj.nome === 'undefined') continue;
 				const errorInfo = MdFilter.Stint_Match_objs(StintBrand, obj, ['code', 'nome']);
 				if(errorInfo) {
 					console.log(i, "errorInfo", errorInfo);
 					continue;
 				}
-				
+
 				const objSame = await BrandDB.findOne({$or:[{'code': obj.code}, {'nome': obj.nome}], Firm});
 				if(objSame) {
 					console.log(i, 'objSame');
@@ -722,7 +724,7 @@ module.exports = (app) => {
 				obj.code = String(arr[1]).replace(/(\s*$)/g, "").replace( /^\s*/, '');
 				obj.nome = String(arr[2]).replace(/(\s*$)/g, "").replace( /^\s*/, '');
 				if(obj.code === 'undefined' || obj.nome === 'undefined') continue;
-				const errorInfo = MdFilter.Stint_Match_objs(StintBrand, obj, ['code', 'nome']);
+				const errorInfo = MdFilter.Stint_Match_objs(StintPd, obj, ['code', 'nome']);
 				if(errorInfo) {
 					console.log(i, errorInfo);
 					continue;

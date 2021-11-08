@@ -46,6 +46,7 @@ exports.ShopPost = async(req, res) => {
 		if(objSame) return res.json({status: 400, message: '[server] 店铺编号或名称相同'});
 		const _object = new ShopDB(obj);
 		const objSave = await _object.save();
+		if(!objSave) return res.json({status: 400, message: "[server] ShopPost 数据库保存失败"});
 		// console.log("/b1/ShopPost", objSave)
 		return res.json({status: 200, message: "[server] 创建成功", data: {object: objSave}});
 	} catch(error) {
