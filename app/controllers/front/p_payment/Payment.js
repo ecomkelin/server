@@ -238,6 +238,14 @@ const getSkus_Prom = (OrderId, payload) => {
 					path: "OrderSkus", select: "price quantity attrs"
 				}})
 			if(!Order) return resolve({status: 400, message: "[server] 没有找到 Order"});
+
+			const timeSpan = Date.now() - Order.at_confirm;
+			if(timeSpan > 2*60*60*1000) {
+				// Order.status = ConfOrder.status_obj.cancel.num;
+				// const OrderSave = await Order.save();
+				return resolve({status: 400, message: "[server] 付款超时 请重新下单"});
+			}
+
 			data.Order = Order;
 			if(!Order.Shop) return resolve({status: 400, message: "[server] 没有找到 Order中的Shop"});
 			data.Shop = Order.Shop;

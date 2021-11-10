@@ -1,9 +1,9 @@
 module.exports = {
-	status_Arrs: [10, 70, 100, 200, 400, 700, 800],
+	status_Arrs: [10, 100, 200, 400, 700, 800],
 	status: {
 		// 0: 		'购物车',
 		10: 	'已取消',
-		70: 	'付款失败',
+		// 70: 	'付款失败',
 		100: 	'客户正在下单',
 		200: 	'等待商家接单',
 		400: 	'正在配货',
@@ -13,7 +13,7 @@ module.exports = {
 	status_obj: {
 		// cart:	{num: 0, 	val: '购物车' 		},
 		cancel:		{num: 10, 	val: '已取消' 		},
-		failPay:	{num: 70, 	val: '付款失败' 		},
+		// failPay:	{num: 70, 	val: '付款失败' 		},
 		placing:	{num: 100, 	val: '客户正在下单'	},
 		responding:	{num: 200, 	val: '等待商家接单' 	},
 		preparing:	{num: 400, 	val: '正在配货' 		},

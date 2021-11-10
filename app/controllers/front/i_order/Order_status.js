@@ -25,6 +25,7 @@ exports.vOrder_change_status = async(req, res) => {
 		} else if(action === ConfOrder.action.front.cancel) {	// 客户取消订单
 			action_prom = await vOrder_status_cancel_Prom(id, payload);
 		}
+
 		if(action_prom) return res.json(action_prom);
 		return res.json({status: 400, message: "请传递您对订单的正确操作"}); 
 	} catch(error) {
@@ -220,7 +221,7 @@ const vOrder_status_place_Prom = async(id, payload) => {
 			let OrderSave = null;
 			let message = '';
 			const timeSpan = Date.now() - Order.at_confirm;
-			if(timeSpan > 15*60*1000) {
+			if(timeSpan > 2*60*60*1000) {
 				// 如果待下单的订单 在15分钟内未下单 则订单自动进入取消状态(前台可以提示超时未下单 取消);
 				Order.code += '-60';
 				Order.at_confirm = null;
@@ -256,7 +257,7 @@ const vOrder_status_place_Prom = async(id, payload) => {
 				} else { // 如果支付失败 则订单进入 下单失败状态;
 					Order.code += '-70';
 					Order.at_confirm = null;
-					Order.status = ConfOrder.status_obj.failPay.num;
+					Order.status = ConfOrder.status_obj.cancel.num;
 					OrderSave = await Order.save();
 					if(!OrderSave) message = "下单失败 并且 保存失败";
 					message = "下单失败";

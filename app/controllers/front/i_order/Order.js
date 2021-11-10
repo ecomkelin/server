@@ -22,16 +22,17 @@ exports.vOrderPost = async(req, res) => {
 
 		// 判断 基本参数 是否正确
 		const obj_Order = req.body.obj;
-		if(!obj_Order) return res.json({status: 400, message: "[server] 请传递正确的obj数据"});
+		if(!obj_Order) return MdFilter.jsonError(res, "请传递正确的obj数据");
 
 		// 判断是否为 其他订单重新下单的
 		const org_OrderId = req.body.Order ? req.body.Order : false;
 		delete obj_Order._id;
 
-		if(!MdFilter.is_ObjectId_Func(obj_Order.Shop)) return res.json({status: 400, message: "[server] 请传递正确的 Shop _id 信息"});
+		if(!MdFilter.is_ObjectId_Func(obj_Order.Shop)) return MdFilter.jsonError(res, "请传递正确的 Shop _id 信息");
+
 		const Shop = await ShopDB.findOne({_id: obj_Order.Shop, is_usable: 1}, {code:1, serve_Citas: 1, Firm: 1})
 			.populate({path: 'serve_Citas.Cita'});
-		if(!Shop) return res.json({status: 400, message: "[server] 没有找到此商店信息"});
+		if(!Shop) return MdFilter.jsonError(res, "没有找到此商店信息");
 
 		// 订单的送货方式
 		if(obj_Order.type_ship == ConfOrder.type_ship_obj.sClient.num) {
@@ -48,17 +49,19 @@ exports.vOrderPost = async(req, res) => {
 				const serve_Cita = Shop.serve_Citas[i];
 				if(obj_Order.ship_info.Cita_code === String(serve_Cita.Cita.code)) break;
 			}
-			if(i === Shop.serve_Citas.length) return res.json({status: 400, message: "[server] 此城市不在服务区"});
+			if(i === Shop.serve_Citas.length) return MdFilter.jsonError(res, "此城市不在服务区");
 			const Cita = await CitaDB.findOne({code: obj_Order.ship_info.Cita_code}, {code: 1, nome:1});
-			if(!Cita) return res.json({status: 400, message: "[server] 没有找到此城市"});
+			if(!Cita) return MdFilter.jsonError(res, "没有找到此城市");
+
 			obj_Order.ship_info.city = Cita.code;
 		} else {
-			return res.json({status: 400, message: "[server] 请传递 type_ship"});
+			return MdFilter.jsonError(res, "请传递 type_ship");
 		}
 
 		// 基本信息赋值
 		const code_res = await generate_codeOrder_Prom(Shop._id, Shop.code);
-		if(code_res.status !== 200) return resolve({status: 400, message: code_res.message});
+		if(code_res.status !== 200) return MdFilter.jsonError(res, code_res.message);
+
 		obj_Order.code = code_res.data.code;
 		// obj_Order.shop 已赋值
 		obj_Order.Client = payload._id;
@@ -72,7 +75,8 @@ exports.vOrderPost = async(req, res) => {
 		obj_Order.total_regular = 0;
 		obj_Order.at_confirm = Date.now();
 
-		if(!(obj_Order.OrderProds instanceof Array)) return res.json({status: 400, message: "[server] 购物车中的产品数据 obj.OrderProds 参数错误[应该是数组]"});
+		if(!(obj_Order.OrderProds instanceof Array)) return MdFilter.jsonError(res, "购物车中的产品数据 obj.OrderProds 参数错误[应该是数组]");
+
 		const oProds = [...obj_Order.OrderProds];
 
 		obj_Order.OrderProds = [];	// 数据格式化, 在循环中再添加 OrderProd 的 _id;
