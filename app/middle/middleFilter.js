@@ -188,7 +188,7 @@ exports.page_Func = (page, pagesize) => {
 	if(isNaN(page) || page<1) page=1;
 
 	pagesize = parseInt(pagesize);
-	if(isNaN(pagesize) || pagesize<1) pagesize=50;
+	if(isNaN(pagesize) || pagesize<1) pagesize=30;
 
 	const skip = (page-1)*pagesize;
 	return {page, pagesize, skip};

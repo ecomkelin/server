@@ -58,6 +58,8 @@ exports.sortDBs = (dbName) => {
 	if(!dbName) return sortObj;
 	if(dbName === 'User') {
 		sortObj = {Shop: 1, role: 1, is_usable: -1, sort: -1, at_upd: -1, code: 1, nome: 1 };
+	} else if(dbName === 'Order') {
+		sortObj = {at_crt: -1 };
 	}
 	return sortObj;
 }

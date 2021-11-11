@@ -683,7 +683,7 @@ module.exports = (app) => {
 				if(is_usable === '1') obj.is_usable = true;
 
 				const img_url = String(arr[5]).replace(/(\s*$)/g, "").replace( /^\s*/, '');
-				obj.img_url = '/upload/Brand/'+img_url;
+				if(img_url !== "undefined") obj.img_url = '/upload/Brand/'+img_url;
 
 				const _object = new BrandDB(obj);
 				const objSave = await _object.save();
@@ -769,7 +769,7 @@ module.exports = (app) => {
 				obj.img_urls = [];
 				for(let j=10; j<15; j++) {
 					const img_url = String(arr[j]).replace(/(\s*$)/g, "").replace( /^\s*/, '');
-					if(img_url) obj.img_urls.push('/upload/Pd/'+img_url);
+					if(img_url !== "undefined") obj.img_urls.push('/upload/Pd/'+img_url);
 				}
 
 				const _object = new PdDB(obj);
