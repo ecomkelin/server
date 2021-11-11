@@ -125,6 +125,8 @@ exports.PdPut = async(req, res) => {
 const Pd_general = async(res, obj, Pd, payload) => {
 	try {
 
+		const updateManyParam = {};
+
 		if(obj.code) {
 			obj.code = obj.code.replace(/^\s*/g,"");	// 注意 Pd code 没有转大写
 			if(obj.code && (obj.code != Pd.code)) {
@@ -132,7 +134,7 @@ const Pd_general = async(res, obj, Pd, payload) => {
 				if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
 				const objSame = await PdDB.findOne({'code': obj.code, Firm: payload.Firm});
 				if(objSame) return res.json({status: 400, message: '[server] 产品编号相同'});
-				const code_UpdMany = await ProdDB.updateMany({Pd: Pd._id}, {code: obj.code});
+				updateManyParam.code = obj.code;
 				Pd.code = obj.code;
 			} else {
 				Pd.code = null;
@@ -145,7 +147,7 @@ const Pd_general = async(res, obj, Pd, payload) => {
 			if(obj.nome != Pd.nome) {
 				const objSame = await PdDB.findOne({'nome': obj.nome, Firm: payload.Firm});
 				if(objSame) return res.json({status: 400, message: '[server] 产品编号相同'});
-				const nome_UpdMany = await ProdDB.updateMany({Pd: Pd._id}, {nome: obj.nome});
+				updateManyParam.nome = obj.nome;
 				Pd.nome = obj.nome;
 			}
 		}
@@ -159,14 +161,14 @@ const Pd_general = async(res, obj, Pd, payload) => {
 			if(!MdFilter.is_ObjectId_Func(obj.Nation)) return res.json({status: 400, message: '[server] 国家数据需要为 _id 格式'});
 			const Nation = await NationDB.findOne({_id: obj.Nation});
 			if(!Nation) return res.json({status: 400, message: '[server] 没有找到此国家信息'});
-			const Nation_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: payload.Firm}, {Nation: obj.Nation});
+			updateManyParam.Nation = obj.Nation;
 			Pd.Nation = obj.Nation;
 		}
 		if(obj.Brand && (obj.Brand != Pd.Brand)) {
 			if(!MdFilter.is_ObjectId_Func(obj.Brand)) return res.json({status: 400, message: '[server] 品牌数据需要为 _id 格式'});
 			const Brand = await BrandDB.findOne({_id: obj.Brand});
 			if(!Brand) return res.json({status: 400, message: '[server] 没有找到此品牌信息'});
-			const Brand_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: payload.Firm}, {Brand: obj.Brand});
+			updateManyParam.Brand = obj.Brand;
 			Pd.Brand = obj.Brand;
 		}
 
@@ -187,7 +189,7 @@ const Pd_general = async(res, obj, Pd, payload) => {
 			}
 			if(obj.is_usable_Firm != Pd.is_usable_Firm) {
 				Pd.is_usable_Firm = obj.is_usable_Firm;
-				const usable_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: payload.Firm}, {is_usable_Firm: obj.is_usable_Firm});
+				updateManyParam.is_usable_Firm = obj.is_usable_Firm;
 				Pd.is_usable_Firm = obj.is_usable_Firm;
 			}
 		}
@@ -197,14 +199,18 @@ const Pd_general = async(res, obj, Pd, payload) => {
 			if(String(obj.Categ) !== String(Pd.Categ) ) {
 				const Categ = await CategDB.findOne({_id: obj.Categ, Firm: payload.Firm, level: 2});
 				if(!Categ) return res.json({status: 400, message: "[server] 您的二级分类不正确, 请输入正确的二级分类"});
-				const Categ_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: payload.Firm}, {Categ: obj.Categ});
+				updateManyParam.Categ = obj.Categ;
 				Pd.Categ = obj.Categ;
 			}
 		}
 
+		Pd.desp = obj.desp;
+
 		Pd.User_upd = payload._id;
 
 		const objSave = await Pd.save();
+		if(!objSave) res.json({status: 400, message: "[server] 保存错误"})
+		const Categ_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: payload.Firm}, updateManyParam);
 		return res.json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
 	} catch(error) {
 		console.log(error);
