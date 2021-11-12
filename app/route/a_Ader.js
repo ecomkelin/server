@@ -730,7 +730,7 @@ module.exports = (app) => {
 					continue;
 				}
 
-				const objSame = await BrandDB.findOne({$or:[{'code': obj.code}, {'nome': obj.nome}], Firm});
+				const objSame = await PdDB.findOne({$or:[{'code': obj.code}, {'nome': obj.nome}], Firm});
 				if(objSame) {
 					console.log(i, '有相同的编号或名称');
 					continue;
