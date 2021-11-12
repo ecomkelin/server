@@ -279,7 +279,7 @@ exports.Shops = async(req, res) => {
 			dbName: dbShop,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		console.log(dbs_res.data.objects[0].code)
+		// console.log(dbs_res.data.objects[0].code)
 		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/b1/Shops", error);
