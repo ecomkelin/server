@@ -755,7 +755,7 @@ module.exports = (app) => {
 
 				const BrandCode = String(arr[7]).replace(/(\s*$)/g, "").replace( /^\s*/, '');
 				const Brand = P_Brands.find(item => item.code === BrandCode);
-				if(Brand) obj.Brand = Categ._id;
+				if(Brand) obj.Brand = Brand._id;
 
 				const NationCode = String(arr[8]).replace(/(\s*$)/g, "").replace( /^\s*/, '');
 				if(NationCode.length === 2) {
