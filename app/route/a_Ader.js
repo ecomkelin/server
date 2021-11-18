@@ -662,13 +662,13 @@ module.exports = (app) => {
 				if(obj.code === 'undefined' || obj.nome === 'undefined') continue;
 				const errorInfo = MdFilter.Stint_Match_objs(StintBrand, obj, ['code', 'nome']);
 				if(errorInfo) {
-					console.log(i, "errorInfo", errorInfo);
+					console.log(i, xuhao, "errorInfo", errorInfo);
 					continue;
 				}
 
 				const objSame = await BrandDB.findOne({$or:[{'code': obj.code}, {'nome': obj.nome}], Firm});
 				if(objSame) {
-					console.log(i, 'objSame');
+					console.log(i, xuhao, 'objSame');
 					continue;
 				}
 				obj.Firm = Firm;
@@ -721,18 +721,19 @@ module.exports = (app) => {
 			for(let i=5; i<arrs.length; i++) {
 				const arr = arrs[i];
 				const obj = {};
+				const xuhao = String(arr[0]).replace(/(\s*$)/g, "").replace( /^\s*/, '');
 				obj.code = String(arr[1]).replace(/(\s*$)/g, "").replace( /^\s*/, '');
 				obj.nome = String(arr[2]).replace(/(\s*$)/g, "").replace( /^\s*/, '');
 				if(obj.code === 'undefined' || obj.nome === 'undefined') continue;
 				const errorInfo = MdFilter.Stint_Match_objs(StintPd, obj, ['code', 'nome']);
 				if(errorInfo) {
-					console.log(i, errorInfo);
+					console.log(i, xuhao, errorInfo);
 					continue;
 				}
 
 				const objSame = await PdDB.findOne({$or:[{'code': obj.code}, {'nome': obj.nome}], Firm});
 				if(objSame) {
-					console.log(i, '有相同的编号或名称');
+					console.log(i, xuhao, '有相同的编号或名称');
 					continue;
 				}
 				obj.Firm = Firm;
@@ -741,7 +742,7 @@ module.exports = (app) => {
 
 				const price_regular = parseFloat(String(arr[4]).replace(/(\s*$)/g, "").replace( /^\s*/, ''));
 				if(isNaN(price_regular) || price_regular <= 0) {
-					console.log(i, '价格错误');
+					console.log(i, xuhao, '价格错误');
 					continue;
 				}
 				obj.price_regular = price_regular;
