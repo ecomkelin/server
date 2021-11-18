@@ -1,3 +1,4 @@
+0.0.54	批量上传 不检查相同的名字
 0.0.53	批量上传 检查
 0.0.52	Pd Prod => price_regular price_sale
 0.0.51	小bug

@@ -666,7 +666,7 @@ module.exports = (app) => {
 					continue;
 				}
 
-				const objSame = await BrandDB.findOne({$or:[{'code': obj.code}, {'nome': obj.nome}], Firm});
+				const objSame = await BrandDB.findOne({'code': obj.code, Firm});
 				if(objSame) {
 					console.log(i, xuhao, 'objSame');
 					continue;
