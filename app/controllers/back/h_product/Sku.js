@@ -54,6 +54,7 @@ const includes_attrs_Func = (Attrs, attrs) => {	// 判断 Attrs 中是否包含�
 	return true;
 }
 
+
 exports.SkuPost = async(req, res) => {
 	console.log("/b1/SkuPost");
 	try{
@@ -207,7 +208,6 @@ exports.SkuPut = async(req, res) => {
 			Sku.attrs = obj.attrs;
 		}
 
-		console.log(obj.price_regular)
 		if(obj.price_regular && !isNaN(parseFloat(obj.price_regular))) Sku.price_regular =parseFloat(obj.price_regular);
 		if(obj.price_sale && !isNaN(parseInt(obj.price_sale))) Sku.price_sale =parseInt(obj.price_sale);
 		if(obj.limit_quantity && !isNaN(parseInt(obj.limit_quantity))) Sku.limit_quantity =parseInt(obj.limit_quantity);

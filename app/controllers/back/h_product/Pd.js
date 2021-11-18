@@ -12,6 +12,7 @@ const CategDB = require('../../../models/complement/Categ');
 const BrandDB = require('../../../models/complement/Brand');
 const NationDB = require('../../../models/address/Nation');
 const ProdDB = require('../../../models/product/Prod');
+const SkuDB = require('../../../models/product/Sku');
 
 const _ = require('underscore');
 
@@ -67,6 +68,15 @@ exports.PdPost = async(req, res) => {
 		if(!obj.price_regular) return res.json({status: 400, message: '[server] 请输入产品默认价格'});
 		obj.price_regular = parseFloat(obj.price_regular);
 		if(isNaN(obj.price_regular)) return res.json({status: 400, message: '[server] 价格要为数字'});
+
+		if(obj.price_sale) {
+			obj.price_sale = parseFloat(obj.price_sale);
+			if(isNaN(obj.price_sale)) return res.json({status: 400, message: '[server] 价格要为数字'});
+
+			if(obj.price_sale >= obj.price_regular) obj.price_sale = obj.price_regular;
+		} else {
+			obj.price_sale = obj.price_regular;
+		}
 
 		if(!MdFilter.is_ObjectId_Func(obj.Brand)) obj.Brand = null;
 		if(!MdFilter.is_ObjectId_Func(obj.Nation)) obj.Nation = null;
@@ -125,7 +135,34 @@ exports.PdPut = async(req, res) => {
 const Pd_general = async(res, obj, Pd, payload) => {
 	try {
 
-		const updateManyParam = {};
+		if(obj.is_usable) {
+			Pd.is_usable = (obj.is_usable == '1' || obj.is_usable == 'true') ? true : false;
+		}
+
+		const updManyProdObj = {};
+
+		if(obj.price_regular) {
+			obj.price_regular = parseFloat(obj.price_regular);
+			if(!isNaN(obj.price_regular) && (Pd.price_regular != obj.price_regular)) {
+				Pd.price_regular = obj.price_regular;
+				updManyProdObj.price_regular = obj.price_regular;
+			}
+		}
+		if(obj.price_sale) {
+			obj.price_sale = parseFloat(obj.price_sale);
+			if(!isNaN(obj.price_sale) && (Pd.price_sale != obj.price_sale)) {
+				if(obj.price_sale >= Pd.price_regular) obj.price_sale = Pd.price_regular;
+				Pd.price_sale = obj.price_sale;
+				updManyProdObj.price_sale = obj.price_sale;
+			}
+		}
+		if(!Pd.price_sale) Pd.price_sale = Pd.price_regular;
+		if(obj.force && (obj.force.price == 1 || obj.force.price == true)) {
+			const Sku_UpdMany = await SkuDB.updateMany(
+				{Pd: Pd._id, Firm: payload.Firm},
+				{price_regular: Pd.price_regular, price_sale: Pd.price_sale},
+			);
+		}
 
 		if(obj.code) {
 			obj.code = obj.code.replace(/^\s*/g,"");	// 注意 Pd code 没有转大写
@@ -134,7 +171,7 @@ const Pd_general = async(res, obj, Pd, payload) => {
 				if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
 				const objSame = await PdDB.findOne({'code': obj.code, Firm: payload.Firm});
 				if(objSame) return res.json({status: 400, message: '[server] 产品编号相同'});
-				updateManyParam.code = obj.code;
+				updManyProdObj.code = obj.code;
 				Pd.code = obj.code;
 			} else {
 				Pd.code = null;
@@ -147,38 +184,26 @@ const Pd_general = async(res, obj, Pd, payload) => {
 			if(obj.nome != Pd.nome) {
 				const objSame = await PdDB.findOne({'nome': obj.nome, Firm: payload.Firm});
 				if(objSame) return res.json({status: 400, message: '[server] 产品编号相同'});
-				updateManyParam.nome = obj.nome;
+				updManyProdObj.nome = obj.nome;
 				Pd.nome = obj.nome;
 			}
-		}
-
-		if(obj.price_regular) {
-			obj.price_regular = parseFloat(obj.price_regular);
-			if(!isNaN(obj.price_regular)) Pd.price_regular = obj.price_regular;
 		}
 
 		if(obj.Nation && (obj.Nation != Pd.Nation)) {
 			if(!MdFilter.is_ObjectId_Func(obj.Nation)) return res.json({status: 400, message: '[server] 国家数据需要为 _id 格式'});
 			const Nation = await NationDB.findOne({_id: obj.Nation});
 			if(!Nation) return res.json({status: 400, message: '[server] 没有找到此国家信息'});
-			updateManyParam.Nation = obj.Nation;
+			updManyProdObj.Nation = obj.Nation;
 			Pd.Nation = obj.Nation;
 		}
 		if(obj.Brand && (obj.Brand != Pd.Brand)) {
 			if(!MdFilter.is_ObjectId_Func(obj.Brand)) return res.json({status: 400, message: '[server] 品牌数据需要为 _id 格式'});
 			const Brand = await BrandDB.findOne({_id: obj.Brand});
 			if(!Brand) return res.json({status: 400, message: '[server] 没有找到此品牌信息'});
-			updateManyParam.Brand = obj.Brand;
+			updManyProdObj.Brand = obj.Brand;
 			Pd.Brand = obj.Brand;
 		}
 
-		if(obj.is_usable) {
-			if(obj.is_usable == '1' || obj.is_usable == 'true') {
-				Pd.is_usable = true;
-			} else {
-				Pd.is_usable = false;
-			}
-		}
 
 		// is_usable_Firm 控制已经被同步的商品 不可用. 如果 is_usable_Firm 为 false, is_usable 一定为 false
 		if(obj.is_usable_Firm) {
@@ -189,7 +214,7 @@ const Pd_general = async(res, obj, Pd, payload) => {
 			}
 			if(obj.is_usable_Firm != Pd.is_usable_Firm) {
 				Pd.is_usable_Firm = obj.is_usable_Firm;
-				updateManyParam.is_usable_Firm = obj.is_usable_Firm;
+				updManyProdObj.is_usable_Firm = obj.is_usable_Firm;
 				Pd.is_usable_Firm = obj.is_usable_Firm;
 			}
 		}
@@ -199,7 +224,7 @@ const Pd_general = async(res, obj, Pd, payload) => {
 			if(String(obj.Categ) !== String(Pd.Categ) ) {
 				const Categ = await CategDB.findOne({_id: obj.Categ, Firm: payload.Firm, level: 2});
 				if(!Categ) return res.json({status: 400, message: "[server] 您的二级分类不正确, 请输入正确的二级分类"});
-				updateManyParam.Categ = obj.Categ;
+				updManyProdObj.Categ = obj.Categ;
 				Pd.Categ = obj.Categ;
 			}
 		}
@@ -209,14 +234,17 @@ const Pd_general = async(res, obj, Pd, payload) => {
 		Pd.User_upd = payload._id;
 
 		const objSave = await Pd.save();
-		if(!objSave) res.json({status: 400, message: "[server] 保存错误"})
-		const Categ_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: payload.Firm}, updateManyParam);
+		if(!objSave) res.json({status: 400, message: "[server] 保存错误"});
+		if(Object.keys(updManyProdObj).length != 0) {
+			const Prod_UpdMany = await ProdDB.updateMany({Pd: Pd._id, Firm: payload.Firm}, updManyProdObj);
+		}
 		return res.json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
 	} catch(error) {
 		console.log(error);
 		return res.json({status: 500, message: "[服务器错误: Pd_general]"});
 	}
 }
+
 const Pd_delete_img_urls = async(res, obj, Pd, payload) => {
 	try{
 		const img_urls = obj.img_urls

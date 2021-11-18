@@ -19,6 +19,8 @@ const dbSchema = new Schema({
 	Nation: {type: ObjectId, ref: 'Nation'},	// 只读 [由 Pd 决定] 产品国家 比如 中国货 意大利货 日本货 韩国货
 	is_usable_Firm: Boolean,					// 只读 [由 Pd 决定] 公司层面是否可用
 	Categ: {type: ObjectId, ref: 'Categ'},		// 只读 [由 Pd 决定]
+	price_regular: Float,						// 只读 [由 Pd 决定]
+	price_sale: Float,							// 只读 [由 Pd 决定]
 
 	/* 同步 可修改 */
 	desp: String,
@@ -38,6 +40,7 @@ const dbSchema = new Schema({
 
 	/* 只读 根据 Skus 的price_sale 或 price_regular*/
 	Skus: [{type: ObjectId, ref: 'Sku'}],	// 只读 [由 Skus 决定] 公司层面是否可用
+
 	is_simple: Boolean,								// 只读 [由 this.Skus.length 决定] 如果 Skus.length > 1 is_simple=false;
 	price: Float,									// 只读 [由 Skus 决定] 产品价格
 	price_min: Float,								// 只读 [由 Skus 决定]

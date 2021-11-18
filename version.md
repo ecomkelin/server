@@ -1,3 +1,4 @@
+0.0.52	Pd Prod => price_regular price_sale
 0.0.51	小bug
 0.0.50	产品名字限制
 0.0.49	批量上传 bug2

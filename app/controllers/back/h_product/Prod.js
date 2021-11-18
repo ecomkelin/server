@@ -33,6 +33,8 @@ exports.ProdPost = async(req, res) => {
 
 			obj.code = Pd.code;
 			obj.nome = Pd.nome;
+			obj.price_regular = Pd.price_regular;
+			obj.price_sale = Pd.price_sale;
 			obj.img_urls = Pd.img_urls;
 			obj.Brand = Pd.Brand;
 			obj.Nation = Pd.Nation;
@@ -92,7 +94,8 @@ exports.ProdPost = async(req, res) => {
 		obj_Sku.Prod = _object._id;
 		obj_Sku.attrs = null;
 		obj_Sku.is_usable = false;
-		obj_Sku.price_sale = obj_Sku.price_regular = obj.price
+		obj_Sku.price_regular = obj.price_regular
+		obj_Sku.price_sale = obj.price_sale
 		obj_Sku.Firm = obj.Firm
 		obj_Sku.Shop = obj.Shop
 		const _Sku = new SkuDB(obj_Sku);
@@ -179,7 +182,19 @@ exports.ProdPut = async(req, res) => {
 		if(obj.is_usable == 1 || obj.is_usable == true || obj.is_usable == 'true') Prod.is_usable = true;
 		if(obj.is_usable == 0 || obj.is_usable == false || obj.is_usable == 'false') Prod.is_usable = false;
 		if(!Prod.Pd) {	// 如果是单店 可以修改名称等 暂时没有做
-
+			Prod.code = obj.code.replace(/^\s*/g,"");	// 注意 Pd code 没有转大写
+			Prod.nome = obj.nome.replace(/^\s*/g,"");	// 注意 Pd code 没有转大写
+			Prod.Nation = obj.Nation;	// 注意 Pd code 没有转大写
+			Prod.Brand = obj.Brand;	// 注意 Pd code 没有转大写
+			Prod.Categ = obj.Categ;	// 注意 Pd code 没有转大写
+			if(obj.price_regular) {
+				obj.price_regular = parseFloat(obj.price_regular);
+				if(!isNaN(obj.price_regular)) Prod.price_regular = obj.price_regular;
+			}
+			if(obj.price_sale) {
+				obj.price_sale = parseFloat(obj.price_sale);
+				if(!isNaN(obj.price_sale)) Prod.price_sale = obj.price_sale;
+			}
 		}
 		Prod.User_upd = payload._id;
 

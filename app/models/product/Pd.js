@@ -28,7 +28,9 @@ const dbSchema = new Schema({
 	}],
 	// Tags: [{type: ObjectId, ref: 'Tag'}],
 	sort: Number,
-	price_regular: Float,							// 默认价格 Product 一般同步此价格
+	price_regular: Float,							// 默认标价 默认Sku 一般同步此价格
+	price_sale: Float,								// 建议售价 默认Sku 一般同步此价格
+	is_fixPrice: { type: Boolean, default: false },	// 价格是否固定 如果是否则分店是可以更改价格
 	// (is_usable_Firm == 0) && (is_usable = 0); 
 	is_usable: { type: Boolean, default: true },	// 只是不能被同步, 已经被同步的商品 不受此字段影响
 

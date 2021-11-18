@@ -745,6 +745,7 @@ module.exports = (app) => {
 					continue;
 				}
 				obj.price_regular = price_regular;
+				obj.price_sale = price_regular;
 
 				const sort = parseInt(String(arr[5]).replace(/(\s*$)/g, "").replace( /^\s*/, ''));
 				obj.sort = isNaN(sort) ? 0 : sort;
