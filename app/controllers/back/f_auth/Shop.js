@@ -242,6 +242,46 @@ const Shop_serveCitaDelete = async(res, obj, Shop) => {
 
 
 
+
+
+const dbShop = 'Shop';
+exports.Shops = async(req, res) => {
+	console.log("/b1/Shops");
+	try {
+		const dbs_res = await GetDB.dbs(obtFilterObj(req));
+		return res.json(dbs_res);
+	} catch(error) {
+		console.log("/b1/Shops", error);
+		return res.json({status: 500, message: "[服务器错误: Shops]"});
+	}
+}
+
+exports.Shop = async(req, res) => {
+	console.log("/b1/Shop");
+	try {
+		const db_res = await GetDB.db(obtFilterObj(req, req.params.id));
+		return res.json(db_res);
+	} catch(error) {
+		console.log("/b1/Shop", error);
+		return res.json({status: 500, message: "[服务器错误: Shop]"});
+	}
+}
+
+const obtFilterObj = (req, id) => {
+	const DB_filter =  {
+		payload: req.payload,
+		queryObj: req.query,
+
+		objectDB: ShopDB,
+		path_Callback: Shop_path_Func,
+		dbName: dbShop,
+	};
+	if(id) DB_filter.id = id;
+
+	return DB_filter;
+}
+
+
 const Shop_path_Func = (pathObj, payload, queryObj) => {
 	pathObj.Firm = payload.Firm;
 	if(payload.role > ConfUser.role_set.manager) {
@@ -263,46 +303,5 @@ const Shop_path_Func = (pathObj, payload, queryObj) => {
 	if(queryObj.Citas) {
 		const ids = MdFilter.getArray_ObjectId_Func(queryObj.Citas);
 		pathObj["Cita"] = {$in: ids};
-	}
-}
-
-const dbShop = 'Shop';
-exports.Shops = async(req, res) => {
-	console.log("/b1/Shops");
-	try {
-		const payload = req.payload;
-		const GetDB_Filter = {
-			payload: payload,
-			queryObj: req.query,
-			objectDB: ShopDB,
-			path_Callback: Shop_path_Func,
-			dbName: dbShop,
-		};
-		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		// console.log(dbs_res.data.objects[0].code)
-		return res.json(dbs_res);
-	} catch(error) {
-		console.log("/b1/Shops", error);
-		return res.json({status: 500, message: "[服务器错误: Shops]"});
-	}
-}
-
-exports.Shop = async(req, res) => {
-	console.log("/b1/Shop");
-	try {
-		const payload = req.payload;
-		const GetDB_Filter = {
-			id: req.params.id,
-			payload: payload,
-			queryObj: req.query,
-			objectDB: ShopDB,
-			path_Callback: Shop_path_Func,
-			dbName: dbShop,
-		};
-		const db_res = await GetDB.db(GetDB_Filter);
-		return res.json(db_res);
-	} catch(error) {
-		console.log("/b1/Shop", error);
-		return res.json({status: 500, message: "[服务器错误: Shop]"});
 	}
 }

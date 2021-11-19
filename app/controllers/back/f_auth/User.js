@@ -5,6 +5,7 @@ const StintUser = require('../../../config/StintUser.js');
 const MdFilter = require('../../../middle/middleFilter');
 const MdSafe = require('../../../middle/middleSafe');
 
+const dbUser = 'User';
 const UserDB = require('../../../models/auth/User');
 
 const ShopDB = require('../../../models/auth/Shop');
@@ -53,8 +54,12 @@ exports.UserPost = async(req, res) => {
 
 		const _object = new UserDB(obj);
 		const objSave = await _object.save();
-		console.log('UserPost end')
-		return res.json({status: 200, message: "[server] 创建新成功", data: {object: objSave}});
+		if(Object.keys(req.query).length > 0) {
+			const db_res = await GetDB.db(obtFilterObj(req, objSave._id));
+			return res.json(db_res);
+		} else {
+			return res.json({status: 200, data: {object: objSave}, message: '[server] 创建新成功'});
+		}
 	} catch(error) {
 		console.log("/b1/UserPost", error);
 		return res.json({status: 500, message: "[服务器错误: UserPost]: "+ error});
@@ -76,21 +81,22 @@ exports.UserPut = async(req, res) => {
 		if(!User) return res.json({status: 400, message: "[server] 没有找到此用户信息, 请刷新重试"});
 
 		if(req.body.general) {
-			User_general(res, req.body.general, User, payload); 
+			User_general(req, res, User, payload); 
 		} else if(req.body.password) {
-			User_putPwd(res, req.body.password, User, payload); 
+			User_putPwd(req, res, User, payload); 
 		} else {
 			return res.json({status: 400, message: "[server] 请传递正确的数据 对象数据"});
 		}
-		
+
 	} catch(error) {
 		console.log("/b1/UserPut", error);
 		return res.json({status: 500, message: "[服务器错误: UserPut]"});
 	}
 }
 
-const User_putPwd = async(res, obj, User, payload) => {
+const User_putPwd = async(req, res, User, payload) => {
 	try{
+		const obj = req.body.password;
 		if(!obj.pwd || !obj.pwdConfirm) return res.json({status: 400, message: '[server] 密码不能为空'});
 		obj.pwd = obj.pwd.replace(/(\s*$)/g, "").replace( /^\s*/, '');
 		obj.pwdConfirm = obj.pwdConfirm.replace(/(\s*$)/g, "").replace( /^\s*/, '');
@@ -105,14 +111,20 @@ const User_putPwd = async(res, obj, User, payload) => {
 		}
 		User.pwd = await MdFilter.encrypt_tProm(obj.pwd);
 		const objSave = await User.save();
-		return res.json({status: 200, data: {object: objSave}, message: '[server] 密码修改成功'});
+		if(Object.keys(req.query).length > 0) {
+			const db_res = await GetDB.db(obtFilterObj(req, objSave._id));
+			return res.json(db_res);
+		} else {
+			return res.json({status: 200, data: {object: objSave}, message: '[server] 修改成功'});
+		}
 	} catch(error) {
 		console.log("/b1/User_putPwd", error);
 		return res.json({status: 500, message: "[服务器错误: User_putPwd]"});
 	}
 }
-const User_general = async(res, obj, User, payload) => {
+const User_general = async(req, res, User, payload) => {
 	try{
+		const obj = req.body.general
 		MdFilter.readonly_Func(obj);
 		delete obj.at_last_login;
 		delete obj.refreshToken;
@@ -151,7 +163,13 @@ const User_general = async(res, obj, User, payload) => {
 		const _object = _.extend(User, obj);
 
 		const objSave = await _object.save();
-		return res.json({status: 200, data: {object: objSave}, message: '[server] 修改成功'});
+
+		if(Object.keys(req.query).length > 0) {
+			const db_res = await GetDB.db(obtFilterObj(req, objSave._id));
+			return res.json(db_res);
+		} else {
+			return res.json({status: 200, data: {object: objSave}, message: '[server] 修改成功'});
+		}
 	} catch(error) {
 		console.log("/b1/User_general", error);
 		return res.json({status: 500, message: "[服务器错误: User_general]"});
@@ -192,31 +210,10 @@ exports.UserDelete = async(req, res) => {
 
 
 
-
-
-
-const User_path_Func = (pathObj, payload, queryObj) => {
-	pathObj.Firm = payload.Firm;
-	pathObj.role = {$gte: payload.role};
-	if(payload.Shop) pathObj.Shop = payload.Shop;
-	if(payload.role == ConfUser.role_set.staff || payload.role == ConfUser.role_set.worker) pathObj._id = payload._id;
-
-	if(!queryObj) return;
-}
-const dbUser = 'User';
-
 exports.Users = async(req, res) => {
 	console.log("/b1/Users");
 	try {
-		const payload = req.payload;
-		const GetDB_Filter = {
-			payload: payload,
-			queryObj: req.query,
-			objectDB: UserDB,
-			path_Callback: User_path_Func,
-			dbName: dbUser,
-		};
-		const dbs_res = await GetDB.dbs(GetDB_Filter);
+		const dbs_res = await GetDB.dbs(obtFilterObj(req));
 		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/b1/Users", error);
@@ -227,19 +224,34 @@ exports.Users = async(req, res) => {
 exports.User = async(req, res) => {
 	console.log("/b1/User")
 	try {
-		const payload = req.payload;
-		const GetDB_Filter = {
-			id: req.params.id,
-			payload: payload,
-			queryObj: req.query,
-			objectDB: UserDB,
-			path_Callback: User_path_Func,
-			dbName: dbUser,
-		};
-		const db_res = await GetDB.db(GetDB_Filter);
+		const db_res = await GetDB.db(obtFilterObj(req, req.params.id));
 		return res.json(db_res);
 	} catch(error) {
 		console.log("/b1/User", error);
 		return res.json({status: 500, message: "[服务器错误: User]"});
 	}
+}
+
+const obtFilterObj = (req, id) => {
+	const DB_filter =  {
+		payload: req.payload,
+		queryObj: req.query,
+
+		objectDB: UserDB,
+		path_Callback: User_path_Func,
+		dbName: dbUser,
+	};
+	if(id) DB_filter.id = id;
+
+	return DB_filter;
+}
+
+
+const User_path_Func = (pathObj, payload, queryObj) => {
+	pathObj.Firm = payload.Firm;
+	pathObj.role = {$gte: payload.role};
+	if(payload.Shop) pathObj.Shop = payload.Shop;
+	if(payload.role == ConfUser.role_set.staff || payload.role == ConfUser.role_set.worker) pathObj._id = payload._id;
+
+	if(!queryObj) return;
 }

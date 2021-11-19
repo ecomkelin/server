@@ -62,7 +62,7 @@ exports.SkuPost = async(req, res) => {
 		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
 		let obj = req.body.general;
-		console.log(req.body)
+
 		if(!obj) return res.json({status: 400, message: '[server] 请输入 obj 参数'});
 		if(!MdFilter.is_ObjectId_Func(obj.Prod)) return res.json({status: 400, message: '[server] 所属商品 _id'});
 		const Prod = await ProdDB.findOne({_id: obj.Prod, Firm: payload.Firm})
@@ -87,30 +87,28 @@ exports.SkuPost = async(req, res) => {
 
 		if(!Sku_def) return res.json({status: 400, message: '[server] 没有找到此产品的默认值 '});
 
-		obj.Pd = Sku_def.Pd;
-		obj.Firm = Sku_def.Firm;
-		obj.Shop = Sku_def.Shop;
+		obj.Pd = Prod.Pd;
+		obj.Firm = Prod.Firm;
+		obj.Shop = Prod.Shop;
 
-		obj.price_regular = isNaN(parseFloat(obj.price_regular)) ? Sku_def.price_regular : parseFloat(obj.price_regular);
-		obj.price_sale = isNaN(parseInt(obj.price_sale)) ? Sku_def.price_sale : parseFloat(obj.price_sale);
-		obj.limit_quantity = isNaN(parseInt(obj.limit_quantity)) ? Sku_def.limit_quantity : parseInt(obj.limit_quantity);
+		obj.price_regular = isNaN(parseFloat(obj.price_regular)) ? Prod.price_regular : parseFloat(obj.price_regular);
+		obj.price_sale = isNaN(parseFloat(obj.price_sale)) ? Prod.price_sale : parseFloat(obj.price_sale);
+		obj.limit_quantity = isNaN(parseInt(obj.limit_quantity)) ? 0 : parseInt(obj.limit_quantity);
 
 		if(obj.is_controlStock == 1 || obj.is_controlStock == "true") {
 			obj.is_controlStock = true;
 		} else if(obj.is_controlStock == 0 || obj.is_controlStock == "false") {
 			obj.is_controlStock = false;
 		} else {
-			obj.is_controlStock = Sku_def.is_controlStock;
+			obj.is_controlStock = true;
 		}
-		obj.quantity = (obj.quantity) ? parseInt(obj.quantity) : Sku_def.quantity;
-		obj.quantity_alert = (obj.quantity_alert) ? parseInt(obj.quantity_alert) : Sku_def.quantity_alert;
+		obj.quantity = (obj.quantity) ? parseInt(obj.quantity) : 0;
+		obj.quantity_alert = (obj.quantity_alert) ? parseInt(obj.quantity_alert) : 0;
 
 		if(obj.allow_backorder == 1 || obj.allow_backorder == "true") {
 			obj.allow_backorder = true;
-		} else if(obj.allow_backorder == 0 || obj.allow_backorder == "false") {
-			obj.allow_backorder = false;
 		} else {
-			obj.allow_backorder = Sku_def.allow_backorder;
+			obj.allow_backorder = false;
 		}
 
 		obj.User_crt = payload._id;
@@ -209,7 +207,7 @@ exports.SkuPut = async(req, res) => {
 		}
 
 		if(obj.price_regular && !isNaN(parseFloat(obj.price_regular))) Sku.price_regular =parseFloat(obj.price_regular);
-		if(obj.price_sale && !isNaN(parseInt(obj.price_sale))) Sku.price_sale =parseInt(obj.price_sale);
+		if(obj.price_sale && !isNaN(parseFloat(obj.price_sale))) Sku.price_sale =parseFloat(obj.price_sale);
 		if(obj.limit_quantity && !isNaN(parseInt(obj.limit_quantity))) Sku.limit_quantity =parseInt(obj.limit_quantity);
 		if(obj.quantity && !isNaN(parseInt(obj.quantity))) Sku.quantity =parseInt(obj.quantity);
 		if(obj.quantity_alert && !isNaN(parseInt(obj.quantity_alert))) Sku.quantity_alert =parseInt(obj.quantity_alert);
