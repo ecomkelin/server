@@ -173,8 +173,6 @@ const Pd_general = async(res, obj, Pd, payload) => {
 				if(objSame) return res.json({status: 400, message: '[server] 产品编号相同'});
 				updManyProdObj.code = obj.code;
 				Pd.code = obj.code;
-			} else {
-				Pd.code = null;
 			}
 		}
 		if(obj.nome) {
