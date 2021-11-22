@@ -1,4 +1,5 @@
 const Lang = require('../../controllers/back/f_auth/Lang');
+const Firm = require('../../controllers/back/f_auth/Firm');
 const Shop = require('../../controllers/back/f_auth/Shop');
 const User = require('../../controllers/back/f_auth/User');
 const Bind = require('../../controllers/back/f_auth/Bind');
@@ -11,6 +12,10 @@ module.exports = (app) => {
 	app.get('/api/b1/Langs', MdAuth.path_ower, Lang.Langs);
 	app.post('/api/b1/Lang', MdAuth.path_ower, Lang.LangPost);
 	app.put('/api/b1/Lang/:id', MdAuth.path_ower, Lang.LangPut);
+
+	/* ------------------------ Firm ------------------------ */
+	app.get('/api/b1/Firm/:id', MdAuth.path_User, Firm.Firm);
+	app.put('/api/b1/Firm/:id', MdAuth.path_mger, Firm.FirmPut);
 
 	/* ------------------------ Shop ------------------------ */
 	app.delete('/api/b1/Shop/:id', MdAuth.path_mger, Shop.ShopDelete);

@@ -102,7 +102,6 @@ exports.ShopPut = async(req, res) => {
 		const Shop = await ShopDB.findOne(pathObj);
 		if(!Shop) return res.json({status: 400, message: "[server] 没有找到此店铺信息, 请刷新重试"});
 
-		let put_prom = null;
 		if(req.body.general) {
 			Shop_general(res, req.body.general, Shop, payload);
 		} else if(req.body.serveCitaPost) {
@@ -222,8 +221,8 @@ const Shop_serveCitaDelete = async(res, obj, Shop) => {
 		const objSave = await Shop.save();
 		return res.json({status: 200, message: '成功删除服务区', data: {object: objSave}});
 	} catch(error) {
-		console.log("/b1/Shop_serveCitaPut", error);
-		return res.json({status: 500, message: "[服务器错误: Shop_serveCitaPut]"});
+		console.log("/b1/Shop_serveCitaDelete", error);
+		return res.json({status: 500, message: "[服务器错误: Shop_serveCitaDelete]"});
 	}
 }
 
