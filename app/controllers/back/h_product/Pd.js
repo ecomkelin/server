@@ -138,6 +138,13 @@ const Pd_general = async(res, obj, Pd, payload) => {
 		if(obj.is_usable) {
 			Pd.is_usable = (obj.is_usable == '1' || obj.is_usable == 'true') ? true : false;
 		}
+		if(obj.sort) {
+			obj.sort = parseInt(obj.sort);
+			if(!isNaN(obj.sort)) Pd.sort = obj.sort;
+		}
+		if(obj.desp) {
+			Pd.desp = obj.desp;
+		}
 
 		const updManyProdObj = {};
 
@@ -226,8 +233,6 @@ const Pd_general = async(res, obj, Pd, payload) => {
 				Pd.Categ = obj.Categ;
 			}
 		}
-
-		Pd.desp = obj.desp;
 
 		Pd.User_upd = payload._id;
 
