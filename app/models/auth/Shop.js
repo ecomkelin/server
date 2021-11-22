@@ -22,7 +22,7 @@ const dbSchema = new Schema({
 		price_ship: Float,								// 额外运费, 如果无则为0 
 	}],
 
-	is_main: {type: Boolean, default: false},	// 是否为精品店
+	is_main: {type: Boolean, default: false},	// 是否为公司主店
 	is_boutique: {type: Boolean, default: false},	// 是否为精品店
 	is_usable: { type: Boolean, default: true },	// 是否可用
 	sort: Number,									// 排序

@@ -1,20 +1,12 @@
 const GetDB = require('../../_db/GetDB');
 
 const ConfUser = require('../../../config/ConfUser.js');
-const StintFirm = require('../../../config/StintFirm.js');
 const MdFilter = require('../../../middle/middleFilter');
-const MdFiles = require('../../../middle/middleFiles');
+
 const MdSafe = require('../../../middle/middleSafe');
 
 const FirmDB = require('../../../models/auth/Firm');
-
-const CitaDB = require('../../../models/address/Cita');
-
-const ProdDB = require('../../../models/product/Prod');
-const UserDB = require('../../../models/auth/User');
-
-const _ = require('underscore');
-
+const ShopDB = require('../../../models/auth/Shop');
 
 
 exports.FirmPut = async(req, res) => {
@@ -30,18 +22,32 @@ exports.FirmPut = async(req, res) => {
 
 		if(req.body.general) {
 			Firm_general(res, req.body.general, Firm, payload);
-		} else {
-			// 判断是否用上传文件的形式 传递了数据
-			const obj = await MdFiles.mkPicture_prom(req, {img_Dir: "/Firm", field: "img_url"});
-			if(!obj) return res.json({status: 400, message: "[server] 参数错误"});
-			Firm_general(res, obj, Firm, payload);
+		} else if(req.body.mainShop) {
+			Firm_mainShop(res, req.body.mainShop, Firm, payload);
+		} {
+			return res.json({status: 400, message: "[server] 请传递 general 参数"});
 		}
 	} catch(error) {
 		console.log("/b1/FirmPut", error);
 		return res.json({status: 500, message: "[服务器错误: FirmPut]"});
 	}
 }
+const Firm_mainShop = async(res, obj, Firm, payload) => {
+	try {
+		const ShopId = obj.ShopId;
+		if(!MdFilter.is_ObjectId_Func(ShopId)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
+		const Shop = await ShopDB.findOne({_id: ShopId, Firm: Firm._id});
+		if(!Shop) return res.json({status: 400, message: "[server] 没有找到店铺信息"});
 
+		const ShopUpdMany = await Shop.updateMany({Firm: Firm._id, is_main: true}, {is_main: false});
+		Shop.is_main = true;
+		const mainShopSave = await Shop.save();
+		return res.json({status: 200, message: "[server] 修改成功", data: {object: Firm}});
+	} catch(error) {
+		console.log("/b1/Firm_mainShop", error);
+		return res.json({status: 500, message: "[服务器错误: Firm_mainShop]"});
+	}
+}
 const Firm_general = async(res, obj, Firm, payload) => {
 	try{
 		if(obj.nome) Firm.nome = obj.nome;
