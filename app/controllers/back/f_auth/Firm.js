@@ -24,7 +24,7 @@ exports.FirmPut = async(req, res) => {
 			Firm_general(res, req.body.general, Firm, payload);
 		} else if(req.body.mainShop) {
 			Firm_mainShop(res, req.body.mainShop, Firm, payload);
-		} {
+		} else {
 			return res.json({status: 400, message: "[server] 请传递 general 参数"});
 		}
 	} catch(error) {
@@ -39,7 +39,7 @@ const Firm_mainShop = async(res, obj, Firm, payload) => {
 		const Shop = await ShopDB.findOne({_id: ShopId, Firm: Firm._id});
 		if(!Shop) return res.json({status: 400, message: "[server] 没有找到店铺信息"});
 
-		const ShopUpdMany = await Shop.updateMany({Firm: Firm._id, is_main: true}, {is_main: false});
+		const ShopUpdMany = await ShopDB.updateMany({Firm: Firm._id, is_main: true}, {is_main: false});
 		Shop.is_main = true;
 		const mainShopSave = await Shop.save();
 		return res.json({status: 200, message: "[server] 修改成功", data: {object: Firm}});
@@ -49,7 +49,7 @@ const Firm_mainShop = async(res, obj, Firm, payload) => {
 	}
 }
 const Firm_general = async(res, obj, Firm, payload) => {
-	try{
+	try {
 		if(obj.nome) Firm.nome = obj.nome;
 		if(obj.resp) Firm.resp = obj.resp;
 		if(obj.tel) Firm.tel = obj.tel;
@@ -95,7 +95,6 @@ const obtFilterObj = (req, id) => {
 
 
 const Firm_path_Func = (pathObj, payload, queryObj) => {
-	pathObj.Firm = payload.Firm;
 	if(payload.role > ConfUser.role_set.manager) {
 		pathObj.is_usable = 1;
 	}

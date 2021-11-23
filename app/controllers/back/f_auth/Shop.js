@@ -142,8 +142,10 @@ const Shop_general = async(res, obj, Shop, payload) => {
 		}
 
 		if((obj.is_main == '1' || obj.is_main == 'true') && (Shop.is_main !== true)) {
-			const mainShop = await ShopDB.findOne({is_main: true});
-			if(mainShop) return res.json({status: 400, message: "[server] 只能有一个主店铺, 需要把主店铺关闭, 再开启此主店铺"})
+			const ShopUpdMany = await ShopDB.updateMany({Firm: payload.Firm, is_main: true}, {is_main: false});
+			obj.is_main = true;
+			// const mainShop = await ShopDB.findOne({is_main: true});
+			// if(mainShop) return res.json({status: 400, message: "[server] 只能有一个主店铺, 需要把主店铺关闭, 再开启此主店铺"})
 		}
 
 		if(obj.Cita && (obj.Cita != Shop.Cita)) {
@@ -291,8 +293,12 @@ const Shop_path_Func = (pathObj, payload, queryObj) => {
 	}
 
 	if(!queryObj) return;
+	if(queryObj.is_main) {
+		const is_main = (queryObj.is_main == 1 || queryObj.is_main == "true") ? 1 :  0;
+		pathObj["is_main"] = {'$eq': is_main};
+	}
 	if(queryObj.is_boutique) {
-		(queryObj.is_boutique == 0 || queryObj.is_boutique == "false") ? (is_boutique = 0) : (is_boutique = 1)
+		const is_boutique = (queryObj.is_boutique == 1 || queryObj.is_boutique == "true") ? 1 : 0;
 		pathObj["is_boutique"] = {'$eq': is_boutique};
 	}
 	if(queryObj.serve_Citas) {

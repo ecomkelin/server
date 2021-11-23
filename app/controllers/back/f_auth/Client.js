@@ -37,15 +37,7 @@ const dbClient = 'Client';
 exports.Clients = async(req, res) => {
 	console.log("/b1/Clients");
 	try {
-		const payload = req.payload;
-		const GetDB_Filter = {
-			payload: payload,
-			queryObj: req.query,
-			objectDB: ClientDB,
-			path_Callback: null,
-			dbName: dbClient,
-		};
-		const dbs_res = await GetDB.dbs(GetDB_Filter);
+		const dbs_res = await GetDB.dbs(obtFilterObj(req));
 		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/b1/Clients", error);
@@ -56,19 +48,24 @@ exports.Clients = async(req, res) => {
 exports.Client = async(req, res) => {
 	console.log("/b1/Client");
 	try {
-		const payload = req.payload;
-		const GetDB_Filter = {
-			id: req.params.id,
-			payload: payload,
-			queryObj: req.query,
-			objectDB: ClientDB,
-			path_Callback: null,
-			dbName: dbClient,
-		};
-		const db_res = await GetDB.db(GetDB_Filter);
+		const db_res = await GetDB.db(obtFilterObj(req, req.params.id));
 		return res.json(db_res);
 	} catch(error) {
 		console.log("/b1/Client", error);
 		return res.json({status: 500, message: "[服务器错误: Client]"});
 	}
+}
+
+const obtFilterObj = (req, id) => {
+	const DB_filter =  {
+		payload: req.payload,
+		queryObj: req.query,
+
+		objectDB: ClientDB,
+		path_Callback: null,
+		dbName: dbClient,
+	};
+	if(id) DB_filter.id = id;
+
+	return DB_filter;
 }
