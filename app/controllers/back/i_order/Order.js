@@ -56,12 +56,9 @@ exports.OrderDelete = async(req, res) => {
 		const force = req.query.force;
 		if(force !== payload.code) return res.json({status: 400, message: "[server] 请传递force的值为本人code"});
 
-		const pathObj = {_id: id};
-		if(req.query.force !== 'true') {
-			pathObj.is_hide_client = true;
-			pathObj.status = {'$in': ConfOrder.status_confirms};
-			if(payload) pathObj.Shop = payload.Shop;
-		}
+		const pathObj = {_id: id, is_hide_client: true, Firm: payload.Firm};
+		if(payload.Shop) pathObj.Shop = payload.Shop;
+
 		const Order = await OrderDB.findOne(pathObj);
 		if(!Order) return res.json({status: 400, message: "[server] 没有找到此产品信息, 请刷新重试"});
 

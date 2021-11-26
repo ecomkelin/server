@@ -15,7 +15,7 @@ exports.refreshtoken = async(req, res, objectDB) => {
 		const payload = refresh_res.data.payload;
 		const reToken = refresh_res.data.token;
 		const object = await objectDB.findOne({_id: payload._id});
-		if(!object) return res.json({status: 400, message: "[server] 授权错误, 请重新登录"});
+		if(!object) return MdFilter.jsonError(res, "授权错误, 请重新登录");
 
 		// const match_res = await MdFilter.bcrypt_match_Prom(reToken, object.refreshToken);
 		// if(match_res.status != 200) return res.json({status: 400, message: "[server] refreshToken 不匹配"});
@@ -46,7 +46,6 @@ exports.logout = async(req, res, objectDB) => {
 		const payload = refresh_res.data.payload;
 		const object = await objectDB.findOne({_id: payload._id}, {refreshToken: 1});
 		if(!object) return res.json({status: 200, message: "[server] 未找到相应用户"});
-		// if(object.refreshToken !== refreshToken) return res.json({status: 400, message: "[server] 服务器未删除"});
 		object.refreshToken = null;
 		const objSave = await object.save();
 		return res.json({status: 200, message: "[server] 成功从服务器登出"});
@@ -66,9 +65,9 @@ exports.logout = async(req, res, objectDB) => {
 exports.login = async(req, res, objectDB) => {
 	try{
 		const Obj_res = await obtain_payload(req.body.system, req.body.social, objectDB);
-		if(Obj_res.status === 400) return res.json({status: 400, message: Obj_res.message});
+		if(Obj_res.status === 400) return MdFilter.jsonError(res, Obj_res.message);
 		const payload = Obj_res.data.object;
-		if(!payload) return res.json({status: 400, message: "[server] 登陆失败"});
+		if(!payload) return MdFilter.jsonError(res, "登陆失败");
 		const accessToken = MdJwt.generateToken(payload);
 		const refreshToken = MdJwt.generateToken(payload, true);
 
@@ -206,33 +205,33 @@ exports.register = async(req, res) => {
 			pathSame.email = to;
 		} else {					// 手机注册
 			const phonePre = MdFilter.get_phonePre_Func(req.body.phonePre);
-			if(!phonePre) return res.json({status: 400, message: "[server] phonePre 错误"});
+			if(!phonePre) return MdFilter.jsonError(res, "phonePre 错误");
 			const phone = req.body.phone;
 			to = phonePre+phone;
 			obj = {phone: to};
 			pathSame.phone = to;
 		}
 		const vrifyChecks_res = await verifyChecks_Prom(to, req.body.otp);	// 把注册邮箱或手机 连同验证码 验证
-		if(vrifyChecks_res.status !== 200) return res.json({status: 400, message: "[server] 验证不成功"});
+		if(vrifyChecks_res.status !== 200) return MdFilter.jsonError(res, "验证不成功");
 
 		// 如果验证成功 则检查数据库 是否已有此邮箱或手机的账户
 		const objSame = await ClientDB.findOne(pathSame);	
-		if(objSame) return res.json({status: 400, message: "[server] 此电话或邮箱已被注册"});
+		if(objSame) return MdFilter.jsonError(res, "此电话或邮箱已被注册");
 		// 创建新账户
 		const code_result = await generate_codeClient_Prom();		// 自动生成账户编号
-		if(code_result.status !== 200) return res.json({status: 400, message: code_result.message});
+		if(code_result.status !== 200) return MdFilter.jsonError(res, code_result.message);
 		obj.code = code_result.data.code;
 
 		const pwd = req.body.pwd.replace(/(\s*$)/g, "").replace( /^\s*/, '');
 		const errorInfo = MdFilter.Stint_Match_objs(StintClient, req.body, ['pwd']);
-		if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
+		if(errorInfo) return MdFilter.jsonError(res, errorInfo);
 		obj.pwd = await MdFilter.encrypt_tProm(pwd);			// 密码加密
 
 		obj.is_active = true;
 		obj.is_usable = true;
 		const _object = new ClientDB(obj);
 		objSave = await _object.save();
-		if(!objSave) return res.json({status: 400, message: "[server] 创建用户失败"});
+		if(!objSave) return MdFilter.jsonError(res, "创建用户失败");
 		return res.json({status: 200, data: {object: objSave}});
 	} catch(error) {
 		console.log("/v1/register", error);
@@ -256,7 +255,7 @@ exports.relSocial = async(req, res)=> {
 
 		// 判断是否已经关联了此类型的社交账号
 		const is_reled = object.socials.map(item => {if(item.social_type === login_type) return item});
-		if(is_reled.length > 0) return res.json({status: 400, message: "[server] 已经存在此社交媒体"});
+		if(is_reled.length > 0) return MdFilter.jsonError(res, "已经存在此社交媒体");
 
 		// 根据 登录类型 和 第三方token 获取第三方社交账号的登录结果
 		let social_res = null;
@@ -270,22 +269,22 @@ exports.relSocial = async(req, res)=> {
 			// console.log("/v1/vRelSocial", "weixin");
 			social_res = await weixinAuth_Prom(Client_accessToken);
 		} else {
-			return res.json({status: 400, message: "[server] 系统还没有此社交媒体关联"});
+			return MdFilter.jsonError(res, "系统还没有此社交媒体关联");
 		}
 		if(social_res.status !== 200) return res.json(social_res);
 		// 获取第三方的 唯一标识 user_id
 		const user_id = social_res.data.user_id;
-		if(!user_id) return res.json({status: 400, message: "[server] 没有找到 user_id 请联系后端"});
+		if(!user_id) return MdFilter.jsonError(res, "没有找到 user_id 请联系后端");
 
 		// 查找其他账号 是否被此账号 关联 如果已被关联 则不可再次关联
 		const objSame = await ClientDB.findOne({socials: { $elemMatch: {social_type: login_type, social_id: user_id}} });
-		if(objSame) return res.json({status: 400, message: "[server] 此第三方社交媒体已关联了账户"});
+		if(objSame) return MdFilter.jsonError(res, "此第三方社交媒体已关联了账户");
 
 		// 在此账号上加入 第三方社交账号
 		object.socials.push({social_type: login_type, social_id: user_id});
 
 		const objSave = await object.save();
-		if(!objSave) return status(400).json({status: 400, message: "[server] 保存错误"});
+		if(!objSave) return MdFilter.jsonError(res, "保存错误");
 
 		return res.json({status: 200, message: "[server] 成功"});
 
@@ -313,9 +312,9 @@ exports.reActive = async(req, res) => {
 	try{
 		const payload = req.payload;
 		const Client = await ClientDB.findOne({_id: payload._id});
-		if(!Client) return res.json({status: 400, message: "[server] 没有找到此人"});
+		if(!Client) return MdFilter.jsonError(res, "没有找到此人");
 		const pwd_match_res = await MdFilter.bcrypt_match_Prom(req.body.pwd, Client.pwd);
-		if(pwd_match_res.status != 200) return res.json({status: 400, message: "[server] 密码不匹配"});
+		if(pwd_match_res.status != 200) return MdFilter.jsonError(res, "密码不匹配");
 
 		let obj = null;
 		let to = null;
@@ -327,7 +326,7 @@ exports.reActive = async(req, res) => {
 			Client.email = to;
 		} else {					// 手机注册
 			const phonePre = MdFilter.get_phonePre_Func(req.body.phonePre);
-			if(!phonePre) return res.json({status: 400, message: "[server] phonePre 错误"});
+			if(!phonePre) return MdFilter.jsonError(res, "phonePre 错误");
 			const phone = req.body.phone;
 			to = phonePre+phone;
 			obj = {phone: to};
@@ -335,14 +334,14 @@ exports.reActive = async(req, res) => {
 			Client.phone = to;
 		}
 		const vrifyChecks_res = await verifyChecks_Prom(to, req.body.otp);	// 把注册邮箱或手机 连同验证码 验证
-		if(vrifyChecks_res.status !== 200) return res.json({status: 400, message: "[server] 验证不成功"});
+		if(vrifyChecks_res.status !== 200) return MdFilter.jsonError(res, "验证不成功");
 
 		// 如果验证成功 则检查数据库 是否已有其他此邮箱或手机的账户
 		const objSame = await ClientDB.findOne(pathSame);	
-		if(objSame) return res.json({status: 400, message: "[server] 此电话或邮箱已被注册"});
-		
+		if(objSame) return MdFilter.jsonError(res, "此电话或邮箱已被注册");
+
 		objSave = await Client.save();
-		if(!objSave) return res.json({status: 400, message: "[server] 重新激活失败"});
+		if(!objSave) return MdFilter.jsonError(res, "重新激活失败");
 
 		return res.json({status: 200, data: {object: objSave}});
 	} catch(error) {
@@ -383,11 +382,11 @@ exports.obtain_otp = async(req, res) => {
 	} else if(req.body.phonePre && req.body.phone){
 		channel = 'sms';
 		const phonePre = MdFilter.get_phonePre_Func(req.body.phonePre);
-		if(!phonePre) return res.json({status: 400, message: "[server] phonePre 错误"});
+		if(!phonePre) return MdFilter.jsonError(res, "phonePre 错误");
 		const phone =req.body.phone;
 		to = `${phonePre}${phone}`;
 	} else {
-		return res.json({status: 400, message: `[server] 请输入正确的邮箱或电话参数`})
+		return MdFilter.jsonError(res, "请输入正确的邮箱或电话参数");
 	}
 	const accountSid = process.env.TWILIO_ACCOUNT_SID;
 	const authToken = process.env.TWILIO_AUTH_TOKEN;

@@ -120,7 +120,7 @@ exports.vClientPut = async(req, res) => {
 			const addr_sort = req.body.addr_sort;
 
 			let numTh = 0;
-			if(addr_sort.numTh && !isNaN(parseInt(addr_sort.numTh))) numTh = parseInt(addr_sort.numTh) - 1;
+			if(addr_sort.numTh && !isNaN(addr_sort.numTh)) numTh = parseInt(addr_sort.numTh) - 1;
 			if(numTh < 0) numTh = 0;
 
 			let i=0;

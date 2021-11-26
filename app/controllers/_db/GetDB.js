@@ -54,7 +54,7 @@ exports.dbs = (GetDB_Filter) => {
 			const populateObjs = dbFilter.limitPopulate(queryObj.populateObjs, payload);
 
 			const sortObj = MdFilter.sort_Func(queryObj.sortKey, parseInt(queryObj.sortVal), dbName);
-			// console.log('dbs', pathObj)
+			// console.log('dbs', sortObj)
 			const count = await objectDB.countDocuments(pathObj);
 			let objects = await objectDB.find(pathObj, selectObj)
 				.skip(skip).limit(pagesize)

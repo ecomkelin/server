@@ -16,71 +16,90 @@ exports.ProdPost = async(req, res) => {
 		const payload = req.payload;
 		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
-		let obj = {};
-		let Pd = null;
 		if(req.body.Pd) {		// 从总公司同步
-			const Pd_id = req.body.Pd;
-			if(!MdFilter.is_ObjectId_Func(Pd_id)) return res.json({status: 400, message: '[server] 请输入需要同步的产品_id'});
-			Pd = await PdDB.findOne({_id: Pd_id, Firm: payload.Firm});
-			if(!Pd) return res.json({status: 400, message: '[server] 没有找到同步产品信息'});
-
-			const objSame = await ProdDB.findOne({Pd: Pd_id, Shop: payload.Shop, Firm: payload.Firm});
-			if(objSame) return res.json({status: 400, message: '[server] 此商品之前已经被同步', data: {object: objSame}});
-			obj.Pd = Pd._id;
-			obj.Shop = payload.Shop;
-			if(Pd.Categ) obj.Categ = Pd.Categ;
-			obj.sort = Pd.sort;
-
-			obj.code = Pd.code;
-			obj.nome = Pd.nome;
-			obj.price_regular = Pd.price_regular;
-			obj.price_sale = Pd.price_sale;
-			obj.img_urls = Pd.img_urls;
-			obj.Brand = Pd.Brand;
-			obj.Nation = Pd.Nation;
-			obj.is_usable_Firm = Pd.is_usable_Firm;
-
-			obj.desp = Pd.desp;
-			obj.unit = Pd.unit;
-			obj.langs = Pd.langs;
-
-			obj.price = obj.price_min = obj.price_max = Pd.price_regular;
-		} else if(req.body.obj) {		// 如果是单一店铺 则自己添加
-			obj = req.body.obj;
-
-			if(obj.code) {
-				// 如果输入了 编号 则编号必须是唯一;  注意 Prod code 没有转大写
-				const errorInfo = MdFilter.Stint_Match_objs(StintProd, obj, ['code', 'nome']);
-				if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
-				const objSame = await ProdDB.findOne({'code': obj.code, Firm: payload.Firm});
-				if(objSame) return res.json({status: 400, message: '[server] 产品编号相同'});
-			} else {
-				const errorInfo = MdFilter.Stint_Match_objs(StintProd, obj, ['nome']);
-				if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
-			}
-
-			if(!obj.price) return res.json({status: 400, message: '[server] 请输入产品默认价格'});
-			obj.price = obj.price_min = obj.price_max = parseFloat(obj.price);
-			if(isNaN(obj.price)) return res.json({status: 400, message: '[server] 价格要为数字'});
-
-			if(!MdFilter.is_ObjectId_Func(obj.Nation)) obj.Nation = null;
-
-			if(!MdFilter.is_ObjectId_Func(obj.Brand)) obj.Brand = null;
-
-			if(!MdFilter.is_ObjectId_Func(obj.Categ)) obj.Categ = null;
+			Prod_PdSynchronize(res, req.body.Pd, payload);
+		} else {		// 如果是单一店铺 则自己添加
+			const obj = await MdFiles.mkPicture_prom(req, {img_Dir:"/Prod", field: "img_urls", is_Array: true});
+			if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
+			Prod_PdNull(res, obj, payload);
+		}		
+	} catch(error) {
+		console.log("/b1/ProdPost", error)
+		return res.json({status: 500, message: "[服务器错误: ProdPost]: "+ error});
+	}
+}
+const Prod_PdNull = async(res, obj, payload) => {
+	try {
+		obj.Pd = null;
+		if(obj.code) {
+			// 如果输入了 编号 则编号必须是唯一;  注意 Prod code 没有转大写
+			const errorInfo = MdFilter.Stint_Match_objs(StintProd, obj, ['code', 'nome']);
+			if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
+			const objSame = await ProdDB.findOne({'code': obj.code, Firm: payload.Firm});
+			if(objSame) return res.json({status: 400, message: '[server] 产品编号相同'});
 		} else {
-			return res.json({status: 400, message: "[server] 请传递正确的数据"});
+			const errorInfo = MdFilter.Stint_Match_objs(StintProd, obj, ['nome']);
+			if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
 		}
 
-		if(payload.role < ConfUser.role_set.boss) {
-			if(!MdFilter.is_ObjectId_Func(req.body.Shop)) return res.json({status: 400, message: '[server] 请输入商品所属分店'});
-			const Shop = await ShopDB.findOne({_id: req.body.Shop, Firm: payload.Firm});
-			if(!Shop) return res.json({status: 400, message: '[server] 没有找到该分店'});
-			obj.Shop = Shop._id;
-		} else {
-			obj.Shop = payload.Shop;
-		}
+		if(isNaN(obj.price_regular)) return res.json({status: 400, message: '[server] 价格要为数字'});
+		obj.price_regular = parseFloat(obj.price_regular);
 
+		if(isNaN(obj.price_sale)) return res.json({status: 400, message: '[server] 价格要为数字'});
+		obj.price_sale = parseFloat(obj.price_sale);
+
+		if(!MdFilter.is_ObjectId_Func(obj.Brand)) obj.Brand = null;
+		if(!MdFilter.is_ObjectId_Func(obj.Nation)) obj.Nation = null;
+		if(!MdFilter.is_ObjectId_Func(obj.Categ)) obj.Categ = null;
+
+		if(!isNaN(obj.limit_quantity)) obj.limit_quantity = parseInt(obj.limit_quantity);
+		if(!isNaN(obj.quantity)) obj.quantity = parseInt(obj.quantity);
+		if(!isNaN(obj.quantity_alert)) obj.quantity_alert = parseInt(obj.quantity_alert);
+		obj.allow_backorder = (obj.allow_backorder == 1 || obj.allow_backorder === true || obj.allow_backorder === 'true') ? true : false; 
+		Prod_save(res, obj, payload, null);
+	} catch(error) {
+		console.log("Prod PdNull", error)
+		return res.json({status: 500, message: "[服务器错误: Prod_PdNull]: "+ error});
+	}
+}
+const Prod_PdSynchronize = async(res, Pd_id, payload) => {
+	try {
+		const obj = {};
+		if(!MdFilter.is_ObjectId_Func(Pd_id)) return res.json({status: 400, message: '[server] 请输入需要同步的产品_id'});
+		Pd = await PdDB.findOne({_id: Pd_id, Firm: payload.Firm});
+		if(!Pd) return res.json({status: 400, message: '[server] 没有找到同步产品信息'});
+
+		const objSame = await ProdDB.findOne({Pd: Pd_id, Shop: payload.Shop, Firm: payload.Firm});
+		if(objSame) return res.json({status: 400, message: '[server] 此商品之前已经被同步', data: {object: objSame}});
+		obj.Pd = Pd._id;
+		obj.Shop = payload.Shop;
+		if(Pd.Categ) obj.Categ = Pd.Categ;
+		obj.sort = Pd.sort;
+
+		obj.code = Pd.code;
+		obj.nome = Pd.nome;
+		obj.price_regular = Pd.price_regular;
+		obj.price_sale = Pd.price_sale;
+		obj.img_urls = Pd.img_urls;
+		obj.Brand = Pd.Brand;
+		obj.Nation = Pd.Nation;
+
+		obj.desp = Pd.desp;
+		obj.unit = Pd.unit;
+		obj.langs = Pd.langs;
+
+		obj.price = obj.price_min = obj.price_max = Pd.price_regular;
+		Prod_save(res, obj, payload, Pd)
+	} catch(error) {
+		console.log("Prod Synchronize", error);
+		return res.json({status: 500, message: "[服务器错误: Prod_PdSynchronize]: "+ error});
+	}
+}
+
+const Prod_save = async(res, obj, payload, Pd) => {
+	try {
+		obj.is_usable = (obj.is_usable == 1 || obj.is_usable === true || obj.is_usable === 'true') ? true: false;
+		obj.Shop = payload.Shop;
 		obj.is_usable = false;
 		obj.Skus = [];
 
@@ -115,8 +134,8 @@ exports.ProdPost = async(req, res) => {
 
 		return res.json({status: 200, message: "[server] 创建成功", data: {object: objSave}});
 	} catch(error) {
-		console.log("/b1/ProdPost", error)
-		return res.json({status: 500, message: "[服务器错误: ProdPost]: "+ error});
+		console.log("Prod save", error);
+		return res.json({status: 500, message: "[服务器错误: Prod_save]: "+ error});
 	}
 }
 
@@ -179,8 +198,10 @@ exports.ProdPut = async(req, res) => {
 			obj.sort = parseInt(obj.sort);
 			if(!isNaN(obj.sort)) Prod.sort = obj.sort;
 		}
-		if(obj.is_usable == 1 || obj.is_usable == true || obj.is_usable == 'true') Prod.is_usable = true;
-		if(obj.is_usable == 0 || obj.is_usable == false || obj.is_usable == 'false') Prod.is_usable = false;
+
+		if(obj.is_usable == 1 || obj.is_usable === true || obj.is_usable === 'true') Prod.is_usable = true;
+		if(obj.is_usable == 0 || obj.is_usable === false || obj.is_usable === 'false') Prod.is_usable = false;
+
 		if(!Prod.Pd) {	// 如果是单店 可以修改名称等 暂时没有做
 			Prod.code = obj.code.replace(/^\s*/g,"");	// 注意 Pd code 没有转大写
 			Prod.nome = obj.nome.replace(/^\s*/g,"");	// 注意 Pd code 没有转大写

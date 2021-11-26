@@ -17,7 +17,6 @@ const dbSchema = new Schema({
 	img_urls: [String], 						// 只读 [由 Pd 决定] 产品图片
 	Brand: {type: ObjectId, ref: 'Brand'},		// 只读 [由 Pd 决定] 产品品牌
 	Nation: {type: ObjectId, ref: 'Nation'},	// 只读 [由 Pd 决定] 产品国家 比如 中国货 意大利货 日本货 韩国货
-	is_usable_Firm: Boolean,					// 只读 [由 Pd 决定] 公司层面是否可用
 	Categ: {type: ObjectId, ref: 'Categ'},		// 只读 [由 Pd 决定]
 	price_regular: Float,						// 只读 [由 Pd 决定]
 	price_sale: Float,							// 只读 [由 Pd 决定]
@@ -69,6 +68,7 @@ dbSchema.pre('save', function(next) {
 	} else {
 		this.at_upd = Date.now();
 	}
+	if(this.price_sale >= this.price_regular) this.price_sale = this.price_regular;
 	if(!this.Skus || this.Skus.length == 0) {
 		this.is_usable = false;
 	} else if(this.Skus.length == 1) {

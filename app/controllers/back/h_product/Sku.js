@@ -91,25 +91,15 @@ exports.SkuPost = async(req, res) => {
 		obj.Firm = Prod.Firm;
 		obj.Shop = Prod.Shop;
 
-		obj.price_regular = isNaN(parseFloat(obj.price_regular)) ? Prod.price_regular : parseFloat(obj.price_regular);
-		obj.price_sale = isNaN(parseFloat(obj.price_sale)) ? Prod.price_sale : parseFloat(obj.price_sale);
-		obj.limit_quantity = isNaN(parseInt(obj.limit_quantity)) ? 0 : parseInt(obj.limit_quantity);
+		obj.price_regular = isNaN(obj.price_regular) ? Prod.price_regular : parseFloat(obj.price_regular);
+		obj.price_sale = isNaN(obj.price_sale) ? Prod.price_sale : parseFloat(obj.price_sale);
+		obj.limit_quantity = isNaN(obj.limit_quantity) ? 0 : parseInt(obj.limit_quantity);
 
-		if(obj.is_controlStock == 1 || obj.is_controlStock == "true") {
-			obj.is_controlStock = true;
-		} else if(obj.is_controlStock == 0 || obj.is_controlStock == "false") {
-			obj.is_controlStock = false;
-		} else {
-			obj.is_controlStock = true;
-		}
+		obj.is_controlStock = (obj.is_controlStock == 1 || obj.is_controlStock === true || obj.is_controlStock === 'true') ? true : false;
 		obj.quantity = (obj.quantity) ? parseInt(obj.quantity) : 0;
 		obj.quantity_alert = (obj.quantity_alert) ? parseInt(obj.quantity_alert) : 0;
 
-		if(obj.allow_backorder == 1 || obj.allow_backorder == "true") {
-			obj.allow_backorder = true;
-		} else {
-			obj.allow_backorder = false;
-		}
+		obj.allow_backorder = (obj.allow_backorder == 1 || obj.allow_backorder === true || obj.allow_backorder === 'true') ? true :false;
 
 		obj.User_crt = payload._id;
 		const _object = new SkuDB(obj);
@@ -206,27 +196,15 @@ exports.SkuPut = async(req, res) => {
 			Sku.attrs = obj.attrs;
 		}
 
-		if(obj.price_regular && !isNaN(parseFloat(obj.price_regular))) Sku.price_regular =parseFloat(obj.price_regular);
-		if(obj.price_sale && !isNaN(parseFloat(obj.price_sale))) Sku.price_sale =parseFloat(obj.price_sale);
-		if(obj.limit_quantity && !isNaN(parseInt(obj.limit_quantity))) Sku.limit_quantity =parseInt(obj.limit_quantity);
-		if(obj.quantity && !isNaN(parseInt(obj.quantity))) Sku.quantity =parseInt(obj.quantity);
-		if(obj.quantity_alert && !isNaN(parseInt(obj.quantity_alert))) Sku.quantity_alert =parseInt(obj.quantity_alert);
+		if(obj.price_regular && !isNaN(obj.price_regular)) Sku.price_regular =parseFloat(obj.price_regular);
+		if(obj.price_sale && !isNaN(obj.price_sale)) Sku.price_sale =parseFloat(obj.price_sale);
+		if(obj.limit_quantity && !isNaN(obj.limit_quantity)) Sku.limit_quantity =parseInt(obj.limit_quantity);
+		if(obj.quantity && !isNaN(obj.quantity)) Sku.quantity =parseInt(obj.quantity);
+		if(obj.quantity_alert && !isNaN(obj.quantity_alert)) Sku.quantity_alert =parseInt(obj.quantity_alert);
 		if(obj.purchase_note) Sku.purchase_note = obj.purchase_note;
-		if(obj.is_controlStock == 1 || obj.is_controlStock == "true") {
-			Sku.is_controlStock = true;
-		} else if(obj.is_controlStock == 0 || obj.is_controlStock == "false") {
-			Sku.is_controlStock = false;
-		}
-		if(obj.allow_backorder == 1 || obj.allow_backorder == "true") {
-			Sku.allow_backorder = true;
-		} else if(obj.allow_backorder == 0 || obj.allow_backorder == "false") {
-			Sku.allow_backorder = false;
-		}
-		if(obj.is_usable == 1 || obj.is_usable == "true") {
-			Sku.is_usable = true;
-		} else if(obj.is_usable == 0 || obj.is_usable == "false") {
-			Sku.is_usable = false;
-		}
+		Sku.is_controlStock = (obj.is_controlStock == 1 || obj.is_controlStock === true || obj.is_controlStock === 'true') ? true : false;
+		Sku.allow_backorder = (obj.allow_backorder == 1 || obj.allow_backorder === true || obj.allow_backorder === 'true') ? true : false;
+		Sku.is_usable = (obj.is_usable == 1 || obj.is_usable === true || obj.is_usable === "true") ? true : false;
 		
 		Sku.User_upd = payload._id;
 

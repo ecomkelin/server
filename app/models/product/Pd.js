@@ -14,7 +14,7 @@ const dbSchema = new Schema({
 	img_urls: [String], 						// imgs
 	Brand: {type: ObjectId, ref: 'Brand'},
 	Nation: {type: ObjectId, ref: 'Nation'},
-	is_usable_Firm: { type: Boolean, default: true },	// 是否可用 禁用后 分部也会被禁用
+
 	Categ: {type: ObjectId, ref: 'Categ'},
 
 	/* 同步 可修改 */
@@ -31,7 +31,7 @@ const dbSchema = new Schema({
 	price_regular: Float,							// 默认标价 默认Sku 一般同步此价格
 	price_sale: Float,								// 建议售价 默认Sku 一般同步此价格
 	is_fixPrice: { type: Boolean, default: false },	// 价格是否固定 如果是否则分店是可以更改价格
-	// (is_usable_Firm == 0) && (is_usable = 0); 
+
 	is_usable: { type: Boolean, default: true },	// 只是不能被同步, 已经被同步的商品 不受此字段影响
 
 	/* 只读 */
@@ -57,7 +57,7 @@ dbSchema.pre('save', function(next) {
 	} else {
 		this.at_upd = Date.now();
 	}
-	if(!this.is_usable_Firm) this.is_usable = false;
+	if(this.price_sale >= this.price_regular) this.price_sale = this.price_regular;
 	next();
 })
 

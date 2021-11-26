@@ -52,8 +52,9 @@ dbSchema.pre('save', function(next) {
 		if(!this.quantity) this.quantity = 0;
 		if(!this.quantity_alert) this.quantity_alert = 0;
 		this.at_upd = this.at_crt = Date.now();
+	} else {
+		this.at_upd = Date.now();
 	}
-	this.at_upd = Date.now();
 	this.is_sell = this.is_usable
 		? this.is_controlStock
 			? this.allow_backorder

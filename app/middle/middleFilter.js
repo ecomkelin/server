@@ -176,7 +176,6 @@ exports.select_func = (selectKeys, selectVal, dbName, payload) => {
 exports.sort_Func = (sortKey, sortVal, dbName) => {
 	let sortObj = dbFilter.sortDBs(dbName);
 	if(!sortObj) sortObj = {is_usable: -1, sort: -1, at_upd: -1, code: 1, nome: 1 };
-
 	if(sortKey && (sortVal === 1 || sortVal === -1) ) sortObj = {[sortKey]: '', ...sortObj, [sortKey]: sortVal};
 
 	return sortObj;

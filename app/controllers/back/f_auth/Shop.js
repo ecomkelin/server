@@ -141,7 +141,7 @@ const Shop_general = async(res, obj, Shop, payload) => {
 			if(objSame) return res.json({status: 400, message: '[server] 此店铺编号已被占用, 请查看'});
 		}
 
-		if((obj.is_main == '1' || obj.is_main == 'true') && (Shop.is_main !== true)) {
+		if((obj.is_main == 1 || obj.is_main === true || obj.is_main === 'true') && (Shop.is_main !== true)) {
 			const ShopUpdMany = await ShopDB.updateMany({Firm: payload.Firm, is_main: true}, {is_main: false});
 			obj.is_main = true;
 			// const mainShop = await ShopDB.findOne({is_main: true});
@@ -175,7 +175,7 @@ const Shop_general = async(res, obj, Shop, payload) => {
 
 const Shop_serveCitaPost = async(res, obj, Shop) => {
 	try{
-		if(isNaN(parseFloat(obj.price_ship)) || !obj.Cita || !MdFilter.is_ObjectId_Func(obj.Cita)) {
+		if(isNaN(obj.price_ship) || !obj.Cita || !MdFilter.is_ObjectId_Func(obj.Cita)) {
 			return res.json({status: 400, message: "[server] 请正确传输 新的服务区参数"});
 		}
 
@@ -294,11 +294,11 @@ const Shop_path_Func = (pathObj, payload, queryObj) => {
 
 	if(!queryObj) return;
 	if(queryObj.is_main) {
-		const is_main = (queryObj.is_main == 1 || queryObj.is_main == "true") ? 1 :  0;
+		const is_main = (queryObj.is_main == 1 || queryObj.is_main === true || queryObj.is_main === 'true') ? 1 :  0;
 		pathObj["is_main"] = {'$eq': is_main};
 	}
 	if(queryObj.is_boutique) {
-		const is_boutique = (queryObj.is_boutique == 1 || queryObj.is_boutique == "true") ? 1 : 0;
+		const is_boutique = (queryObj.is_boutique == 1 || queryObj.is_boutique === true || queryObj.is_boutique === 'true') ? 1 : 0;
 		pathObj["is_boutique"] = {'$eq': is_boutique};
 	}
 	if(queryObj.serve_Citas) {

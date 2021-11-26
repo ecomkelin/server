@@ -65,18 +65,12 @@ exports.PdPost = async(req, res) => {
 			if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
 		}
 
-		if(!obj.price_regular) return res.json({status: 400, message: '[server] 请输入产品默认价格'});
-		obj.price_regular = parseFloat(obj.price_regular);
 		if(isNaN(obj.price_regular)) return res.json({status: 400, message: '[server] 价格要为数字'});
+		obj.price_regular = parseFloat(obj.price_regular);
 
-		if(obj.price_sale) {
-			obj.price_sale = parseFloat(obj.price_sale);
-			if(isNaN(obj.price_sale)) return res.json({status: 400, message: '[server] 价格要为数字'});
+		if(isNaN(obj.price_sale)) return res.json({status: 400, message: '[server] 价格要为数字'});
+		obj.price_sale = parseFloat(obj.price_sale);
 
-			if(obj.price_sale >= obj.price_regular) obj.price_sale = obj.price_regular;
-		} else {
-			obj.price_sale = obj.price_regular;
-		}
 
 		if(!MdFilter.is_ObjectId_Func(obj.Brand)) obj.Brand = null;
 		if(!MdFilter.is_ObjectId_Func(obj.Nation)) obj.Nation = null;
@@ -134,10 +128,9 @@ exports.PdPut = async(req, res) => {
 
 const Pd_general = async(res, obj, Pd, payload) => {
 	try {
+		if(obj.is_usable == 1 || obj.is_usable === true || obj.is_usable === 'true') Pd.is_usable = true;
+		if(obj.is_usable == 0 || obj.is_usable === false || obj.is_usable === 'false') Pd.is_usable = false;
 
-		if(obj.is_usable) {
-			Pd.is_usable = (obj.is_usable == '1' || obj.is_usable == 'true') ? true : false;
-		}
 		if(obj.sort) {
 			obj.sort = parseInt(obj.sort);
 			if(!isNaN(obj.sort)) Pd.sort = obj.sort;
@@ -164,7 +157,7 @@ const Pd_general = async(res, obj, Pd, payload) => {
 			}
 		}
 		if(!Pd.price_sale) Pd.price_sale = Pd.price_regular;
-		if(obj.force && (obj.force.price == 1 || obj.force.price == true)) {
+		if(obj.force && (obj.force.price == 1 || obj.force.price === true || obj.force.price === 'true')) {
 			const Sku_UpdMany = await SkuDB.updateMany(
 				{Pd: Pd._id, Firm: payload.Firm},
 				{price_regular: Pd.price_regular, price_sale: Pd.price_sale},
@@ -207,21 +200,6 @@ const Pd_general = async(res, obj, Pd, payload) => {
 			if(!Brand) return res.json({status: 400, message: '[server] 没有找到此品牌信息'});
 			updManyProdObj.Brand = obj.Brand;
 			Pd.Brand = obj.Brand;
-		}
-
-
-		// is_usable_Firm 控制已经被同步的商品 不可用. 如果 is_usable_Firm 为 false, is_usable 一定为 false
-		if(obj.is_usable_Firm) {
-			if(obj.is_usable_Firm == '1' || obj.is_usable_Firm == 'true') {
-				obj.is_usable_Firm = true;
-			} else {
-				obj.is_usable_Firm = false;
-			}
-			if(obj.is_usable_Firm != Pd.is_usable_Firm) {
-				Pd.is_usable_Firm = obj.is_usable_Firm;
-				updManyProdObj.is_usable_Firm = obj.is_usable_Firm;
-				Pd.is_usable_Firm = obj.is_usable_Firm;
-			}
 		}
 
 		if(obj.Categ) {
@@ -326,7 +304,6 @@ const Pd_ImgPost = async(res, obj, Pd, payload) => {
 const Pd_path_Func = (pathObj, payload, queryObj) => {
 	pathObj.Firm = payload.Firm;
 	if(payload.role >= ConfUser.role_set.boss) {
-		pathObj.is_usable_Firm = 1;
 		pathObj.is_usable = 1;
 	}
 

@@ -19,8 +19,11 @@ exports.ClientPut = async(req, res) => {
 
 		const obj = req.body.general;
 		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
-		Client.is_usable = (obj.is_usable == '1' || obj.is_usable == 'true') ? true : false;
-		if(obj.sort && !isNaN(parseInt(obj.sort))) Client.sort = parseInt(obj.sort);
+		
+		if(obj.is_usable == 1 || obj.is_usable === true || obj.is_usable === 'true') Client.is_usable = true;
+		if(obj.is_usable == 0 || obj.is_usable === false || obj.is_usable === 'false') Client.is_usable = false;
+
+		if(!isNaN(parseInt(obj.sort))) Client.sort = parseInt(obj.sort);
 
 		const objSave = await Client.save();
 		return res.json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
