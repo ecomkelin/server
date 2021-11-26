@@ -40,7 +40,7 @@ module.exports = {
 	type_Order_Arrs: [-1, 1],
 	type_Order_obj: {
 		sale: 		{num: -1, 	val: '销售订单'	},
-		purchase: 	{num: -1, 	val: '采购订单'	},
+		purchase: 	{num: 1, 	val: '采购订单'	},
 	},
 
 	// 配送方式
