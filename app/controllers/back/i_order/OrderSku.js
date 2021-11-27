@@ -36,7 +36,7 @@ exports.OrderSkuPost = async(req, res) => {
 		if(!Prod) return res.json({status: 400, message: '[server] 没有找到相应商品'});
 
 		// 为 OrderSku 赋值
-		obj.price = Sku.price_sale;
+		obj.price_sale = Sku.price_sale;
 		obj.price_regular = Sku.price_regular;
 		obj.attrs = "";
 		if(Sku.attrs) Sku.attrs.forEach(attr => OrderSkuObj.attrs += `${attr.nome}:${attr.option},`);

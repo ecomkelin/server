@@ -41,7 +41,7 @@ const dbSchema = new Schema({
 	Skus: [{type: ObjectId, ref: 'Sku'}],	// 只读 [由 Skus 决定] 公司层面是否可用
 
 	is_simple: Boolean,								// 只读 [由 this.Skus.length 决定] 如果 Skus.length > 1 is_simple=false;
-	price: Float,									// 只读 [由 Skus 决定] 产品价格
+	price_unit: Float,									// 只读 [由 Skus 决定] 产品价格
 	price_min: Float,								// 只读 [由 Skus 决定]
 	price_max: Float,								// 只读 [由 Skus 决定]
 	is_discount: Boolean, 							// 只读 [由 Skus 决定] 根据 product 中的 is_discount
@@ -76,7 +76,7 @@ dbSchema.pre('save', function(next) {
 	} else {
 		this.is_simple = false;
 	}
-	this.price = (this.price_max == this.price_min) ? (this.price_max) : 0;
+	this.price_unit = (this.price_max == this.price_min) ? (this.price_max) : 0;
 	next();
 })
 

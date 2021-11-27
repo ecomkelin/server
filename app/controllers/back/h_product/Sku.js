@@ -222,7 +222,7 @@ exports.SkuPut = async(req, res) => {
 
 
 const Prod_save_post_Prom = (id) => {
-	// price: Float,									// 只读 [由 Skus 决定] 产品价格
+	// price_unit: Float,								// 只读 [由 Skus 决定] 产品价格
 	// price_min: Float,								// 只读 [由 Skus 决定]
 	// price_max: Float,								// 只读 [由 Skus 决定]
 	// is_discount: Boolean, 							// 只读 [由 Skus 决定] 根据 product 中的 is_discount

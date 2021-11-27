@@ -17,15 +17,16 @@ exports.paypalPayment =  async (req, res) => {
 		if(items_res.status !== 200) return res.json(items_res);
 		const {order_items, Order} = items_res.data;
 
+		/* ----- paypal 的数据格式 ----- */
 		const total = order_items.reduce((sum, item) => {
-			return sum + item.price * item.quantity
+			return sum + item.price_sale * item.quantity
 		}, 0);
 		const items = order_items.map(item => {
 			return {
 				name: item.desp,
 				unit_amount: {
 					currency_code: process.env.CURRENCY,
-					value: item.price,
+					value: item.price_sale,
 				},
 				quantity: item.quantity,
 			}
@@ -43,6 +44,7 @@ exports.paypalPayment =  async (req, res) => {
 			},
 			items,
 		}];
+		/* ----- paypal 的数据格式 ----- */
 
 		const request = new paypal.orders.OrdersCreateRequest();
 		request.prefer("return=representation")
@@ -160,7 +162,7 @@ exports.stripePayment = async(req, res) => {
 		if(items_res.status !== 200) return res.json(items_res);
 		const {Shop, order_items} = items_res.data;
 		const line_items = order_items.map( item => {
-			const unit_amount = parseInt(item.price * 100);
+			const unit_amount = parseInt(item.price_sale * 100);
 			return {
 				price_data: {
 					currency: process.env.CURRENCY,
@@ -225,22 +227,24 @@ exports.stripePayment = async(req, res) => {
 
 
 
-
+/* 根据 订单_id 找到相应订单 提取第三方支付需要的订单数据 */
 const getSkus_Prom = (OrderId, payload) => {
 	return new Promise(async(resolve) => {
 		try{
+			// stripe 和 payple 所需要的数据
 			const data = {Shop: null, Order: null, order_items: []};
 
+			// 找到相应 Order
 			if(!MdFilter.is_ObjectId_Func(OrderId)) return resolve({status: 400, message: "[server] 请传递正确的 Order _id 信息"});
 			const Order = await OrderDB.findOne({_id: OrderId, Client: payload._id})
 				.populate({path: "Shop"})
 				.populate({path: "OrderProds", select: "OrderSkus nome", populate: {
-					path: "OrderSkus", select: "price quantity attrs"
+					path: "OrderSkus", select: "price_sale quantity attrs"
 				}})
 			if(!Order) return resolve({status: 400, message: "[server] 没有找到 Order"});
 
 			const timeSpan = Date.now() - Order.at_confirm;
-			if(timeSpan > 2*60*60*1000) {
+			if(timeSpan > ConfOrder.clientTime) {
 				// Order.status = ConfOrder.status_obj.cancel.num;
 				// const OrderSave = await Order.save();
 				return resolve({status: 400, message: "[server] 付款超时 请重新下单"});
@@ -256,13 +260,13 @@ const getSkus_Prom = (OrderId, payload) => {
 				if(!OrderProd.OrderSkus) return resolve({status: 400, message: "[server] 没有找到 Order中的 OrderProds"});
 				for(let j=0; j<OrderProd.OrderSkus.length; j++) {
 					const OrderSku = OrderProd.OrderSkus[j];
-					const price = parseFloat(OrderSku.price);
-					if(isNaN(price) || price <= 0) return resolve({status: 400, message: "[server] 订单中的某个产品价格错误"});
+					const price_sale = parseFloat(OrderSku.price_sale);
+					if(isNaN(price_sale) || price_sale <= 0) return resolve({status: 400, message: "[server] 订单中的某个产品价格错误"});
 					const quantity = OrderSku.quantity
 					if(isNaN(quantity) || quantity <= 0) return resolve({status: 400, message: "[server] 订单中的某个产品数量错误"});
 					data.order_items.push({
 						desp: `${OrderProd.nome} ${OrderSku.attrs}`,
-						price,
+						price_sale,
 						quantity,
 					})
 				}

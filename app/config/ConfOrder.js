@@ -1,4 +1,5 @@
 module.exports = {
+	clientTime: 2 * 60 * 60 * 1000,
 	status_Arrs: [10, 100, 200, 400, 700, 800],
 	status: {
 		// 0: 		'购物车',

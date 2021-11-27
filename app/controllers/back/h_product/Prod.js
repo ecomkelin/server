@@ -88,7 +88,7 @@ const Prod_PdSynchronize = async(res, Pd_id, payload) => {
 		obj.unit = Pd.unit;
 		obj.langs = Pd.langs;
 
-		obj.price = obj.price_min = obj.price_max = Pd.price_regular;
+		obj.price_unit = obj.price_min = obj.price_max = Pd.price_regular;
 		Prod_save(res, obj, payload, Pd)
 	} catch(error) {
 		console.log("Prod Synchronize", error);

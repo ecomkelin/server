@@ -111,7 +111,7 @@ const vOrder_proof_Prom = (pathObj) => {
 					{path: "Prod", select: "nome unit"},
 					{
 						path: "OrderSkus",
-						slelect: "price price_regular quantity attrs Sku",
+						slelect: "price_sale price_regular quantity attrs Sku",
 						populate: {
 							path: "Sku",
 							slelect: "price_sale price_regular quantity is_usable is_sell"
@@ -152,7 +152,7 @@ const vOrder_proof_Prom = (pathObj) => {
 						nome: OrderProd.nome,
 						img_url,
 						attrs: OrderSku.attrs,
-						price: OrderSku.price,
+						price_sale: OrderSku.price_sale,
 					};
 					// if(!OrderSku)
 					const Sku = OrderSku.Sku;
@@ -167,9 +167,9 @@ const vOrder_proof_Prom = (pathObj) => {
 					} else {
 						// 购物车中商品Sku的售价 和 标价是否被改变
 						let is_change = false;
-						if(OrderSku.price !== Sku.price_sale) {
-							changeObj.price = OrderSku.price;
-							OrderSku.price = Sku.price_sale;
+						if(OrderSku.price_sale !== Sku.price_sale) {
+							changeObj.price_sale = OrderSku.price_sale;
+							OrderSku.price_sale = Sku.price_sale;
 							is_change = true;
 						}
 						// if(OrderSku.price_regular !== Sku.price_regular) {
@@ -190,7 +190,7 @@ const vOrder_proof_Prom = (pathObj) => {
 							changeObjs.push(changeObj);
 						}
 						total_regular += OrderSku.price_regular;
-						imp += OrderSku.price;
+						imp += OrderSku.price_sale;
 					}
 
 				}
@@ -221,7 +221,7 @@ const vOrder_status_place_Prom = async(id, payload) => {
 			let OrderSave = null;
 			let message = '';
 			const timeSpan = Date.now() - Order.at_confirm;
-			if(timeSpan > 2*60*60*1000) {
+			if(timeSpan > ConfOrder.clientTime) {
 				// 如果待下单的订单 在15分钟内未下单 则订单自动进入取消状态(前台可以提示超时未下单 取消);
 				Order.code += '-60';
 				Order.at_confirm = null;

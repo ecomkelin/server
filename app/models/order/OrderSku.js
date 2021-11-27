@@ -14,7 +14,7 @@ const dbSchema = new Schema({
 	attrs: String,										// 只读
 	price_regular: Float,								// 只读[2] 加入购物车时的原价 客户confirm时的原价
 
-	price: Float,										// 只读[2] 加入购物车时的交易价格 客户confirm时的交易价格
+	price_sale: Float,										// 只读[2] 加入购物车时的交易价格 客户confirm时的交易价格
 	quantity: Number, 									// 采购本条目总数
 
 	is_picked: {type:Boolean, default: false},			// 是否配货完成 辅助配货员用的
@@ -36,9 +36,9 @@ dbSchema.pre('save', function(next) {
 		this.at_upd = Date.now();
 	}
 	if(!this.quantity) this.quantity = 0;
-	if(!this.price) this.price = 0;
+	if(!this.price_sale) this.price_sale = 0;
 	if(!this.price_regular) this.price_regular = 0;
-	this.tot = this.price * this.quantity;
+	this.tot = this.price_sale * this.quantity;
 	this.tot_regular = this.price_regular * this.quantity;
 	this.tot_discout = this.tot_regular - this.tot;
 
