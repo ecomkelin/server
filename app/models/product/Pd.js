@@ -57,6 +57,8 @@ dbSchema.pre('save', function(next) {
 	} else {
 		this.at_upd = Date.now();
 	}
+	this.price_regular = (isNaN(this.price_regular)) ? 0 : parseFloat(this.price_regular);
+	this.price_sale = (isNaN(this.price_sale)) ? this.price_regular : parseFloat(this.price_sale);
 	if(this.price_sale >= this.price_regular) this.price_sale = this.price_regular;
 	next();
 })

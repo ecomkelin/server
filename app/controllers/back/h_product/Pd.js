@@ -186,6 +186,17 @@ const Pd_general = async(res, obj, Pd, payload) => {
 				Pd.nome = obj.nome;
 			}
 		}
+		if(obj.unit) {
+			obj.unit = obj.unit.replace(/^\s*/g,"");	// 注意 Pd unit 没有转大写
+			const errorInfo = MdFilter.Stint_Match_objs(StintPd, obj, ['unit']);
+			if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
+			if(obj.unit != Pd.unit) {
+				const objSame = await PdDB.findOne({'unit': obj.unit, Firm: payload.Firm});
+				if(objSame) return res.json({status: 400, message: '[server] 产品编号相同'});
+				updManyProdObj.unit = obj.unit;
+				Pd.unit = obj.unit;
+			}
+		}
 
 		if(obj.Nation && (obj.Nation != Pd.Nation)) {
 			if(!MdFilter.is_ObjectId_Func(obj.Nation)) return res.json({status: 400, message: '[server] 国家数据需要为 _id 格式'});

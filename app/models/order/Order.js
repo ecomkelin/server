@@ -67,14 +67,15 @@ const dbSchema = new Schema({
 		phone: String,
 	},
 
-	total_quantity: {type:Number, default: 0},			// 只读 采购本条目总数
-	price_ship: {type: Float, default: 0},
+	goods_quantity: {type:Number, default: 0},			// 只读 采购本条目总数
 	total_sale: {type: Float, default: 0},				// 只读	此货物的费用
 	total_regular: {type: Float, default: 0},			// 只读	此订单节省价格
 	total_discount: {type: Float, default: 0},			// 只读	此订单原价
 
-	total: {type: Float, default: 0},					// 只读	后台给出的价格 后面批发时用
-	imp: {type: Float, default: 0},						// 客户 付款
+	price_ship: {type: Float, default: 0},
+
+	price_total: {type: Float, default: 0},				// 只读	后台给出的价格 后面批发时用
+	price_imp: {type: Float, default: 0},				// 只读 	客户应付
 
 	OrderProds: [{type: ObjectId, ref: 'OrderProd'}],
 

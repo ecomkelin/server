@@ -127,7 +127,7 @@ const vOrder_proof_Prom = (pathObj) => {
 			const changeObjs = [];
 
 			let total_regular = 0;
-			let imp = 0;
+			let total_sale = 0;
 			for(let i=0; i<OrderProds.length; i++) {
 				const OrderProd = OrderProds[i];
 
@@ -190,15 +190,15 @@ const vOrder_proof_Prom = (pathObj) => {
 							changeObjs.push(changeObj);
 						}
 						total_regular += OrderSku.price_regular;
-						imp += OrderSku.price_sale;
+						total_sale += OrderSku.price_sale;
 					}
 
 				}
 			}
 
 			Order.total_regular = total_regular;
-			Order.imp = imp;
-			Order.total_discount = total_regular - imp;
+			Order.total_sale = total_sale;
+			Order.total_discount = total_regular - total_sale;
 
 			return resolve({status: 200, data: {Order, changeObjs}});
 		} catch(error) {

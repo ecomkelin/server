@@ -18,7 +18,7 @@ exports.paypalPayment =  async (req, res) => {
 		const {order_items, Order} = items_res.data;
 
 		/* ----- paypal 的数据格式 ----- */
-		const total = order_items.reduce((sum, item) => {
+		const orderPayValue = order_items.reduce((sum, item) => {
 			return sum + item.price_sale * item.quantity
 		}, 0);
 		const items = order_items.map(item => {
@@ -34,11 +34,11 @@ exports.paypalPayment =  async (req, res) => {
 		const purchase_units = [{
 			amount: {
 				currency_code: process.env.CURRENCY,
-				value: total,
+				value: orderPayValue,
 				breakdown: {
 					item_total: {
 						currency_code: process.env.CURRENCY,
-						value: total,
+						value: orderPayValue,
 					},
 				},
 			},

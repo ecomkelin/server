@@ -69,8 +69,7 @@ exports.vOrderPost = async(req, res) => {
 		obj_Order.status = ConfOrder.status_obj.placing.num;
 		obj_Order.type_Order = ConfOrder.type_Order_obj.sale.num;
 
-		obj_Order.imp = parseFloat(obj_Order.imp);
-		obj_Order.total_quantity = 0;
+		obj_Order.goods_quantity = 0;
 		obj_Order.total_sale = 0;
 		obj_Order.total_regular = 0;
 		obj_Order.at_confirm = Date.now();
@@ -147,17 +146,16 @@ exports.vOrderPost = async(req, res) => {
 				continue;
 			}
 
-			_Order.total_quantity += OProdSave.prod_quantity;
+			_Order.goods_quantity += OProdSave.prod_quantity;
 			_Order.total_regular += OProdSave.prod_regular;
 			_Order.total_sale += OProdSave.prod_sale;
 			_Order.OrderProds.push(OProdSave._id);
 		}
-		_Order.imp = _Order.total_sale;
 
 		// 判断 如果订单 下没有采购商品 则错误
-		if(_Order.total_quantity < 1) return res.json({status: 400, message: "[server] 订单中没有产品"});
+		if(_Order.goods_quantity < 1) return res.json({status: 400, message: "[server] 订单中没有产品"});
 		// 判断下单金额
-		if(_Order.total_quantity < 1) return res.json({status: 400, message: "[server] 订单中没有产品"});
+		if(_Order.goods_quantity < 1) return res.json({status: 400, message: "[server] 订单中没有产品"});
 
 		const OrderSave = await _Order.save();
 		if(!OrderSave) {

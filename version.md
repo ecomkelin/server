@@ -1,3 +1,4 @@
+0.0.71	Pd Upd unit. Prod not 
 0.0.70	[OrderSku] price => price_sale [prod] price => price_unit 
 0.0.62	小的修改 
 0.0.61	大的修改 

@@ -15,11 +15,10 @@ const dbSchema = new Schema({
 	img_url: String,								// 店铺logo
 
 	Cita: {type: ObjectId, ref: 'Cita'},			// 所属城市	如果更换 需要检查服务城市列表是否有此城市
-
-	price_ship: Float,								// 本地运费
+	price_ship: {type: Float, default: 0},			// 本地运费
 	serve_Citas: [{									// 服务区
 		Cita: {type: ObjectId, ref: 'Cita'},			// 服务城市
-		price_ship: Float,								// 额外运费, 如果无则为0 
+		price_ship: {type: Float, default: 0},			// 额外运费, 如果无则为0 
 	}],
 
 	is_main: {type: Boolean, default: false},	// 是否为公司主店

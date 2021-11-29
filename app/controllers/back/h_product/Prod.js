@@ -193,7 +193,6 @@ exports.ProdPut = async(req, res) => {
 		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 参数对象数据"});
 
 		if(obj.desp) Prod.desp = obj.desp.replace(/^\s*/g,"");
-		if(obj.unit) Prod.unit = obj.unit.replace(/^\s*/g,"");
 		if(obj.sort) {
 			obj.sort = parseInt(obj.sort);
 			if(!isNaN(obj.sort)) Prod.sort = obj.sort;
