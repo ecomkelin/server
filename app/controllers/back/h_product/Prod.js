@@ -58,7 +58,7 @@ const Prod_PdNull = async(res, obj, payload) => {
 		if(!isNaN(obj.quantity)) obj.quantity = parseInt(obj.quantity);
 		if(!isNaN(obj.quantity_alert)) obj.quantity_alert = parseInt(obj.quantity_alert);
 		obj.allow_backorder = (obj.allow_backorder == 1 || obj.allow_backorder === true || obj.allow_backorder === 'true') ? true : false; 
-		const save_res = await Prod_save_Prom(res, obj, payload, null);
+		const save_res = await Prod_save_Prom(obj, payload, null);
 		return res.json(save_res);
 	} catch(error) {
 		console.log("Prod PdNull", error)
@@ -75,7 +75,7 @@ const Prod_PdSynchronize = async(res, Pd_id, payload) => {
 		const objSame = await ProdDB.findOne({Pd: Pd_id, Shop: payload.Shop, Firm: payload.Firm});
 		if(objSame) return res.json({status: 400, message: '[server] 此商品之前已经被同步', data: {object: objSame}});
 		const obj = Pd_to_Prod(Pd);
-		const save_res = await Prod_save_Prom(res, obj, payload, Pd)
+		const save_res = await Prod_save_Prom(obj, payload, Pd);
 		return res.json(save_res);
 	} catch(error) {
 		console.log("Prod Synchronize", error);
@@ -104,7 +104,7 @@ const Prods_PdSynchronize = async(res, Pds, payload) => {
 				continue;
 			}
 			const obj = Pd_to_Prod(Pd);
-			const save_res = await Prod_save_Prom(res, obj, payload, Pd);
+			const save_res = await Prod_save_Prom(obj, payload, Pd);
 			if(save_res.status) console.log(save_res.message);
 		}
 		return res.json({status: 200, message: "同步成功"});
@@ -134,7 +134,7 @@ const Pd_to_Prod = (Pd) => {
 	obj.price_unit = obj.price_min = obj.price_max = Pd.price_regular;
 	return obj;
 }
-const Prod_save_Prom = async(res, obj, payload, Pd) => {
+const Prod_save_Prom = async(obj, payload, Pd) => {
 	return new Promise(async(resolve) => {
 		try {
 			obj.is_usable = (obj.is_usable == 1 || obj.is_usable === true || obj.is_usable === 'true') ? true: false;
