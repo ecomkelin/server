@@ -15,9 +15,11 @@ exports.ProdPost = async(req, res) => {
 	try{
 		const payload = req.payload;
 		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
-
+		if(!payload.Shop) return res.json({status: 400, message: "[server] 请用店铺身份同步"});
 		if(req.body.Pd) {		// 从总公司同步
 			Prod_PdSynchronize(res, req.body.Pd, payload);
+		} else if(req.body.Pds) {
+			Prods_PdSynchronize(res, req.body.Pds, payload);
 		} else {		// 如果是单一店铺 则自己添加
 			const obj = await MdFiles.mkPicture_prom(req, {img_Dir:"/Prod", field: "img_urls", is_Array: true});
 			if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
@@ -56,87 +58,125 @@ const Prod_PdNull = async(res, obj, payload) => {
 		if(!isNaN(obj.quantity)) obj.quantity = parseInt(obj.quantity);
 		if(!isNaN(obj.quantity_alert)) obj.quantity_alert = parseInt(obj.quantity_alert);
 		obj.allow_backorder = (obj.allow_backorder == 1 || obj.allow_backorder === true || obj.allow_backorder === 'true') ? true : false; 
-		Prod_save(res, obj, payload, null);
+		const save_res = await Prod_save_Prom(res, obj, payload, null);
+		return res.json(save_res);
 	} catch(error) {
 		console.log("Prod PdNull", error)
 		return res.json({status: 500, message: "[服务器错误: Prod_PdNull]: "+ error});
 	}
 }
+
 const Prod_PdSynchronize = async(res, Pd_id, payload) => {
 	try {
-		const obj = {};
 		if(!MdFilter.is_ObjectId_Func(Pd_id)) return res.json({status: 400, message: '[server] 请输入需要同步的产品_id'});
 		Pd = await PdDB.findOne({_id: Pd_id, Firm: payload.Firm});
 		if(!Pd) return res.json({status: 400, message: '[server] 没有找到同步产品信息'});
 
 		const objSame = await ProdDB.findOne({Pd: Pd_id, Shop: payload.Shop, Firm: payload.Firm});
 		if(objSame) return res.json({status: 400, message: '[server] 此商品之前已经被同步', data: {object: objSame}});
-		obj.Pd = Pd._id;
-		obj.Shop = payload.Shop;
-		if(Pd.Categ) obj.Categ = Pd.Categ;
-		obj.sort = Pd.sort;
-
-		obj.code = Pd.code;
-		obj.nome = Pd.nome;
-		obj.price_regular = Pd.price_regular;
-		obj.price_sale = Pd.price_sale;
-		obj.img_urls = Pd.img_urls;
-		obj.Brand = Pd.Brand;
-		obj.Nation = Pd.Nation;
-
-		obj.desp = Pd.desp;
-		obj.unit = Pd.unit;
-		obj.langs = Pd.langs;
-
-		obj.price_unit = obj.price_min = obj.price_max = Pd.price_regular;
-		Prod_save(res, obj, payload, Pd)
+		const obj = Pd_to_Prod(Pd);
+		const save_res = await Prod_save_Prom(res, obj, payload, Pd)
+		return res.json(save_res);
 	} catch(error) {
 		console.log("Prod Synchronize", error);
 		return res.json({status: 500, message: "[服务器错误: Prod_PdSynchronize]: "+ error});
 	}
 }
-
-const Prod_save = async(res, obj, payload, Pd) => {
+const Prods_PdSynchronize = async(res, Pds, payload) => {
 	try {
-		obj.is_usable = (obj.is_usable == 1 || obj.is_usable === true || obj.is_usable === 'true') ? true: false;
-		obj.Shop = payload.Shop;
-		obj.is_usable = false;
-		obj.Skus = [];
+		if(!MdFilter.is_ArrObjectId_Func(Pds)) return res.json({status: 400, message: '[server] 请输入需要同步的产品 Pds 的 _id'});
+		for(let i = 0; i<Pds.length; i++) {
+			const Pd_id = Pds[i];
+			if(!MdFilter.is_ObjectId_Func(Pd_id)) {
+				console.log('Prods_PdSynchronize: ['+Pd_id+'] 不是 _id');
+				continue;
+			}
 
-		obj.Firm = payload.Firm;
-		obj.User_crt = payload._id;
-		const _object = new ProdDB(obj);
+			Pd = await PdDB.findOne({_id: Pd_id, Firm: payload.Firm});
+			if(!Pd) {
+				console.log('Prods_PdSynchronize: ['+Pd_id+'] 没有找到产品信息');
+				continue;
+			}
 
-		// 创建 obj_Sku
-		const obj_Sku = {};
-		obj_Sku.Pd = obj.Pd;
-		obj_Sku.Prod = _object._id;
-		obj_Sku.attrs = null;
-		obj_Sku.is_usable = false;
-		obj_Sku.price_regular = obj.price_regular
-		obj_Sku.price_sale = obj.price_sale
-		obj_Sku.Firm = obj.Firm
-		obj_Sku.Shop = obj.Shop
-		const _Sku = new SkuDB(obj_Sku);
-
-		_object.Skus.push(_Sku._id);
-		const objSave = await _object.save();
-		if(!objSave) return res.json({status: 400, message: '[server] 商品保存失败'});
-
-		const SkuSave = await _Sku.save();
-		if(!SkuSave) return res.json({status: 400, message: '[server] 商品obj_Sku保存失败'});
-
-		// 如果是同步 则需要把产品下的商品 _id 推送到产品中去
-		if(Pd) {
-			Pd.Prods.push(objSave._id);
-			await Pd.save();
+			const objSame = await ProdDB.findOne({Pd: Pd_id, Shop: payload.Shop, Firm: payload.Firm});
+			if(objSame) {
+				console.log('Prods_PdSynchronize: ['+Pd_id+'] 此商品之前已经被同步');
+				continue;
+			}
+			const obj = Pd_to_Prod(Pd);
+			const save_res = await Prod_save_Prom(res, obj, payload, Pd);
+			if(save_res.status) console.log(save_res.message);
 		}
-
-		return res.json({status: 200, message: "[server] 创建成功", data: {object: objSave}});
+		return res.json({status: 200, message: "同步成功"});
 	} catch(error) {
-		console.log("Prod save", error);
-		return res.json({status: 500, message: "[服务器错误: Prod_save]: "+ error});
+		console.log("Prod Synchronize", error);
+		return res.json({status: 500, message: "[服务器错误: Prods_PdSynchronize]: "+ error});
 	}
+}
+const Pd_to_Prod = (Pd) => {
+	const obj = {};
+	obj.Pd = Pd._id;
+	if(Pd.Categ) obj.Categ = Pd.Categ;
+	obj.sort = Pd.sort;
+
+	obj.code = Pd.code;
+	obj.nome = Pd.nome;
+	obj.price_regular = Pd.price_regular;
+	obj.price_sale = Pd.price_sale;
+	obj.img_urls = Pd.img_urls;
+	obj.Brand = Pd.Brand;
+	obj.Nation = Pd.Nation;
+
+	obj.desp = Pd.desp;
+	obj.unit = Pd.unit;
+	obj.langs = Pd.langs;
+
+	obj.price_unit = obj.price_min = obj.price_max = Pd.price_regular;
+	return obj;
+}
+const Prod_save_Prom = async(res, obj, payload, Pd) => {
+	return new Promise(async(resolve) => {
+		try {
+			obj.is_usable = (obj.is_usable == 1 || obj.is_usable === true || obj.is_usable === 'true') ? true: false;
+			obj.Shop = payload.Shop;
+			obj.is_usable = false;
+			obj.Skus = [];
+
+			obj.Firm = payload.Firm;
+			obj.User_crt = payload._id;
+			const _object = new ProdDB(obj);
+
+			// 创建 obj_Sku
+			const obj_Sku = {};
+			obj_Sku.Pd = obj.Pd;
+			obj_Sku.Prod = _object._id;
+			obj_Sku.attrs = null;
+			obj_Sku.is_usable = false;
+			obj_Sku.price_regular = obj.price_regular
+			obj_Sku.price_sale = obj.price_sale
+			obj_Sku.Firm = obj.Firm
+			obj_Sku.Shop = obj.Shop
+			const _Sku = new SkuDB(obj_Sku);
+
+			_object.Skus.push(_Sku._id);
+			const objSave = await _object.save();
+			if(!objSave) resolve({status: 400, message: '[server] 商品保存失败'});
+
+			const SkuSave = await _Sku.save();
+			if(!SkuSave) resolve({status: 400, message: '[server] 商品obj_Sku保存失败'});
+
+			// 如果是同步 则需要把产品下的商品 _id 推送到产品中去
+			if(Pd) {
+				Pd.Prods.push(objSave._id);
+				await Pd.save();
+			}
+
+			return resolve({status: 200, message: "[server] 创建成功", data: {object: objSave}});
+		} catch(error) {
+			console.log("Prod save", error);
+			return resolve({status: 500, message: "[服务器错误: Prod_save_Prom]: "+ error});
+		}
+	})
 }
 
 

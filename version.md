@@ -1,5 +1,6 @@
+0.0.74 	Prod 批量同步 
 0.0.73 	小 bug 
-0.0.72 	小 bug 
+0.0.72 	小 bug
 0.0.71	Pd Upd unit. Prod not 
 0.0.70	[OrderSku] price => price_sale [prod] price => price_unit 
 0.0.62	小的修改 
