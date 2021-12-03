@@ -4,8 +4,10 @@ const ObjectId = Schema.Types.ObjectId;
 
 const colection = 'User';
 const dbSchema = new Schema({
-	phonePre: String, 
-	phone: String, 
+	phonePre: String,
+	phoneNum: String,
+	phone: String, 									// [只读 绝对]
+	email: String, 
 	code: String,									// 用户账户
 	pwd: String, 									// md5 加密
 
@@ -38,6 +40,8 @@ dbSchema.pre('save', function(next) {
 	} else {
 		this.at_upd = Date.now();
 	}
+	this.phone = (this.phonePre && this.phoneNum) ? (String(this.phonePre) + String(this.phoneNum)) : '';
+
 	next();
 });
 

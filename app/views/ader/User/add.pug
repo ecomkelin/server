@@ -16,11 +16,11 @@ block content
 						.col-4
 							input#phonePreIpt.form-control(type="number", name="obj[phonePre]", value='0039')
 						.col-8
-							input#phoneIpt.form-control(type="number", name="obj[phone]", value="3888676796")
+							input#phoneNumIpt.form-control(type="number", name="obj[phoneNum]", value="3888676796")
 				.offset-4.offset-sm-2.col-8.col-sm-6#phonePreOpt.text-danger(style="display:none")
 					span 用户手机前缀长度必须为: #{Stint.User.phonePre.trim} 的数字
-				.offset-4.offset-sm-2.col-8.col-sm-6#phoneOpt.text-danger(style="display:none")
-					span 用户手机长度必须为: #{Stint.User.phone.trim} 的数字
+				.offset-4.offset-sm-2.col-8.col-sm-6#phoneNumOpt.text-danger(style="display:none")
+					span 用户手机长度必须为: #{Stint.User.phoneNum.trim} 的数字
 			.form-group.row
 				label.col-4.col-sm-2.col-form-label(for="codeIpt")#codeLabel.text-info 帐号
 				.col-8.col-sm-6

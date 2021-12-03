@@ -1,11 +1,11 @@
 module.exports = {
-	phonePre: {regexp: '^[0-9]*$', trim: 4, errMsg: {
+	phonePre: {min: 2, max: 6, errMsg: {
 		nullMsg: '电话号码前缀不能为空',
-		regexpMsg: '电话号码前缀只能由数字组成',
-		trimMsg: '电话号码前缀长度只能为: ',
+		minMsg: '成员账号的位数不能小于: ',
+		maxMsg: '成员账号的位数不能大于: '
 	}},
 
-	phone: {regexp: '^[0-9]*$', trim: 10, errMsg: {
+	phoneNum: {regexp: '^[0-9]*$', trim: 10, errMsg: {
 		nullMsg: '电话号码不能为空',
 		regexpMsg: '电话号码只能由数字组成',
 		trimMsg: '电话号码的长度只能为: ',

@@ -550,9 +550,27 @@ module.exports = (app) => {
 		try{
 			const obj = req.body.obj;
 
-			const errorInfo = MdFilter.Stint_Match_objs(Stint.User, obj, ['code', 'pwd', 'phone']);
+			const same_param = {"$or": []};
+			same_param["$or"].push({'code': obj.code});
+			const stints = ['code', 'pwd'];
+
 			obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
 			obj.pwd = obj.pwd.replace(/^\s*/g,"").toUpperCase();
+			if(obj.phonePre && obj.phoneNum) {
+				obj.phonePre = obj.phonePre.replace(/^\s*/g,"").toUpperCase();
+				obj.phoneNum = obj.phoneNum.replace(/^\s*/g,"").toUpperCase();
+				obj.phone = String(obj.phonePre) + obj.phoneNum;
+				stints.push('phonePre')
+				stints.push('phoneNum')
+				same_param["$or"].push({'phone': String(obj.phonePre)+obj.phoneNum});
+			}
+			if(obj.email) {
+				obj.email = obj.email.replace(/^\s*/g,"").toUpperCase();
+				stints.push('email')
+				same_param["$or"].push({'email': obj.email});
+			}
+
+			const errorInfo = MdFilter.Stint_Match_objs(Stint.User, obj, stints);
 			if(errorInfo) return res.redirect('/?error=没有找到此公司,请重新选择'+errorInfo+'&reUrl=/adUserAdd');
 
 			obj.pwd = await MdFilter.encrypt_tProm(obj.pwd);
@@ -561,9 +579,14 @@ module.exports = (app) => {
 			// if(!ConfUser.role_Arrs.includes(parseInt(obj.role))) return res.redirect('/?error=用户角色参数错误&reUrl=/adUserAdd');
 			obj.role = ConfUser.role_set.owner;
 			
-			// const objSame = await UserDB.findOne({'code': obj.code, Firm: obj.Firm });
-			const objSame = await UserDB.findOne({'code': obj.code});
-			if(objSame) return res.redirect('/?error=已有此账号，请重新注册&reUrl=/adUserAdd');
+			const objSame = await UserDB.findOne(same_param);
+			if(objSame) {
+				let errorInfo = '';
+				if(objSame.code === obj.code) errorInfo = '已有此账号，请重新注册';
+				else if(objSame.phone === obj.phone) errorInfo = '已有此电话，请重新注册';
+				else if(objSame.email === obj.email) errorInfo = '已有此邮箱，请重新注册';
+				return res.redirect('/?error='+errorInfo+'&reUrl=/adUserAdd');
+			}
 
 			const _object = new UserDB(obj)
 			const objSave = await _object.save();

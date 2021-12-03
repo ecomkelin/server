@@ -8,7 +8,7 @@ $(function() {
 		const Firm = $("#FirmIpt").val();
 		if(!phonePreFilter(phonePre)){
 			e.preventDefault();
-		} else if(!phoneFilter(phone)) {
+		} else if(!phoneNumFilter(phoneNum)) {
 			e.preventDefault();
 		} else if(!codeFilter(code)) {
 			e.preventDefault();
@@ -42,10 +42,10 @@ $(function() {
 		$(this).val(phonePre);
 		phonePreFilter(phonePre)
 	})
-	$("#phoneIpt").blur(function() {
-		const phone = $(this).val().replace(/^\s*/g,"").toUpperCase();
-		$(this).val(phone);
-		phoneFilter(phone)
+	$("#phoneNumIpt").blur(function() {
+		const phoneNum = $(this).val().replace(/^\s*/g,"").toUpperCase();
+		$(this).val(phoneNum);
+		phoneNumFilter(phoneNum)
 	})
 	$("#codeIpt").blur(function() {
 		const code = $(this).val().replace(/^\s*/g,"").toUpperCase();
@@ -86,17 +86,17 @@ $(function() {
 			return true;
 		}
 	}
-	const phoneFilter = (phone) => {
-		const regexp = new RegExp(Stint_User.phone.regexp);
-		if(!phone || phone.length != Stint_User.phone.trim || !regexp.test(phone)){
-			$("#phoneLabel").removeClass("text-info");
-			$("#phoneLabel").addClass("text-danger");
-			$("#phoneOpt").show();
+	const phoneNumFilter = (phoneNum) => {
+		const regexp = new RegExp(Stint_User.phoneNum.regexp);
+		if(!phoneNum || phoneNum.length != Stint_User.phoneNum.trim || !regexp.test(phoneNum)){
+			$("#phoneNumLabel").removeClass("text-info");
+			$("#phoneNumLabel").addClass("text-danger");
+			$("#phoneNumOpt").show();
 			return false;
 		} else {
-			$("#phoneLabel").removeClass("text-danger");
-			$("#phoneLabel").addClass("text-info");
-			$("#phoneOpt").hide();
+			$("#phoneNumLabel").removeClass("text-danger");
+			$("#phoneNumLabel").addClass("text-info");
+			$("#phoneNumOpt").hide();
 			return true;
 		}
 	}

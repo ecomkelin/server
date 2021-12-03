@@ -12,8 +12,6 @@ const ShopDB = require('../../../models/auth/Shop');
 
 const _ = require('underscore');
 
-
-
 exports.UserPost = async(req, res) => {
 	console.log("/b1/UserPost");
 	try{
@@ -22,14 +20,40 @@ exports.UserPost = async(req, res) => {
 
 		const obj = req.body.obj;
 		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
-		// console.log(obj)
+		// console.log(obj);
 
-		const errorInfo = MdFilter.Stint_Match_objs(StintUser, obj, ['code', 'pwd']);
+		const same_param = {$or: []};
+		const stints = ['code', 'pwd'];
+		obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
+		same_param["$or"].push({code: obj.code});
+
+		console.log('obj', obj);
+		obj.pwd = obj.pwd.replace(/^\s*/g,"");
+		if(obj.phonePre && obj.phoneNum) {
+			obj.phonePre = obj.phonePre.replace(/^\s*/g,"");
+			obj.phoneNum = obj.phoneNum.replace(/^\s*/g,"");
+
+			obj.phonePre = MdFilter.get_phonePre_Func(obj.phonePre);
+			if(!obj.phonePre) return res.json({status: 400, message: "[server] phonePre 错误"});
+			obj.phone = obj.phonePre+obj.phoneNum;
+			same_param["$or"].push({phone: obj.phone});
+
+			stints.push('phonePre');
+			stints.push('phoneNum');
+		}
+		if(obj.email) {
+			obj.email = obj.email.replace(/^\s*/g,"").toUpperCase();
+			same_param["$or"].push({email: obj.email});
+		}
+		const errorInfo = MdFilter.Stint_Match_objs(StintUser, obj, stints);
 		if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
-		obj.code = obj.code.replace(/^\s*/g,"").toUpperCase()
 
-		const objSame = await UserDB.findOne({code: obj.code});
-		if(objSame) return res.json({status: 400, message: '[server] 用户编号相同'});
+		const objSame = await UserDB.findOne(same_param);
+		if(objSame) {
+			if(objSame.code === obj.code) return res.json({status: 400, message: '[server] 已有此用户编号'});
+			if(objSame.phone === obj.phone) return res.json({status: 400, message: '[server] 已有此用户电话'});
+			if(objSame.email === obj.email) return res.json({status: 400, message: '[server] 已有此用户邮箱'});
+		}
 
 		if(payload.role === ConfUser.role_set.boss) {
 			obj.Shop = payload.Shop;
@@ -80,6 +104,8 @@ exports.UserPut = async(req, res) => {
 		const User = await UserDB.findOne(pathObj);
 		if(!User) return res.json({status: 400, message: "[server] 没有找到此用户信息, 请刷新重试"});
 
+		if(payload.role >= User.role && payload._id != User._id) return res.json({status: 400, message: "[server] 您没有权限修改 此用户信息"});
+
 		if(req.body.general) {
 			User_general(req, res, User, payload); 
 		} else if(req.body.password) {
@@ -125,44 +151,82 @@ const User_putPwd = async(req, res, User, payload) => {
 const User_general = async(req, res, User, payload) => {
 	try{
 		const obj = req.body.general
-		MdFilter.readonly_Func(obj);
-		delete obj.at_last_login;
-		delete obj.refreshToken;
 
-		if(obj.code && (obj.code != User.code)) {
+		const same_param = {_id: {$ne: User._id}, "$or": []};
+		const stints = [];
+		if(obj.code) {
 			// 只有管理员以上可以更改
-			if(payload.role >= ConfUser.role_set.manager) return res.json({status: 400, message: '[server] 修改用户编号需要总公司管理权限'});
-			obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
-			const errorInfo = MdFilter.Stint_Match_objs(StintUser, obj, ['code']);
+			obj.code = obj.code.replace(/^\s*/g,"").toUpperCase()
+			if(obj.code !== User.code) {
+				User.code = obj.code;
+				same_param["$or"].push({code: obj.code});
+				stints.push('code');
+			}
+		}
+
+		if(obj.phonePre && obj.phoneNum) {
+			obj.phonePre = obj.phonePre.replace(/^\s*/g,"");
+			obj.phoneNum = obj.phoneNum.replace(/^\s*/g,"");
+			obj.phonePre = MdFilter.get_phonePre_Func(obj.phonePre);
+			if(!obj.phonePre) return res.json({status: 400, message: "[server] phonePre 错误"});
+
+			obj.phone = obj.phonePre + obj.phoneNum;
+			
+			if(obj.phone !== User.phone) {
+				User.phonePre = obj.phonePre;
+				User.phoneNum = obj.phoneNum;
+				User.phone = obj.phone;
+				same_param["$or"].push({phone: obj.phone});
+				stints.push('phonePre');
+				stints.push('phoneNum');
+			}
+		}
+		if(obj.email) {
+			obj.email = obj.email.replace(/^\s*/g,"").toUpperCase();
+			if(obj.email !== User.email) {
+				User.email = obj.email;
+				same_param["$or"].push({email: obj.email});
+			}
+		}
+
+		if(stints.length > 0) {
+			const errorInfo = MdFilter.Stint_Match_objs(StintUser, obj, stints);
 			if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
-			const objSame = await UserDB.findOne({_id: {$ne: User._id}, code: obj.code})
+		}
+
+		if(same_param["$or"].length !== 0) {
+			const objSame = await UserDB.findOne(same_param);
 			if(objSame) return res.json({status: 400, message: '[server] 此用户账户已被占用, 请查看'});
 		}
 
+		if(!obj.Shop) obj.Shop = User.Shop;
+
 		if(obj.role && (obj.role != User.role)) {
 			obj.role = parseInt(obj.role);
-			if(payload.role === User.role) return res.json({status: 400, message: '[server] 您不可以自己修改此信息'});
-			// 只有管理员以上可以更改
-			if(payload.role >= ConfUser.role_set.manager) return res.json({status: 400, message: '[server] 修改用户权限需要总公司管理权限'});
 			if(!ConfUser.role_Arrs.includes(obj.role)) return res.json({status: 400, message: '[server] 您设置的用户权限参数不存在'});
+			if(obj.role <= payload.role) return res.json({status: 400, message: '[server] 您无权授予此权限'});
+ 
 			if(obj.role >= ConfUser.role_set.boss && !obj.Shop) return res.json({status: 400, message: '[server] 请为该角色设置分店'});
 			if(obj.role < ConfUser.role_set.boss) obj.Shop = null;
+			User.role = obj.role;
 		}
 
-		const role = obj.role || User.role;
-		if(role >= ConfUser.role_set.boss) {
-			if(!MdFilter.is_ObjectId_Func(obj.Shop)) return res.json({status: 400, message: '[server] 分店数据需要为 _id 格式'});
-			if(payload.role >= ConfUser.role_set.manager)	return res.json({status: 400, message: '[server] 修改用户所属店铺需要总公司管理权限'});
-			const Shop = await ShopDB.findOne({_id: obj.Shop, Firm: payload.Firm});
-			if(!Shop) return res.json({status: 400, message: '[server] 没有找到此分店信息'});
-		} else {
-			obj.Shop = null;
+		if(obj.Shop && (obj.Shop != User.Shop)) {
+			const role = obj.role || User.role;
+			if(role >= ConfUser.role_set.boss) {
+				if(!MdFilter.is_ObjectId_Func(obj.Shop)) return res.json({status: 400, message: '[server] 分店数据需要为 _id 格式'});
+				if(payload.role >= ConfUser.role_set.manager)	return res.json({status: 400, message: '[server] 修改用户所属店铺需要总公司管理权限'});
+				const Shop = await ShopDB.findOne({_id: obj.Shop, Firm: payload.Firm});
+				if(!Shop) return res.json({status: 400, message: '[server] 没有找到此分店信息'});
+				User.Shop = obj.Shop;
+			} else {
+				User.Shop = null;
+			}
 		}
 
-		if(payload._id != User._id) obj.User_upd = payload._id;
-		const _object = _.extend(User, obj);
+		if(payload._id != User._id) User.User_upd = payload._id;
 
-		const objSave = await _object.save();
+		const objSave = await User.save();
 
 		if(Object.keys(req.query).length > 0) {
 			const db_res = await GetDB.db(obtFilterObj(req, objSave._id));
@@ -225,6 +289,7 @@ exports.User = async(req, res) => {
 	console.log("/b1/User")
 	try {
 		const db_res = await GetDB.db(obtFilterObj(req, req.params.id));
+		console.log(db_res.data.object)
 		return res.json(db_res);
 	} catch(error) {
 		console.log("/b1/User", error);

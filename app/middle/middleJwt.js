@@ -48,6 +48,7 @@ const generatePayload = (obj)=> {
 	if(obj.code) payload.code = obj.code;
 	if(obj.nome) payload.nome = obj.nome;
 	if(obj.phonePre) payload.phonePre = obj.phonePre;
+	if(obj.phoneNum) payload.phoneNum = obj.phoneNum;
 	if(obj.phone) payload.phone = obj.phone;
 	if(obj.email) payload.email = obj.email;
 	return payload;

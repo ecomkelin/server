@@ -101,9 +101,13 @@ const obtain_payload = (system_obj, social_obj, objectDB) => {
 				} else if(system_obj.email) {
 					param.email = system_obj.email.replace(/^\s*/g,"").toUpperCase();
 				} else {
-					const phonePre = MdFilter.get_phonePre_Func(system_obj.phonePre);
-					param.phone = phonePre+system_obj.phone
+					system_obj.phonePre = system_obj.phonePre.replace(/^\s*/g,"").toUpperCase();
+					system_obj.phonePre = MdFilter.get_phonePre_Func(system_obj.phonePre);
+					if(!system_obj.phonePre) return resolve({status: 400, message: "电话前缀错误"});
+					system_obj.phoneNum = system_obj.phoneNum.replace(/^\s*/g,"").toUpperCase();
+					param.phone = system_obj.phonePre+system_obj.phoneNum;
 				}
+
 				let object = await objectDB.findOne(param);
 				if(!object) return resolve({status: 400, message: "没有找到此账号"});
 				const pwd_match_res = await MdFilter.bcrypt_match_Prom(system_obj.pwd, object.pwd);
@@ -197,18 +201,20 @@ exports.register = async(req, res) => {
 	try {
 		let obj = null;
 		let to = null;
-		// const {email, phone, phonePre, pwd, opt} = req.body;
+		// const {email, phonePre, phoneNum, pwd, opt} = req.body;
 		const pathSame = {};	// 检查是否有相同的账号
 		if(req.body.email) {		// 邮箱注册
-			to = req.body.email;
+			to = req.body.email.replace(/^\s*/g,"").toUpperCase();
 			obj = {email: to};
 			pathSame.email = to;
 		} else {					// 手机注册
 			const phonePre = MdFilter.get_phonePre_Func(req.body.phonePre);
 			if(!phonePre) return MdFilter.jsonError(res, "phonePre 错误");
-			const phone = req.body.phone;
-			to = phonePre+phone;
+			const phoneNum = req.body.phoneNum.replace(/^\s*/g,"").toUpperCase();
+			to = phonePre+phoneNum;
 			obj = {phone: to};
+			obj.phonePre = phonePre;
+			obj.phoneNum = phoneNum;
 			pathSame.phone = to;
 		}
 		const vrifyChecks_res = await verifyChecks_Prom(to, req.body.otp);	// 把注册邮箱或手机 连同验证码 验证
@@ -316,21 +322,20 @@ exports.reActive = async(req, res) => {
 		const pwd_match_res = await MdFilter.bcrypt_match_Prom(req.body.pwd, Client.pwd);
 		if(pwd_match_res.status != 200) return MdFilter.jsonError(res, "密码不匹配");
 
-		let obj = null;
 		let to = null;
 		const pathSame = {_id: {"$ne": payload._id}};
 		if(req.body.email) {		// 邮箱注册
-			to = req.body.email;
-			obj = {email: to};
+			to = req.body.email.replace(/^\s*/g,"").toUpperCase();
 			pathSame.email = to;
 			Client.email = to;
 		} else {					// 手机注册
 			const phonePre = MdFilter.get_phonePre_Func(req.body.phonePre);
 			if(!phonePre) return MdFilter.jsonError(res, "phonePre 错误");
-			const phone = req.body.phone;
-			to = phonePre+phone;
-			obj = {phone: to};
+			const phoneNum = req.body.phoneNum.replace(/^\s*/g,"").toUpperCase();
+			to = phonePre+phoneNum;
 			pathSame.phone = to;
+			Client.phonePre = phonePre;
+			Client.phoneNum = phoneNum;
 			Client.phone = to;
 		}
 		const vrifyChecks_res = await verifyChecks_Prom(to, req.body.otp);	// 把注册邮箱或手机 连同验证码 验证
@@ -378,13 +383,13 @@ exports.obtain_otp = async(req, res) => {
 
 	if(req.body.email) {
 		channel = 'email';
-		to = req.body.email;
-	} else if(req.body.phonePre && req.body.phone){
+		to = req.body.email.replace(/^\s*/g,"").toUpperCase();
+	} else if(req.body.phonePre && req.body.phoneNum){
 		channel = 'sms';
 		const phonePre = MdFilter.get_phonePre_Func(req.body.phonePre);
 		if(!phonePre) return MdFilter.jsonError(res, "phonePre 错误");
-		const phone =req.body.phone;
-		to = `${phonePre}${phone}`;
+		const phoneNum =req.body.phoneNum.replace(/^\s*/g,"").toUpperCase();
+		to = `${phonePre}${phoneNum}`;
 	} else {
 		return MdFilter.jsonError(res, "请输入正确的邮箱或电话参数");
 	}
