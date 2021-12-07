@@ -130,15 +130,15 @@ const Categ_general = async(res, obj, Categ, payload) => {
 		delete obj.level;
 		delete obj.Categ_sons;
 
-		if(!obj.code) obj.code = Categ.code;
-		const errorInfo = MdFilter.Stint_Match_objs(StintCateg, obj, ['code']);
-		if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
-		obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
-
-		// (!errorInfo) && (obj.code) && (obj.code = obj.code.replace(/^\s*/g,"").toUpperCase()) && (obj.code != Categ.code) 
-		if(obj.code !== Categ.code) {
-			const objSame = await CategDB.findOne({_id: {$ne: Categ._id}, code: obj.code, Firm: payload.Firm});
-			if(objSame) return res.json({status: 400, message: '[server] 此分类编号已被占用, 请查看'});
+		if(obj.code) {
+			obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
+			if(obj.code !== Categ.code) {
+				const errorInfo = MdFilter.Stint_Match_objs(StintCateg, obj, ['code']);
+				if(errorInfo) return res.json({status: 400, message: '[server] '+errorInfo});
+				const objSame = await CategDB.findOne({_id: {$ne: Categ._id}, code: obj.code, Firm: payload.Firm});
+				if(objSame) return res.json({status: 400, message: '[server] 此分类编号已被占用, 请查看'});
+				Categ.code = obj.code;
+			}
 		}
 
 		// 如果不是顶级分类 并且新的父分类与原父分类不同
@@ -151,22 +151,28 @@ const Categ_general = async(res, obj, Categ, payload) => {
 			if(!Categ_far.Categ_sons) Categ_far.Categ_sons = [];
 			Categ_far.Categ_sons.push(id);
 			const Categ_farSave = await Categ_far.save();
-			if(!Categ_farSave) return res.json({status: 400, message: "父分类 存储错误"})
+			if(!Categ_farSave) return res.json({status: 400, message: "父分类 存储错误"});
 
 			// 原父分类删除子分类 _id
 			const Org_far = await CategDB.findOne({_id: Categ.Categ_far});
 			if(!Org_far) return res.json({status: 400, message: "原父分类信息错误"});
 			Org_far.Categ_sons.remove(id);
 			const Org_farSave = await Org_far.save();
-			if(!Org_farSave) return res.json({status: 400, message: "原父分类 存储错误"})
+			if(!Org_farSave) return res.json({status: 400, message: "原父分类 存储错误"});
+
+			Categ.Categ_far = obj.Categ_far;
 		}
 
 		if(obj.img_url && (obj.img_url != Categ.img_url) && Categ.img_url && Categ.img_url.split("Categ").length > 1){
 			await MdFiles.rmPicture(Categ.img_url);
+			Categ.img_url = obj.img_url;
+		}
+
+		if(!isNaN(obj.sort)) {
+			Categ.sort = obj.sort;
 		}
 		
-		obj.User_upd = payload._id;
-		const _object = _.extend(Categ, obj);
+		Categ.User_upd = payload._id;
 
 		let object = await Categ.save();
 		// kelin 为了 react 的 二级分类
