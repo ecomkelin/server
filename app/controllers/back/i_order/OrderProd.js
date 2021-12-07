@@ -8,6 +8,14 @@ const vOrderProd_path_Func = (pathObj, payload, queryObj) => {
 
 	if(!queryObj) return;
 	if(MdFilter.is_ObjectId_Func(queryObj.Order) ) pathObj["Order"] = queryObj.Order;
+	if(queryObj.Clients && payload.role < ConfUser.role_set.boss) {
+		const arrs = MdFilter.getArrayFromString(queryObj.Clients);
+		if(arrs.length > 0) pathObj.Client = {"$in": arrs};
+	}
+	if(queryObj.Shops && payload.role < ConfUser.role_set.boss) {
+		const arrs = MdFilter.getArrayFromString(queryObj.Shops);
+		if(arrs.length > 0) pathObj.Shop = {"$in": arrs};
+	}
 }
 
 const dbOrderProd = 'OrderProd';
