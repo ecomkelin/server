@@ -267,8 +267,7 @@ const dbOrderSku = 'OrderSku';
 exports.OrderSkus = async(req, res) => {
 	console.log("/b1/OrderSkus");
 	try {
-		if(!MdFilter.is_ObjectId_Func(req.query.Order)) return res.json({status: 400, message: "[server] 请告知服务器 查看哪个订单中的产品"});
-
+		// if(!MdFilter.is_ObjectId_Func(req.query.Order)) return res.json({status: 400, message: "[server] 请告知服务器 查看哪个订单中的产品"});
 		const payload = req.payload;
 		const GetDB_Filter = {
 			payload: payload,

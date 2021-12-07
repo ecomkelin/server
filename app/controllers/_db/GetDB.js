@@ -20,10 +20,10 @@ exports.db = (GetDB_Filter) => {
 			const object = await objectDB.findOne(pathObj, selectObj)
 				.populate(populateObjs);
 			if(!object) resolve({status: 400, message: "[server] 没有找到数据"});
-			resolve({status: 200, message: '[server] 成功读取', data: {object}});
+			return resolve({status: 200, message: '[server] 成功读取', data: {object}});
 		} catch(error) {
 			console.log("/db", error)
-			resolve({status: 500, message: "[服务器错误: GetDB.db]"});
+			return resolve({status: 500, message: "[服务器错误: GetDB.db]"});
 		}
 	})
 }
@@ -35,7 +35,6 @@ exports.db = (GetDB_Filter) => {
 	path_Callback: function;
 */
 exports.dbs = (GetDB_Filter) => {
-	// console.log("/dbs");
 	return new Promise(async(resolve) => {
 		try{
 			const {payload, queryObj, objectDB, path_Callback, dbName} = GetDB_Filter;
@@ -75,11 +74,10 @@ exports.dbs = (GetDB_Filter) => {
 					objects = [object, ...objects];
 				}
 			}
-			// console.log('obj', count)
-			resolve({status: 200, message: '[server] 成功读取', data: {count, page, pagesize, object, objects}, parameter: {pathObj, sortObj}});
+			return resolve({status: 200, message: '[server] 成功读取', data: {count, page, pagesize, object, objects}, parameter: {pathObj, sortObj}});
 		} catch(error) {
 			console.log("/dbs", error);
-			resolve({status: 500, message: "[服务器错误: GetDB.dbs]"});
+			return resolve({status: 500, message: "[服务器错误: GetDB.dbs]"});
 		}
 	})
 }
