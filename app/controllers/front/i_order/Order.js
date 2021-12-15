@@ -252,7 +252,7 @@ exports.vOrderPut = async(req, res) => {
 
 		const Order = await OrderDB.findOne({_id: id, Client: payload._id, status: ConfOrder.status_obj.placing.num})
 			.populate({path: "Shop", select: "serve_Citas"});
-		if(!Order) return res.json({status: 400, message: "[server] 没有找到此产品信息, 请刷新重试"});
+		if(!Order) return res.json({status: 400, message: "[server] 没有找到此订单信息, 请刷新重试"});
 
 		const obj = req.body.general;
 
@@ -311,8 +311,7 @@ exports.vOrders = async(req, res) => {
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
 		return res.json(dbs_res);
 	} catch(error) {
-		console.log("/v1/Orders", error)
-		console.log(error);
+		console.log("/v1/Orders", error);
 		return res.json({status: 500, message: "[服务器错误: vOrders]"});
 	}
 }

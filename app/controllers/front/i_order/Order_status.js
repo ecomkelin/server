@@ -2,6 +2,8 @@ const ConfOrder = require('../../../config/ConfOrder');
 const MdFilter = require('../../../middle/middleFilter');
 const MdSafe = require('../../../middle/middleSafe');
 const OrderDB = require('../../../models/order/Order');
+const OrderProdDB = require('../../../models/order/OrderProd');
+const OrderSkuDB = require('../../../models/order/OrderSku');
 
 const moment = require('moment');
 

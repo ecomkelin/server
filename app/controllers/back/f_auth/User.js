@@ -9,7 +9,6 @@ const dbUser = 'User';
 const UserDB = require('../../../models/auth/User');
 
 const ShopDB = require('../../../models/auth/Shop');
-
 const _ = require('underscore');
 
 exports.UserPost = async(req, res) => {
@@ -27,7 +26,6 @@ exports.UserPost = async(req, res) => {
 		obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
 		same_param["$or"].push({code: obj.code});
 
-		console.log('obj', obj);
 		obj.pwd = obj.pwd.replace(/^\s*/g,"");
 		if(obj.phonePre && obj.phoneNum) {
 			obj.phonePre = obj.phonePre.replace(/^\s*/g,"");
@@ -289,7 +287,6 @@ exports.User = async(req, res) => {
 	console.log("/b1/User")
 	try {
 		const db_res = await GetDB.db(obtFilterObj(req, req.params.id));
-		console.log(db_res.data.object)
 		return res.json(db_res);
 	} catch(error) {
 		console.log("/b1/User", error);

@@ -2,6 +2,7 @@ const GetDB = require('../../_db/GetDB');
 const MdFilter = require('../../../middle/middleFilter');
 const MdSafe = require('../../../middle/middleSafe');
 const BindDB = require('../../../models/auth/Bind');
+
 const _ = require('underscore');
 
 exports.BindPut = async(req, res) => {

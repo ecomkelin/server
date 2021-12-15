@@ -18,7 +18,7 @@ exports.OrderPut = async(req, res) => {
 
 		const Order = await OrderDB.findOne({_id: id, User: payload._id, status: ConfOrder.status_obj.placing.num})
 			.populate({path: "Shop", select: "serve_Citas"});
-		if(!Order) return res.json({status: 400, message: "[server] 没有找到此产品信息, 请刷新重试"});
+		if(!Order) return res.json({status: 400, message: "[server] 没有找到此订单信息, 请刷新重试"});
 
 		if(req.body.ship_info) {
 			const ship_info = req.body.ship_info;
@@ -60,7 +60,7 @@ exports.OrderDelete = async(req, res) => {
 		if(payload.Shop) pathObj.Shop = payload.Shop;
 
 		const Order = await OrderDB.findOne(pathObj);
-		if(!Order) return res.json({status: 400, message: "[server] 没有找到此产品信息, 请刷新重试"});
+		if(!Order) return res.json({status: 400, message: "[server] 没有找到此订单信息, 请刷新重试"});
 
 		OrderSkuDB.deleteMany({Order: id});
 		OrderProdDB.deleteMany({Order: id});
