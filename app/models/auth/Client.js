@@ -53,10 +53,7 @@ dbSchema.pre('save', function(next) {
 	} else {
 		this.at_upd = Date.now();
 	}
-	console.log("phonePre", this.phonePre)
-	console.log("phoneNum", this.phoneNum)
 	this.phone = (this.phonePre && this.phoneNum) ? (String(this.phonePre) + String(this.phoneNum)) : '';
-	console.log("phone", this.phone)
 
 	this.is_active = (!this.email && !this.phone) ? false : true;
 	next();

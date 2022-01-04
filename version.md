@@ -1,3 +1,5 @@
+0.0.842 dbSchema.pre 要注意
+		this.phone
 0.0.841 Client phone bug
 0.0.84 	优化
 0.0.83 	OrderProds OrderSkus bug

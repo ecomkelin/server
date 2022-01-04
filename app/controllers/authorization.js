@@ -44,7 +44,7 @@ exports.logout = async(req, res, objectDB) => {
 		const refresh_res = await MdJwt.token_VerifyProm(req.headers['authorization']);
 		if(refresh_res.status !== 200) return res.json(refresh_res);
 		const payload = refresh_res.data.payload;
-		const object = await objectDB.findOne({_id: payload._id}, {refreshToken: 1});
+		const object = await objectDB.findOne({_id: payload._id});
 		if(!object) return res.json({status: 200, message: "[server] 未找到相应用户"});
 		object.refreshToken = null;
 		const objSave = await object.save();
