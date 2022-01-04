@@ -1,3 +1,4 @@
+0.0.841 Client phone bug
 0.0.84 	优化
 0.0.83 	OrderProds OrderSkus bug
 0.0.82 	OrderProd OrderSku query: Clients 

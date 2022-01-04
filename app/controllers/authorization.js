@@ -64,9 +64,9 @@ exports.logout = async(req, res, objectDB) => {
 */
 exports.login = async(req, res, objectDB) => {
 	try{
-		const Obj_res = await obtain_payload(req.body.system, req.body.social, objectDB);
-		if(Obj_res.status === 400) return MdFilter.jsonError(res, Obj_res.message);
-		const payload = Obj_res.data.object;
+		const payload_res = await obtain_payload(req.body.system, req.body.social, objectDB);
+		if(payload_res.status === 400) return MdFilter.jsonError(res, payload_res.message);
+		const payload = payload_res.data.object;
 		if(!payload) return MdFilter.jsonError(res, "登陆失败");
 		const accessToken = MdJwt.generateToken(payload);
 		const refreshToken = MdJwt.generateToken(payload, true);
@@ -215,6 +215,7 @@ exports.register = async(req, res) => {
 			obj = {phone: to};
 			obj.phonePre = phonePre;
 			obj.phoneNum = phoneNum;
+			obj.phone = phoneNum;
 			pathSame.phone = to;
 		}
 		const vrifyChecks_res = await verifyChecks_Prom(to, req.body.otp);	// 把注册邮箱或手机 连同验证码 验证

@@ -176,16 +176,13 @@ exports.stripePayment = async(req, res) => {
 		})
 		// if(!Shop.stripe_key_private) return res.json({status: 400, message: "[server] 本商店没有写入 strip 的 key Private"});
 		// const stripe = require('stripe')(Shop.stripe_key_private);
-		console.log(1)
 		const Stripe = require('stripe')(process.env.STRIPE_PRIVATE);
 
-		console.log(2)
 		const email = payload.email;
 		const customer = await Stripe.customers.create({
 			email,
 		});
 
-		console.log(3)
 		const stripeSession = await Stripe.checkout.sessions.create({
 			line_items,
 			shipping_rates: ["shr_1JpCbzJIPg2MUXJXFTAgCaFt"],
@@ -205,7 +202,6 @@ exports.stripePayment = async(req, res) => {
 			},
 			customer: customer.id,
 		});
-		console.log(4)
 		return res.json({status: 200, data: {url: stripeSession.url}});
 	} catch(error) {
 		console.log("stripePayment error", error);
