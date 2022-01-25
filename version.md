@@ -1,3 +1,4 @@
+0.0.844 Pd code 4-13位
 0.0.842 dbSchema.pre 要注意
 		this.phone
 0.0.841 Client phone bug
