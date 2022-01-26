@@ -84,7 +84,7 @@ exports.CategDelete = async(req, res) => {
 			Categ_far.Categ_sons.remove(id);
 		}
 
-		if(Categ.img_url && Categ.img_url.split("Categ").length > 1) await MdFiles.rmPicture(Categ.img_url);
+		if(Categ.img_url) await MdFiles.rmPicture(Categ.img_url);
 		const objDel = await CategDB.deleteOne({_id: Categ._id});
 		if(Categ_far) await Categ_far.save();
 
@@ -100,24 +100,34 @@ exports.CategDelete = async(req, res) => {
 exports.CategPut = async(req, res) => {
 	console.log("/b1/CategPut");
 	try{
+		console.log(0)
 		const payload = req.payload;
 		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
 
+		console.log(1)
 		const id = req.params.id;		// 所要更改的Categ的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
 		const pathObj = {_id: id};
 		Categ_path_Func(pathObj, payload);
 
 		const Categ = await CategDB.findOne(pathObj);
+		console.log(2)
 		if(!Categ) return res.json({status: 400, message: "[server] 没有找到此分类信息, 请刷新重试"});
-
+		console.log(3)
 		if(req.body.general) {
+			console.log(41)
 			Categ_general(res, req.body.general, Categ, payload);
+			console.log(42)
 		} else {
+			console.log(51)
 			const obj = await MdFiles.mkPicture_prom(req, {img_Dir: "/Categ", field: "img_url"});
+			console.log(52)
 			if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 obj对象数据"});
+			console.log(53)
 			Categ_general(res, obj, Categ, payload);
+			console.log(54)
 		}
+		console.log(6)
 		
 	} catch(error) {
 		console.log("/b1/CategPut", error);
@@ -126,11 +136,14 @@ exports.CategPut = async(req, res) => {
 }
 const Categ_general = async(res, obj, Categ, payload) => {
 	try{
+		console.log(7)
 		MdFilter.readonly_Func(obj);
 		delete obj.level;
 		delete obj.Categ_sons;
 
+		console.log(8)
 		if(obj.code) {
+		console.log(9)
 			obj.code = obj.code.replace(/^\s*/g,"").toUpperCase();
 			if(obj.code !== Categ.code) {
 				const errorInfo = MdFilter.Stint_Match_objs(StintCateg, obj, ['code']);
@@ -141,29 +154,39 @@ const Categ_general = async(res, obj, Categ, payload) => {
 			}
 		}
 
+		console.log(10)
 		// 如果不是顶级分类 并且新的父分类与原父分类不同
 		if((Categ.level > 1) && (obj.Categ_far && obj.Categ_far != Categ.Categ_far)) {
+		console.log(11)
 			// 新的父分类添加子分类 _id
 			if(!MdFilter.is_ObjectId_Func(obj.Categ_far)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
 			const Categ_far = await CategDB.findOne({_id: obj.Categ_far, Firm: payload.Firm});
 			if(!Categ_far) return res.json({status: 400, message: "没有找到要改变的父分类"});
 
+		console.log(12)
 			if(!Categ_far.Categ_sons) Categ_far.Categ_sons = [];
 			Categ_far.Categ_sons.push(id);
 			const Categ_farSave = await Categ_far.save();
 			if(!Categ_farSave) return res.json({status: 400, message: "父分类 存储错误"});
 
+		console.log(13)
 			// 原父分类删除子分类 _id
 			const Org_far = await CategDB.findOne({_id: Categ.Categ_far});
 			if(!Org_far) return res.json({status: 400, message: "原父分类信息错误"});
 			Org_far.Categ_sons.remove(id);
 			const Org_farSave = await Org_far.save();
+		console.log(14)
 			if(!Org_farSave) return res.json({status: 400, message: "原父分类 存储错误"});
 
 			Categ.Categ_far = obj.Categ_far;
+		console.log(15)
 		}
 
-		if(obj.img_url && (obj.img_url != Categ.img_url) && Categ.img_url && Categ.img_url.split("Categ").length > 1){
+		console.log(16)
+		console.log("obj.img_url", obj.img_url)
+		console.log("Categ.img_url", obj.img_url)
+		if(obj.img_url && (obj.img_url != Categ.img_url) && Categ.img_url){
+		console.log(17)
 			await MdFiles.rmPicture(Categ.img_url);
 			Categ.img_url = obj.img_url;
 		}

@@ -65,7 +65,7 @@ exports.BrandDelete = async(req, res) => {
 		// console.log(Pd);
 		if(Pd) return res.json({status: 400, message: "[server] 请先删除品牌中的产品"});
 
-		if(Brand.img_url && Brand.img_url.split("Brand").length > 1) await MdFiles.rmPicture(Brand.img_url);
+		if(Brand.img_url) await MdFiles.rmPicture(Brand.img_url);
 		const objDel = await BrandDB.deleteOne({_id: Brand._id});
 		return res.json({status: 200, message: "[server] 删除成功"});
 	} catch(error) {
@@ -112,7 +112,7 @@ exports.BrandPut = async(req, res) => {
 			const Nation = await NationDB.findOne({_id: obj.Nation});
 			if(!Nation) return res.json({status: 400, message: '[server] 没有找到此国家信息'});
 		}
-		if(obj.img_url && (obj.img_url != Brand.img_url) && Brand.img_url && Brand.img_url.split("Brand").length > 1){
+		if(obj.img_url && (obj.img_url != Brand.img_url) && Brand.img_url){
 			await MdFiles.rmPicture(Brand.img_url);
 		}
 

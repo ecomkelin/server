@@ -77,7 +77,7 @@ const NationPut = async(req, res) => {
 			if(objSame) return res.json({status: 400, message: '[server] 此城市编号已被占用, 请查看'});
 		}
 
-		if(obj.img_url && (obj.img_url != Nation.img_url) && Nation.img_url && Nation.img_url.split("Nation").length > 1){
+		if(obj.img_url && (obj.img_url != Nation.img_url) && Nation.img_url){
 			await MdFiles.rmPicture(Nation.img_url);
 		}
 
@@ -103,7 +103,7 @@ const NationDelete = async(req, res) => {
 		const Area = await AreaDB.findOne({Nation: id});
 		if(Area) return res.json({status: 400, message: "[server] 请先删除城市中的商店"});
 
-		if(Nation.img_url && Nation.img_url.split("Nation").length > 1) await MdFiles.rmPicture(Nation.img_url);
+		if(Nation.img_url) await MdFiles.rmPicture(Nation.img_url);
 		const objDel = await NationDB.deleteOne({_id: id});
 		return res.json({status: 200, message: "[server] 删除成功"});
 	} catch(error) {
@@ -188,7 +188,7 @@ const AreaPut = async(req, res) => {
 			if(!Nation) return res.json({status: 400, message: '[server] 没有找到此国家信息'});
 		}
 
-		if(obj.img_url && (obj.img_url != Area.img_url) && Area.img_url && Area.img_url.split("Area").length > 1){
+		if(obj.img_url && (obj.img_url != Area.img_url) && Area.img_url){
 			await MdFiles.rmPicture(Area.img_url);
 		}
 
@@ -213,7 +213,7 @@ const AreaDelete = async(req, res) => {
 		const Cita = await CitaDB.findOne({Area: id});
 		if(Cita) return res.json({status: 400, message: "[server] 请先删除城市中的商店"});
 
-		if(Area.img_url && Area.img_url.split("Area").length > 1) await MdFiles.rmPicture(Area.img_url);
+		if(Area.img_url) await MdFiles.rmPicture(Area.img_url);
 		const objDel = await AreaDB.deleteOne({_id: id});
 		return res.json({status: 200, message: "[server] 删除成功"});
 	} catch(error) {
@@ -305,7 +305,7 @@ const CitaPut = async(req, res) => {
 			if(!Area) return res.json({status: 400, message: '[server] 没有找到此大区信息'});
 		}
 
-		if(obj.img_url && (obj.img_url != Cita.img_url) && Cita.img_url && Cita.img_url.split("Cita").length > 1){
+		if(obj.img_url && (obj.img_url != Cita.img_url) && Cita.img_url){
 			await MdFiles.rmPicture(Cita.img_url);
 		}
 
@@ -330,7 +330,7 @@ const CitaDelete = async(req, res) => {
 		const Shop = await ShopDB.findOne({Cita: id});
 		if(Shop) return res.json({status: 400, message: "[server] 请先删除城市中的商店"});
 
-		if(Cita.img_url && Cita.img_url.split("Cita").length > 1) await MdFiles.rmPicture(Cita.img_url);
+		if(Cita.img_url) await MdFiles.rmPicture(Cita.img_url);
 		const objDel = await CitaDB.deleteOne({_id: id});
 		return res.json({status: 200, message: "[server] 删除成功"});
 	} catch(error) {

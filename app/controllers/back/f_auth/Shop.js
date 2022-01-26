@@ -77,7 +77,7 @@ exports.ShopDelete = async(req, res) => {
 		const Prod = await ProdDB.findOne({Shop: Shop._id});
 		if(Prod) return res.json({status: 400, message: "[server] 请先删除店铺中的商品"});
 
-		if(Shop.img_url && Shop.img_url.split("Shop").length > 1) await MdFiles.rmPicture(Shop.img_url);
+		if(Shop.img_url) await MdFiles.rmPicture(Shop.img_url);
 		const objDel = await ShopDB.deleteOne({_id: Shop._id});
 		return res.json({status: 200, message: "[server] 删除成功"});
 	} catch(error) {
@@ -158,7 +158,7 @@ const Shop_general = async(res, obj, Shop, payload) => {
 			if(!Cita) return res.json({status: 400, message: '[server] 没有找到此城市信息'});
 		}
 
-		if(obj.img_url && (obj.img_url != Shop.img_url) && Shop.img_url && Shop.img_url.split("Shop").length > 1){
+		if(obj.img_url && (obj.img_url != Shop.img_url) && Shop.img_url){
 			await MdFiles.rmPicture(Shop.img_url);
 		}
 
