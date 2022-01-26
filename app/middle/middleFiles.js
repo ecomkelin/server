@@ -55,7 +55,8 @@ const multiplesPic_Func = (resolve, obj, field, img_Dir, warnMsg, files, keys, p
 		} else {
 			const img_url = "/upload"+img_Dir+"/" + payload_id + '-'+n+'-' + Date.now() + '.' + imgType;
 			const newfilepath = pubSrc + img_url;
-
+			// console.log('oldfliepath', oldfliepath)
+			// console.log('newfilepath', newfilepath)
 			fs.rename(oldfliepath, newfilepath, err => {
 				if(err) {
 					console.log("multiplesPic_Func", err)

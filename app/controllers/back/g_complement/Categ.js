@@ -119,7 +119,7 @@ exports.CategPut = async(req, res) => {
 		}
 		
 	} catch(error) {
-		console.log("/b1/CategPut", error);
+		console.log("/b1/CategPutError", error);
 		return res.json({status: 500, message: "[服务器错误: CategPut]"});
 	}
 }
@@ -161,13 +161,10 @@ const Categ_general = async(res, obj, Categ, payload) => {
 
 			Categ.Categ_far = obj.Categ_far;
 		}
-		console.log("obj.img_url", obj.img_url)
-		console.log("before Categ.img_url", Categ.img_url)
 		if(obj.img_url && (obj.img_url != Categ.img_url)){
-			Categ.img_url = obj.img_url;
 			if(Categ.img_url) await MdFiles.rmPicture(Categ.img_url);
+			Categ.img_url = obj.img_url;
 		}
-		console.log("After Categ.img_url", Categ.img_url)
 
 		if(!isNaN(obj.sort)) {
 			Categ.sort = obj.sort;
