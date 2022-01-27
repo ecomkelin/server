@@ -247,14 +247,14 @@ exports.ProdPut = async(req, res) => {
 			Prod.Nation = obj.Nation;	// 注意 Pd code 没有转大写
 			Prod.Brand = obj.Brand;	// 注意 Pd code 没有转大写
 			Prod.Categ = obj.Categ;	// 注意 Pd code 没有转大写
-			if(obj.price_regular) {
-				obj.price_regular = parseFloat(obj.price_regular);
-				if(!isNaN(obj.price_regular)) Prod.price_regular = obj.price_regular;
-			}
-			if(obj.price_sale) {
-				obj.price_sale = parseFloat(obj.price_sale);
-				if(!isNaN(obj.price_sale)) Prod.price_sale = obj.price_sale;
-			}
+		}
+		if(obj.price_regular) {
+			Prod.price_regular = parseFloat(obj.price_regular);
+			if(!isNaN(Prod.price_regular)) Prod.price_regular = obj.price_regular;
+		}
+		if(obj.price_sale) {
+			Prod.price_sale = parseFloat(obj.price_sale);
+			if(!isNaN(Prod.price_sale)) Prod.price_sale = obj.price_sale;
 		}
 		Prod.User_upd = payload._id;
 
