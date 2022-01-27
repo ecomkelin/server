@@ -685,13 +685,13 @@ module.exports = (app) => {
 				if(obj.code === 'undefined' || obj.nome === 'undefined') continue;
 				const errorInfo = MdFilter.Stint_Match_objs(StintBrand, obj, ['code', 'nome']);
 				if(errorInfo) {
-					console.log(i, xuhao, "errorInfo", errorInfo);
+					console.log(i, "code", "errorInfo", errorInfo);
 					continue;
 				}
 
 				const objSame = await BrandDB.findOne({'code': obj.code, Firm});
 				if(objSame) {
-					console.log(i, xuhao, 'objSame');
+					console.log(i, "code", obj.code);
 					continue;
 				}
 				obj.Firm = Firm;
