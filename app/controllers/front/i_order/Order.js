@@ -54,6 +54,7 @@ exports.vOrderPost = async(req, res) => {
 			if(!Cita) return MdFilter.jsonError(res, "没有找到此城市");
 
 			obj_Order.ship_info.city = Cita.code;
+			obj_Order.ship_info.Cita = Cita._id;
 		} else {
 			return MdFilter.jsonError(res, "请传递 type_ship");
 		}
@@ -242,7 +243,7 @@ const recu_codeOrderSame_Prom = (codePre, codeNum) => {
 
 
 exports.vOrderPut = async(req, res) => {
-	console.log("/v1/OrderPut_ship");
+	console.log("/v1/OrderPut");
 	try{
 		const payload = req.payload;
 		if(MdSafe.fq_spanTimes1_Func(payload._id)) return res.json({status: 400, message: "[server] 您刷新太过频繁"});
@@ -273,8 +274,8 @@ exports.vOrderPut = async(req, res) => {
 		const objSave = await Order.save();
 		return res.json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
 	} catch(error) {
-		console.log("/v1/OrderPut_ship", error);
-		return res.json({status: 500, message: "[服务器错误: vOrderPut_ship]"});
+		console.log("/v1/OrderPut", error);
+		return res.json({status: 500, message: "[服务器错误: vOrderPut]"});
 	}
 }
 

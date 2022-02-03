@@ -1,3 +1,4 @@
+0.0.89	货到付款优化
 0.0.88	批量上传错误修正
 0.0.87	ProdPut price
 0.0.86	Categ img_url Put
