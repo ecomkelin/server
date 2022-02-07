@@ -31,7 +31,7 @@ const dbProd = 'Prod';
 exports.vProds = async(req, res) => {
 	console.log("/v1/Prods");
 	try {
-		console.log("query", req.query)
+		// console.log("query", req.query)
 		const payload = req.payload || req.ip;
 		const GetDB_Filter = {
 			payload: payload,
