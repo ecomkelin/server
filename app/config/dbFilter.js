@@ -22,7 +22,7 @@ exports.limitPopulate = (popStr, payload, dbName) => {
 		if(dbName === 'Prod') {
 			console.log('--------------limitPopulate-----------------')
 			console.log('init', populate)
-			recursivePop(populate, payload);		// 根据回调 筛选去掉不可返回的populate 中的 select
+			recursivePop(populate, payload, dbName);		// 根据回调 筛选去掉不可返回的populate 中的 select
 			console.log('return', populate)
 			console.log('===========limitPopulate=============')
 		}
@@ -31,8 +31,8 @@ exports.limitPopulate = (popStr, payload, dbName) => {
 		return null;				// 如果错误(主要是 JSON.parse 的错误) 则返回空
 	}
 }
-const recursivePop = (pops, payload) => {
-	console.log(pops);
+const recursivePop = (pops, payload, dbName) => {
+	if(dbName == 'Prod') console.log("recursivePop pops", pops);
 	if(pops instanceof Array) {	// 如果此 populate 是数组 则按数组对待
 		for(let i=0; i<pops.length; i++) {
 			limitFilter(pops[i], payload);
