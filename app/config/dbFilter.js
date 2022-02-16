@@ -15,15 +15,17 @@ exports.limitSelect = (dbName, payload) => {
 	return [];
 }
 
-exports.limitPopulate = (popStr, payload) => {
+exports.limitPopulate = (popStr, payload, dbName) => {
 	try{
 		if(!popStr) return null;	// 如果 字符串 为空 则返回空
 		const populate = JSON.parse(popStr);	// 获取 populate 对象
-		console.log('--------------limitPopulate-----------------')
-		console.log('init', populate)
-		recursivePop(populate, payload);		// 根据回调 筛选去掉不可返回的populate 中的 select
-		console.log('return', populate)
-		console.log('========================')
+		if(dbName === 'Prod') {
+			console.log('--------------limitPopulate-----------------')
+			console.log('init', populate)
+			recursivePop(populate, payload);		// 根据回调 筛选去掉不可返回的populate 中的 select
+			console.log('return', populate)
+			console.log('===========limitPopulate=============')
+		}
 		return populate;
 	} catch(e) {
 		return null;				// 如果错误(主要是 JSON.parse 的错误) 则返回空

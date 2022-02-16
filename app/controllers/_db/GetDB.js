@@ -15,7 +15,7 @@ exports.db = (GetDB_Filter) => {
 			const selectObj = MdFilter.select_func(queryObj.selects, queryObj.selectVal, dbName, payload);
 
 			console.log("/db queryObj populateObjs", queryObj.populateObjs)
-			const populateObjs = dbFilter.limitPopulate(queryObj.populateObjs, payload);
+			const populateObjs = dbFilter.limitPopulate(queryObj.populateObjs, payload, dbName);
 
 			console.log("/db populateObjs", populateObjs)
 			const object = await objectDB.findOne(pathObj, selectObj)
