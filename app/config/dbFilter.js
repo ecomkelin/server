@@ -39,7 +39,9 @@ const recursivePop = (pops, payload, dbName) => {
 	if(pops instanceof Array) {	// 如果此 populate 是数组 则按数组对待
 		console.log('recursivePop 1')
 		for(let i=0; i<pops.length; i++) {
+			console.log('i path----', pops[i].path)
 			limitFilter(pops[i], payload, dbName);
+			console.log(pops)
 		}
 	} else {	// 如果是一个对象 则按对象对待
 		console.log('recursivePop 2')
