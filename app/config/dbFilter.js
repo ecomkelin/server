@@ -47,7 +47,7 @@ const recursivePop = (pops, payload, dbName) => {
 	}
 }
 const limitFilter = (pop, payload, dbName) => {
-	console.log('limitFilter path' pop.path)
+	console.log('limitFilter path', pop.path)
 	if(!pop.path) {	// 如果此对象下没有 path 则为其设置一个 path值 此path值不能在数据库名字 , 并且完成了
 		console.log('limitFilter 1')
 		pop.path = 'null';
