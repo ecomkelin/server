@@ -37,17 +37,17 @@ exports.limitPopulate = (popStr, payload, dbName) => {
 const recursivePop = (pops, payload, dbName) => {
 	if(dbName == 'Prod') console.log("recursivePop pops", pops);
 	if(pops instanceof Array) {	// 如果此 populate 是数组 则按数组对待
-		console.log(1)
+		console.log('recursivePop 1')
 		for(let i=0; i<pops.length; i++) {
 			limitFilter(pops[i], payload, dbName);
 		}
 	} else {	// 如果是一个对象 则按对象对待
-		console.log(2)
+		console.log('recursivePop 2')
 		limitFilter(pops, payload, dbName);
 	}
 }
 const limitFilter = (pop, payload, dbName) => {
-	console.log('limitFilter')
+	console.log('limitFilter path' pop.path)
 	if(!pop.path) {	// 如果此对象下没有 path 则为其设置一个 path值 此path值不能在数据库名字 , 并且完成了
 		console.log('limitFilter 1')
 		pop.path = 'null';
