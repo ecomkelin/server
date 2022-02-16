@@ -16,7 +16,7 @@ exports.db = (GetDB_Filter) => {
 
 			const populateObjs = dbFilter.limitPopulate(queryObj.populateObjs, payload);
 
-			// console.log("/db", populateObjs)
+			console.log("/db", populateObjs)
 			const object = await objectDB.findOne(pathObj, selectObj)
 				.populate(populateObjs);
 			if(!object) resolve({status: 400, message: "[server] 没有找到数据"});
