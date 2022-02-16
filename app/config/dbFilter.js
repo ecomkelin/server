@@ -19,13 +19,18 @@ exports.limitPopulate = (popStr, payload) => {
 	try{
 		if(!popStr) return null;	// 如果 字符串 为空 则返回空
 		const populate = JSON.parse(popStr);	// 获取 populate 对象
+		console.log('--------------limitPopulate-----------------')
+		console.log(populate)
 		recursivePop(populate, payload);		// 根据回调 筛选去掉不可返回的populate 中的 select
+		console.log(populate)
+		console.log('========================')
 		return populate;
 	} catch(e) {
 		return null;				// 如果错误(主要是 JSON.parse 的错误) 则返回空
 	}
 }
 const recursivePop = (pops, payload) => {
+	console.log(pops);
 	if(pops instanceof Array) {	// 如果此 populate 是数组 则按数组对待
 		for(let i=0; i<pops.length; i++) {
 			limitFilter(pops[i], payload);
