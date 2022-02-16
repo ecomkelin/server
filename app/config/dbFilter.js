@@ -9,6 +9,8 @@ exports.limitSelect = (dbName, payload) => {
 	if(dbName === 'User') return ['refreshToken', 'pwd'];
 
 	console.log("limitSelect 3333333333333")
+	console.log('isShop ===', dbName === 'Shop');
+	console.log('isShop ==', dbName == 'Shop');
 	if(dbName === 'Shop') {
 		console("SSSShop 1111111")
 		if(!payload.role) return ['strip', 'User_upd', 'User_crt', 'at_upd'];
