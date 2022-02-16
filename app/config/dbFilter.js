@@ -20,9 +20,9 @@ exports.limitPopulate = (popStr, payload) => {
 		if(!popStr) return null;	// 如果 字符串 为空 则返回空
 		const populate = JSON.parse(popStr);	// 获取 populate 对象
 		console.log('--------------limitPopulate-----------------')
-		console.log(populate)
+		console.log('init', populate)
 		recursivePop(populate, payload);		// 根据回调 筛选去掉不可返回的populate 中的 select
-		console.log(populate)
+		console.log('return', populate)
 		console.log('========================')
 		return populate;
 	} catch(e) {
