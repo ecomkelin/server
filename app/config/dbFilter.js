@@ -24,7 +24,7 @@ exports.limitPopulate = (popStr, payload, dbName) => {
 			console.log('init', populate)
 		}
 		recursivePop(populate, payload, dbName);		// 根据回调 筛选去掉不可返回的populate 中的 select
-		console.log("33333333333333333333")
+		console.log("33333333333333333333", dbName)
 		if(dbName === 'Prod') {
 			console.log('return', populate)
 			console.log('===========limitPopulate=============')
@@ -61,7 +61,8 @@ const limitFilter = (pop, payload, dbName) => {
 		} else {	// 否则 进行筛选
 			if(dbName == 'Prod') console.log('limitFilter 22')
 			const limSels = this.limitSelect(pop.path, payload);	// 查看这个数据库中 是否有限制的字段
-			if(dbName == 'Prod') console.log('fields', fields)
+			console.log('???????????????', dbName)
+			if(dbName == 'Prod') console.log('limSels', limSels)
 			if(limSels.length !== 0) {		// 如果有限制字段 则根据限制 设置select的值
 				const fields = MdFilter.getArrayFromString(pop.select, ' ');
 				const sels = MdFilter.ArrayDelArr(fields, limSels);
