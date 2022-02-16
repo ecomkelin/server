@@ -14,9 +14,10 @@ exports.db = (GetDB_Filter) => {
 			if(path_Callback) path_Callback(pathObj, payload, queryObj);
 			const selectObj = MdFilter.select_func(queryObj.selects, queryObj.selectVal, dbName, payload);
 
+			console.log("/db queryObj populateObjs", queryObj.populateObjs)
 			const populateObjs = dbFilter.limitPopulate(queryObj.populateObjs, payload);
 
-			console.log("/db", populateObjs)
+			console.log("/db populateObjs", populateObjs)
 			const object = await objectDB.findOne(pathObj, selectObj)
 				.populate(populateObjs);
 			if(!object) resolve({status: 400, message: "[server] 没有找到数据"});
