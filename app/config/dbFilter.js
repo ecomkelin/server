@@ -24,7 +24,7 @@ exports.limitPopulate = (popStr, payload, dbName) => {
 			console.log('init', populate)
 		}
 		recursivePop(populate, payload, dbName);		// 根据回调 筛选去掉不可返回的populate 中的 select
-		console.log("rt")
+		console.log("33333333333333333333")
 		if(dbName === 'Prod') {
 			console.log('return', populate)
 			console.log('===========limitPopulate=============')
@@ -39,33 +39,33 @@ const recursivePop = (pops, payload, dbName) => {
 	if(pops instanceof Array) {	// 如果此 populate 是数组 则按数组对待
 		console.log('recursivePop 1')
 		for(let i=0; i<pops.length; i++) {
-			console.log(i,'path----', pops[i].path)
+			if(dbName == 'Prod')console.log(i,'path----', pops[i].path)
 			limitFilter(pops[i], payload, dbName);
-			console.log(pops)
+			if(dbName == 'Prod') console.log(pops)
 		}
 	} else {	// 如果是一个对象 则按对象对待
-		console.log('recursivePop 2')
+		if(dbName == 'Prod') console.log('recursivePop 2')
 		limitFilter(pops, payload, dbName);
 	}
 }
 const limitFilter = (pop, payload, dbName) => {
-	console.log('limitFilter path', pop.path)
+	if(dbName == 'Prod') console.log('limitFilter path', pop.path)
 	if(!pop.path) {	// 如果此对象下没有 path 则为其设置一个 path值 此path值不能在数据库名字 , 并且完成了
-		console.log('limitFilter 1')
+		if(dbName == 'Prod') console.log('limitFilter 1')
 		pop.path = 'null';
 	} else {	// 如果有 path 值 
-		console.log('limitFilter 2')
+		if(dbName == 'Prod') console.log('limitFilter 2')
 		if(!pop.select) {	// 如果 没有 select 则为其设置基础值
 			console.log('limitFilter 21')
 			pop.select = '_id code nome';
 		} else {	// 否则 进行筛选
-			console.log('limitFilter 22')
+			if(dbName == 'Prod') console.log('limitFilter 22')
 			const limSels = this.limitSelect(pop.path, payload);	// 查看这个数据库中 是否有限制的字段
-			console.log('fields', fields)
+			if(dbName == 'Prod') console.log('fields', fields)
 			if(limSels.length !== 0) {		// 如果有限制字段 则根据限制 设置select的值
 				const fields = MdFilter.getArrayFromString(pop.select, ' ');
 				const sels = MdFilter.ArrayDelArr(fields, limSels);
-				console.log('sels', sels)
+				if(dbName == 'Prod') console.log('sels', sels)
 				pop.select = sels.join(' ');
 			}
 		}
