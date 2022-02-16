@@ -22,7 +22,9 @@ exports.limitPopulate = (popStr, payload, dbName) => {
 		if(dbName === 'Prod') {
 			console.log('--------------limitPopulate-----------------')
 			console.log('init', populate)
-			recursivePop(populate, payload, dbName);		// 根据回调 筛选去掉不可返回的populate 中的 select
+		}
+		recursivePop(populate, payload, dbName);		// 根据回调 筛选去掉不可返回的populate 中的 select
+		if(dbName === 'Prod') {
 			console.log('return', populate)
 			console.log('===========limitPopulate=============')
 		}
