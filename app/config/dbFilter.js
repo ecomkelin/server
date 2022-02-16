@@ -12,11 +12,11 @@ exports.limitSelect = (dbName, payload) => {
 	console.log('isShop ===', dbName === 'Shop');
 	console.log('isShop ==', dbName == 'Shop');
 	if(dbName === 'Shop') {
-		console("SSSShop 1111111")
+		console.log("SSSShop 1111111", payload)
 		if(!payload.role) return ['strip', 'User_upd', 'User_crt', 'at_upd'];
-		console("SSSShop 22222222222")
+		console.log("SSSShop 22222222222")
 		if(payload.role != ConfUser.role_set.boss) return ['strip'];
-		console("SSSShop 3333333333")
+		console.log("SSSShop 3333333333")
 		return [];
 	}
 
