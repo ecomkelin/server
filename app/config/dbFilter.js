@@ -37,20 +37,27 @@ exports.limitPopulate = (popStr, payload, dbName) => {
 const recursivePop = (pops, payload, dbName) => {
 	if(dbName == 'Prod') console.log("recursivePop pops", pops);
 	if(pops instanceof Array) {	// 如果此 populate 是数组 则按数组对待
+		console.log(1)
 		for(let i=0; i<pops.length; i++) {
 			limitFilter(pops[i], payload, dbName);
 		}
 	} else {	// 如果是一个对象 则按对象对待
+		console.log(2)
 		limitFilter(pops, payload, dbName);
 	}
 }
 const limitFilter = (pop, payload, dbName) => {
+	console.log('limitFilter')
 	if(!pop.path) {	// 如果此对象下没有 path 则为其设置一个 path值 此path值不能在数据库名字 , 并且完成了
+		console.log('limitFilter 1')
 		pop.path = 'null';
 	} else {	// 如果有 path 值 
+		console.log('limitFilter 2')
 		if(!pop.select) {	// 如果 没有 select 则为其设置基础值
+			console.log('limitFilter 21')
 			pop.select = '_id code nome';
 		} else {	// 否则 进行筛选
+			console.log('limitFilter 22')
 			const limSels = this.limitSelect(pop.path, payload);	// 查看这个数据库中 是否有限制的字段
 			if(limSels.length !== 0) {		// 如果有限制字段 则根据限制 设置select的值
 				const fields = MdFilter.getArrayFromString(pop.select, ' ');
