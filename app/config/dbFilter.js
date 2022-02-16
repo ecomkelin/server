@@ -2,16 +2,23 @@ const ConfUser = require('./ConfUser.js');
 const MdFilter = require('../middle/middleFilter');
 
 exports.limitSelect = (dbName, payload) => {
+	console.log("limitSelect 11111111111111")
 	if(!dbName) return [];
 
+	console.log("limitSelect 222222222222222")
 	if(dbName === 'User') return ['refreshToken', 'pwd'];
 
+	console.log("limitSelect 3333333333333")
 	if(dbName === 'Shop') {
+		console("SSSShop 1111111")
 		if(!payload.role) return ['strip', 'User_upd', 'User_crt', 'at_upd'];
+		console("SSSShop 22222222222")
 		if(payload.role != ConfUser.role_set.boss) return ['strip'];
+		console("SSSShop 3333333333")
 		return [];
 	}
 
+	console.log("limitSelect 444444444444444")
 	return [];
 }
 
