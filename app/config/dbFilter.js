@@ -2,7 +2,7 @@ const ConfUser = require('./ConfUser.js');
 const MdFilter = require('../middle/middleFilter');
 
 exports.limitSelect = (dbName, payload) => {
-	console.log("limitSelect 11111111111111")
+	console.log("limitSelect 11111111111111", dbName)
 	if(!dbName) return [];
 
 	console.log("limitSelect 222222222222222")
@@ -67,6 +67,7 @@ const limitFilter = (pop, payload, dbName) => {
 			pop.select = '_id code nome';
 		} else {	// 否则 进行筛选
 			if(dbName == 'Prod') console.log('limitFilter 22')
+			console.log('pop.path', pop.path);
 			const limSels = this.limitSelect(pop.path, payload);	// 查看这个数据库中 是否有限制的字段
 			console.log('???????????????', dbName)
 			if(dbName == 'Prod') console.log('limSels', limSels)
