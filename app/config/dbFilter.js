@@ -24,6 +24,7 @@ exports.limitPopulate = (popStr, payload, dbName) => {
 			console.log('init', populate)
 		}
 		recursivePop(populate, payload, dbName);		// 根据回调 筛选去掉不可返回的populate 中的 select
+		console.log("rt")
 		if(dbName === 'Prod') {
 			console.log('return', populate)
 			console.log('===========limitPopulate=============')
@@ -37,13 +38,13 @@ const recursivePop = (pops, payload, dbName) => {
 	if(dbName == 'Prod') console.log("recursivePop pops", pops);
 	if(pops instanceof Array) {	// 如果此 populate 是数组 则按数组对待
 		for(let i=0; i<pops.length; i++) {
-			limitFilter(pops[i], payload);
+			limitFilter(pops[i], payload, dbName);
 		}
 	} else {	// 如果是一个对象 则按对象对待
-		limitFilter(pops, payload);
+		limitFilter(pops, payload, dbName);
 	}
 }
-const limitFilter = (pop, payload) => {
+const limitFilter = (pop, payload, dbName) => {
 	if(!pop.path) {	// 如果此对象下没有 path 则为其设置一个 path值 此path值不能在数据库名字 , 并且完成了
 		pop.path = 'null';
 	} else {	// 如果有 path 值 
@@ -57,7 +58,7 @@ const limitFilter = (pop, payload) => {
 				pop.select = sels.join(' ');
 			}
 		}
-		if(pop.populate) recursivePop(pop.populate, payload);
+		if(pop.populate) recursivePop(pop.populate, payload, dbName);
 	}
 }
 
