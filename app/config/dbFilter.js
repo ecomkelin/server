@@ -63,7 +63,9 @@ const limitFilter = (pop, payload, dbName) => {
 			const limSels = this.limitSelect(pop.path, payload);	// 查看这个数据库中 是否有限制的字段
 			if(limSels.length !== 0) {		// 如果有限制字段 则根据限制 设置select的值
 				const fields = MdFilter.getArrayFromString(pop.select, ' ');
+				console.log('fields', fields)
 				const sels = MdFilter.ArrayDelArr(fields, limSels);
+				console.log('sels', sels)
 				pop.select = sels.join(' ');
 			}
 		}
