@@ -41,7 +41,7 @@ exports.vProds = async(req, res) => {
 			dbName: dbProd,
 		};
 		const dbs_res = await GetDB.dbs(GetDB_Filter);
-		// console.log('prods', dbs_res.data.objects[0])
+		console.log('prods', dbs_res.data.objects[0])
 		return res.json(dbs_res);
 	} catch(error) {
 		console.log("/v1/Prods", error);
@@ -63,6 +63,7 @@ exports.vProd = async(req, res) => {
 			dbName: dbProd,
 		};
 		const db_res = await GetDB.db(GetDB_Filter);
+		console.log('prod', dbs_res.data.object)
 		return res.json(db_res);
 	} catch(error) {
 		console.log("/v1/Prod", error);
