@@ -77,16 +77,16 @@ app.use(function(req, res, next) {
 	res.render("404");
 });
 
-// 服务器监听
-const fs = require('fs');
-const https = require('https');
-const privkey = fs.readFileSync('../https/private.pem', 'utf8');
-const certifig = fs.readFileSync('../https/file.crt', 'utf8');
-const objcred = {key: privkey, cert: certifig};
-const serverHttps = require('https').createServer(objcred, app);
-serverHttps.listen(process.env.HTTPS, function(){
-	console.log('Server start on port: https://localhost:' + process.env.HTTPS);
-});
+// // 服务器监听
+// const fs = require('fs');
+// const https = require('https');
+// const privkey = fs.readFileSync('../https/private.pem', 'utf8');
+// const certifig = fs.readFileSync('../https/file.crt', 'utf8');
+// const objcred = {key: privkey, cert: certifig};
+// const serverHttps = require('https').createServer(objcred, app);
+// serverHttps.listen(process.env.HTTPS, function(){
+// 	console.log('Server start on port: https://localhost:' + process.env.HTTPS);
+// });
 
 const serverHttp = require('http').createServer(app);
 serverHttp.listen(process.env.HTTP, function(){

@@ -1,113 +1,7 @@
-const ShopDB = require('../../../models/auth/Shop');
 const OrderDB = require('../../../models/order/Order');
 
 const ConfOrder = require('../../../config/ConfOrder');
 const MdFilter = require('../../../middle/middleFilter');
-
-
-const paypal = require("@paypal/checkout-server-sdk");
-const payPalClient = require('./paypal/payPalClient');
-
-exports.paypalPayment =  async (req, res) => {
-	console.log("/v1/paypalPayment");
-	try {
-		const payload = req.payload;
-		const OrderId = req.body.OrderId;
-		const items_res = await getSkus_Prom(OrderId, payload);
-		if(items_res.status !== 200) return res.json(items_res);
-		const {order_items, Order} = items_res.data;
-
-		/* ----- paypal 的数据格式 ----- */
-		const orderPayValue = order_items.reduce((sum, item) => {
-			return sum + item.price_sale * item.quantity
-		}, 0);
-		const items = order_items.map(item => {
-			return {
-				name: item.desp,
-				unit_amount: {
-					currency_code: process.env.CURRENCY,
-					value: item.price_sale,
-				},
-				quantity: item.quantity,
-			}
-		});
-		const purchase_units = [{
-			amount: {
-				currency_code: process.env.CURRENCY,
-				value: orderPayValue,
-				breakdown: {
-					item_total: {
-						currency_code: process.env.CURRENCY,
-						value: orderPayValue,
-					},
-				},
-			},
-			items,
-		}];
-		/* ----- paypal 的数据格式 ----- */
-
-		const request = new paypal.orders.OrdersCreateRequest();
-		request.prefer("return=representation")
-		request.requestBody({
-			intent: "CAPTURE",
-			purchase_units,
-		});
-		const order = await payPalClient.client().execute(request);
-		if(!order) return resolve({status: 400, message: "[server] paypalClient.execute Error"});
-
-		Order.paypal_orderId = order.result.id;
-		const OrderSave = await Order.save();
-		if(!OrderSave) return resolve({status: 400, message: "[server] paypalClient OrderSave Error"});
-
-		return res.json({status: 200, data: {id: order.result.id}});
-	} catch (e) {
-		console.log("paypaylPayment error:   -------", e)
-		return res.json({ error: e.message })
-	}
-}
-
-exports.paypalCheckout = async(req, res) => {
-	console.log("/v1/paypalCheckout");
-	try {
-		const paypal_orderId = req.body.paypal_orderId;
-		const OrderId = req.body.OrderId;
-
-		const Order = await OrderDB.findOne({_id: OrderId});
-		if(!Order) return res.json({status: 400, message: "[server] 没有找到此订单"});
-		if(Order.paypal_orderId !== paypal_orderId) return res.json({status: 400, message: "[server] 付款信息不是此订单的"});
-
-		const checkRequest = new paypal.orders.OrdersCaptureRequest(paypal_orderId);
-		checkRequest.requestBody({});
-		
-		const checkOrder = await payPalClient.client().execute(checkRequest);
-		Order.status = ConfOrder.status_obj.responding.num;
-		const OrderSave = await Order.save();
-		if(!OrderSave) return res.json({status: 400, message: "[server] paypalCheckout OrderSave Error"});
-		return res.json({ status: 200 })
-	} catch (error) {
-		console.log("paypalCheckout error:   -------", error);
-		return res.json({ status: 400, message: "付款失败" });
-	}
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -208,6 +102,187 @@ exports.stripePayment = async(req, res) => {
 		return res.json({status: 500, message: "[server] create-checkout-session Error"});
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const paypal = require("@paypal/checkout-server-sdk");
+const payPalClient = require('./paypal/payPalClient');
+
+exports.paypalPayment =  async (req, res) => {
+	console.log("/v1/paypalPayment");
+	try {
+		const payload = req.payload;
+		const OrderId = req.body.OrderId;
+		const items_res = await getSkus_Prom(OrderId, payload);
+		if(items_res.status !== 200) return res.json(items_res);
+		const {order_items, Order} = items_res.data;
+
+		/* ----- paypal 的数据格式 ----- */
+		const orderPayValue = order_items.reduce((sum, item) => {
+			return sum + item.price_sale * item.quantity
+		}, 0);
+		const items = order_items.map(item => {
+			return {
+				name: item.desp,
+				unit_amount: {
+					currency_code: process.env.CURRENCY,
+					value: item.price_sale,
+				},
+				quantity: item.quantity,
+			}
+		});
+		const purchase_units = [{
+			amount: {
+				currency_code: process.env.CURRENCY,
+				value: orderPayValue,
+				breakdown: {
+					item_total: {
+						currency_code: process.env.CURRENCY,
+						value: orderPayValue,
+					},
+				},
+			},
+			items,
+		}];
+		/* ----- paypal 的数据格式 ----- */
+
+		const request = new paypal.orders.OrdersCreateRequest();
+		request.prefer("return=representation")
+		request.requestBody({
+			intent: "CAPTURE",
+			purchase_units,
+		});
+		const order = await payPalClient.client().execute(request);
+		if(!order) return resolve({status: 400, message: "[server] paypalClient.execute Error"});
+
+		Order.paypal_orderId = order.result.id;
+		const OrderSave = await Order.save();
+		if(!OrderSave) return resolve({status: 400, message: "[server] paypalClient OrderSave Error"});
+
+		return res.json({status: 200, data: {id: order.result.id}});
+	} catch (e) {
+		console.log("paypaylPayment error:   -------", e)
+		return res.json({ error: e.message })
+	}
+}
+
+exports.paypalCheckout = async(req, res) => {
+	console.log("/v1/paypalCheckout");
+	try {
+		const paypal_orderId = req.body.paypal_orderId;
+		const OrderId = req.body.OrderId;
+
+		const Order = await OrderDB.findOne({_id: OrderId});
+		if(!Order) return res.json({status: 400, message: "[server] 没有找到此订单"});
+		if(Order.paypal_orderId !== paypal_orderId) return res.json({status: 400, message: "[server] 付款信息不是此订单的"});
+
+		const checkRequest = new paypal.orders.OrdersCaptureRequest(paypal_orderId);
+		checkRequest.requestBody({});
+		
+		const checkOrder = await payPalClient.client().execute(checkRequest);
+		Order.status = ConfOrder.status_obj.responding.num;
+		const OrderSave = await Order.save();
+		if(!OrderSave) return res.json({status: 400, message: "[server] paypalCheckout OrderSave Error"});
+		return res.json({ status: 200 })
+	} catch (error) {
+		console.log("paypalCheckout error:   -------", error);
+		return res.json({ status: 400, message: "付款失败" });
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+exports.wxPayment =  async (req, res) => {
+	console.log("/v1/wxPayment");
+	try {
+		const payload = req.payload;
+		const OrderId = req.body.OrderId;
+		const items_res = await getSkus_Prom(OrderId, payload);
+		if(items_res.status !== 200) return res.json(items_res);
+		const {order_items, Order} = items_res.data;
+
+		/* ----- paypal 的数据格式 ----- */
+		const orderPayValue = order_items.reduce((sum, item) => {
+			return sum + item.price_sale * item.quantity
+		}, 0);
+		const items = order_items.map(item => {
+			return {
+				name: item.desp,
+				unit_amount: {
+					currency_code: process.env.CURRENCY,
+					value: item.price_sale,
+				},
+				quantity: item.quantity,
+			}
+		});
+		const purchase_units = [{
+			amount: {
+				currency_code: process.env.CURRENCY,
+				value: orderPayValue,
+				breakdown: {
+					item_total: {
+						currency_code: process.env.CURRENCY,
+						value: orderPayValue,
+					},
+				},
+			},
+			items,
+		}];
+		/* ----- paypal 的数据格式 ----- */
+
+		const request = new paypal.orders.OrdersCreateRequest();
+		request.prefer("return=representation")
+		request.requestBody({
+			intent: "CAPTURE",
+			purchase_units,
+		});
+		const order = await payPalClient.client().execute(request);
+		if(!order) return resolve({status: 400, message: "[server] paypalClient.execute Error"});
+
+		Order.paypal_orderId = order.result.id;
+		const OrderSave = await Order.save();
+		if(!OrderSave) return resolve({status: 400, message: "[server] paypalClient OrderSave Error"});
+
+		return res.json({status: 200, data: {id: order.result.id}});
+	} catch (e) {
+		console.log("paypaylPayment error:   -------", e)
+		return res.json({ error: e.message })
+	}
+}
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -16,4 +16,6 @@ module.exports = (app) => {
 	app.post('/api/v1/create-order', MdAuth.path_Client, Payment.paypalPayment);
 	app.post('/api/v1/check-order', Payment.paypalCheckout);
 
+	/* -------------------------------------- weixin -------------------------------------- */
+	app.post('/api/v1/wxPayment', MdAuth.path_Client, Payment.wxPayment);
 };

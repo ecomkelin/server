@@ -169,6 +169,12 @@ const Categ_general = async(res, obj, Categ, payload) => {
 		if(!isNaN(obj.sort)) {
 			Categ.sort = obj.sort;
 		}
+		if(obj.is_usable === true || obj.is_usable === 'true' || obj.is_usable == 1) {
+			Categ.is_usable = true;
+		}
+		if(obj.is_usable === false || obj.is_usable === 'false' || obj.is_usable == 0) {
+			Categ.is_usable = false;
+		}
 		
 		Categ.User_upd = payload._id;
 
