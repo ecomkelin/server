@@ -235,12 +235,15 @@ exports.wxPayment =  async (req, res) => {
 		const socials = Client;
 		if(socials.length < 1) return res.json({status: 400, message: "没有用第三方登录"});
 		let openid = null;
-		socials.forEach(item => {
-			if(item.social_type === 'wx') {
+		for(let i=0; i<socials.length; i++) {
+			let social = socials[i];
+			if(social.social_type === 'wx') {
 				openid = item.social_id;
-				return;
+				break;
 			}
-		})
+		}
+		if(!openid) return res.json({status: 400, message: 'openid error'});
+
 		console.log(111, openid)
 		if(!openid) return res.json({status: 400, message: "没有传递openid"});
 
