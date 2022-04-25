@@ -222,7 +222,7 @@ const appid = process.env.WX_APPID;
 const mchid = process.env.WX_MCHID_XXX;
 const notify_url = process.env.WX_NOTIFY_URL_YYY;
 const MD5 = require('md5');
-const UserDB = require('../../../models/auth/User');
+const ClientDB = require('../../../models/auth/Client');
 
 
 exports.wxPayment =  async (req, res) => {
@@ -230,7 +230,7 @@ exports.wxPayment =  async (req, res) => {
 	try {
 		let payload = req.payload;
 		
-		const Client = await UserDB.findOne({_id: payload._id});
+		const Client = await ClientDB.findOne({_id: payload._id});
 		if(!Client) return res.json({status: 400, message: "没有找到客户"});
 		const socials = Client;
 		if(socials.length < 1) return res.json({status: 400, message: "没有用第三方登录"});
