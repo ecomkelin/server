@@ -224,7 +224,7 @@ const notify_url = process.env.NOTIFY_URL;
 const MD5 = require('md5');
 const ClientDB = require('../../../models/auth/Client');
 
-let trade_no = 0;
+let trade_no = 2;
 exports.wxPayment =  async (req, res) => {
 	console.log('/v1/wxPayment');
 	try {
