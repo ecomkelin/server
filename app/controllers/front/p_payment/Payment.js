@@ -260,7 +260,7 @@ exports.wxPayment =  async (req, res) => {
 		let service = 'pay.weixin.jspay';							// 7
 		let mch_id = '124570000213';								// 4
 		let is_raw = 1;												// 2
-		let out_trade_no = 'Order001';								// 11
+		let out_trade_no = 'Order002';								// 11
 		let body = 'body_description';								// 1
 		let sub_openid = openid;									// 9 	oz0WQ5FKV39_48Lf4Rcyo6Ux2TrY
 		let sub_appid = process.env.WX_APPID;						// 8	wx48c5ff852226c6ff
