@@ -184,14 +184,14 @@ exports.paypalPayment =  async (req, res) => {
 exports.paypalCheckout = async(req, res) => {
 	console.log("/v1/paypalCheckout");
 	try {
-		const wx_orderId = req.body.wx_orderId;
+		const paypal_orderId = req.body.paypal_orderId;
 		const OrderId = req.body.OrderId;
 
 		const Order = await OrderDB.findOne({_id: OrderId});
 		if(!Order) return res.json({status: 400, message: "[server] 没有找到此订单"});
-		if(Order.wx_orderId !== wx_orderId) return res.json({status: 400, message: "[server] 付款信息不是此订单的"});
+		if(Order.paypal_orderId !== paypal_orderId) return res.json({status: 400, message: "[server] 付款信息不是此订单的"});
 
-		const checkRequest = new paypal.orders.OrdersCaptureRequest(wx_orderId);
+		const checkRequest = new paypal.orders.OrdersCaptureRequest(paypal_orderId);
 		checkRequest.requestBody({});
 		
 		const checkOrder = await payPalClient.client().execute(checkRequest);
@@ -220,7 +220,7 @@ const PRIMARY_PEM = fs.readFileSync(path.join(__dirname, './weixin/XXX_key.pem')
 const { v4: uuidv4 } = require('uuid');
 const appid = process.env.WX_APPID;
 const mchid = process.env.WX_MCHID_XXX;
-const notify_url = process.env.WX_NOTIFY_URL_YYY;
+const notify_url = process.env.NOTIFY_URL;
 const MD5 = require('md5');
 const ClientDB = require('../../../models/auth/Client');
 
@@ -249,7 +249,6 @@ exports.wxPayment =  async (req, res) => {
 		if(!openid) return res.json({status: 400, message: "没有传递openid"});
 
 		let {OrderId} = req.body;
-
 		// let items_res = await getSkus_Prom(OrderId, payload);
 		// if(items_res.status !== 200) return res.json(items_res);
 		// let {order_items, Order} = items_res.data;
@@ -266,7 +265,7 @@ exports.wxPayment =  async (req, res) => {
 		let sub_appid = process.env.WX_APPID;						// 8	wx48c5ff852226c6ff
 		let total_fee = 1;											// 10
 		let mch_create_ip = '66.249.79.131';						// 3
-		let notify_url = process.env.NOTIFY_URL						// 6 	https://unioncityitaly.com
+		// let notify_url = process.env.NOTIFY_URL						// 6 	https://unioncityitaly.com
 		let nonce_str = uuidv4().replace(/-/g, '').substr(0,16);	// 5  	1277e4e29f4240d2
 
 		let stringA = 'body='+body
@@ -325,7 +324,18 @@ exports.wxPayment =  async (req, res) => {
 		return res.json({ error: e.message })
 	}
 }
+exports.wx_notify_url = (req, res) => {
+	try {
+		const body = req.body;
+		console.log(body);
+		// success
+		// Order.status  = 
+		// await save();
+		return res.json('success');
+	} catch(err) {
 
+	}
+}
 exports.wxCheckout = async(req, res) => {
 	console.log("/v1/wxCheckout");
 	try {
@@ -334,21 +344,21 @@ exports.wxCheckout = async(req, res) => {
 
 		const Order = await OrderDB.findOne({_id: OrderId});
 		if(!Order) return res.json({status: 400, message: "[server] 没有找到此订单"});
-		if(Order.paypal_orderId !== paypal_orderId) return res.json({status: 400, message: "[server] 付款信息不是此订单的"});
-
-		const checkRequest = new paypal.orders.OrdersCaptureRequest(paypal_orderId);
-		checkRequest.requestBody({});
-		
-		const checkOrder = await payPalClient.client().execute(checkRequest);
+		/* ====== 微信验证 ===== */
+		// notify_url 
+		// out_trade_no
+		/* ====== 微信验证 ===== */
 		Order.status = ConfOrder.status_obj.responding.num;
 		const OrderSave = await Order.save();
-		if(!OrderSave) return res.json({status: 400, message: "[server] paypalCheckout OrderSave Error"});
+		if(!OrderSave) return res.json({status: 400, message: "[server] wxCheckout OrderSave Error"});
 		return res.json({ status: 200 })
 	} catch (error) {
-		console.log("paypalCheckout error:   -------", error);
+		console.log("wxCheckout error:   -------", error);
 		return res.json({ status: 400, message: "付款失败" });
 	}
 }
+
+
 
 exports.wxPayment_simple =  async(req, res) => {
 	console.log("/v1/wxPayment");
