@@ -222,6 +222,7 @@ const appid = process.env.WX_APPID;
 const mchid = process.env.WX_MCHID_XXX;
 const notify_url = process.env.WX_NOTIFY_URL_YYY;
 const MD5 = require('md5');
+const UserDB = require('../../../models/auth/User');
 
 
 exports.wxPayment =  async (req, res) => {
