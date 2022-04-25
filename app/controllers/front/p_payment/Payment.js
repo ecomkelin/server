@@ -232,10 +232,10 @@ exports.wxPayment =  async (req, res) => {
 		
 		const Client = await ClientDB.findOne({_id: payload._id});
 		if(!Client) return res.json({status: 400, message: "没有找到客户"});
-		const socials = Client;
+		const {socials} = Client;
 		if(socials.length < 1) return res.json({status: 400, message: "没有用第三方登录"});
 		let openid = null;
-		console.log(socials);
+		// console.log(socials);
 		for(let i=0; i<socials.length; i++) {
 			let social = socials[i];
 			if(social.social_type === 'wx') {
