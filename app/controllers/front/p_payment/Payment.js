@@ -239,7 +239,7 @@ exports.wxPayment =  async (req, res) => {
 		for(let i=0; i<socials.length; i++) {
 			let social = socials[i];
 			if(social.social_type === 'wx') {
-				openid = item.social_id;
+				openid = social.social_id;
 				break;
 			}
 		}
