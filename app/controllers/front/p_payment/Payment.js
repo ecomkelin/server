@@ -229,8 +229,21 @@ exports.wxPayment =  async (req, res) => {
 	try {
 		let payload = req.payload;
 		
-		let {OrderId, openid} = req.body;
+		const Client = await UserDB.findOne({_id: payload._id});
+		if(!Client) return res.json({status: 400, message: "没有找到客户"});
+		const socials = Client;
+		if(socials.length < 1) return res.json({status: 400, message: "没有用第三方登录"});
+		let openid = null;
+		socials.forEach(item => {
+			if(item.social_type === 'wx') {
+				openid = item.social_id;
+				return;
+			}
+		})
+		console.log(111, openid)
 		if(!openid) return res.json({status: 400, message: "没有传递openid"});
+
+		let {OrderId} = req.body;
 
 		// let items_res = await getSkus_Prom(OrderId, payload);
 		// if(items_res.status !== 200) return res.json(items_res);
@@ -300,7 +313,7 @@ exports.wxPayment =  async (req, res) => {
 		pay_info = pay_info[1].split(']]><');
 		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败"});
 		pay_info=JSON.parse(pay_info[0]);
-		console.log(pay_info)
+		// console.log(pay_info)
 		return res.json({status: 200, data: {...pay_info}});
 	} catch (e) {
 		console.log("paypaylPayment error:   -------", e)
