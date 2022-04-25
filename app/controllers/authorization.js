@@ -66,7 +66,8 @@ exports.login = async(req, res, objectDB) => {
 	try{
 		const payload_res = await obtain_payload(req.body.system, req.body.social, objectDB);
 		if(payload_res.status === 400) return MdFilter.jsonError(res, payload_res.message);
-		const payload = payload_res.data.object;
+		const {object, user_id} = payload_res.data;
+		const payload = object;
 		if(!payload) return MdFilter.jsonError(res, "登陆失败");
 		const accessToken = MdJwt.generateToken(payload);
 		const refreshToken = MdJwt.generateToken(payload, true);
@@ -80,7 +81,8 @@ exports.login = async(req, res, objectDB) => {
 			data: {
 				accessToken,
 				refreshToken,
-				payload
+				payload,
+				user_id
 			},
 		})
 	} catch(error) {
@@ -155,7 +157,7 @@ const obtain_payload = (system_obj, social_obj, objectDB) => {
 					object = await _object.save();
 					if(!object) return resolve({status: 400, message: "[server] 第三方登陆 创建用户失败"});
 				}
-				return resolve({status: 200, data: {object}});
+				return resolve({status: 200, data: {object, user_id}});
 			}
 			resolve({status: 400, message: "[server] 请传入正确的登陆参数"});
 		} catch(error) {
@@ -470,8 +472,17 @@ const weixinAuth_Prom = async(Client_accessToken) => {
 		try {
 			// console.log("code1", Client_accessToken);
 			if(!Client_accessToken) return resolve({status: 400, message: "[server weixinAuth] 请传入 客户facebook 对应的 accessToken"});
-			const url = `https://api.weixin.qq.com/sns/jscode2session?appid=${process.env.WX_APPID}&secret=${process.env.WX_APPSECRET}&js_code=${Client_accessToken}&grant_type=authorization_code`;
-			const response = await axios.get(url);
+			const response = await axios.get(
+				'https://api.weixin.qq.com/sns/jscode2session',
+				{
+					params: {
+						appid: process.env.WX_APPID,
+						secret: process.env.WX_APPSECRET,
+						js_code: Client_accessToken,
+						grant_type: 'authorization_code'
+					}
+				}
+			);
 			// console.log("status", response.data);
 			return resolve({status:200, data: {object: response.data, user_id: response.data.openid}});
 		} catch(error) {
