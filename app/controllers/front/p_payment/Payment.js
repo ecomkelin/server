@@ -224,7 +224,7 @@ const notify_url = process.env.NOTIFY_URL;
 const MD5 = require('md5');
 const ClientDB = require('../../../models/auth/Client');
 
-
+let trade_no = 0;
 exports.wxPayment =  async (req, res) => {
 	console.log('/v1/wxPayment');
 	try {
@@ -259,7 +259,8 @@ exports.wxPayment =  async (req, res) => {
 		let service = 'pay.weixin.jspay';							// 7
 		let mch_id = '124570000213';								// 4
 		let is_raw = 1;												// 2
-		let out_trade_no = 'Order002';								// 11
+		trade_no++;
+		let out_trade_no = 'Order'+String(trade_no);								// 11
 		let body = 'body_description';								// 1
 		let sub_openid = openid;									// 9 	oz0WQ5FKV39_48Lf4Rcyo6Ux2TrY
 		let sub_appid = process.env.WX_APPID;						// 8	wx48c5ff852226c6ff
@@ -325,9 +326,12 @@ exports.wxPayment =  async (req, res) => {
 	}
 }
 exports.wx_notify_url = (req, res) => {
+	console.log("/v1/wx_notify_url");
 	try {
 		const body = req.body;
-		console.log(body);
+		console.log("body", body);
+		console.log("query", req.query);
+		console.log("params", req.params);
 		// success
 		// Order.status  = 
 		// await save();
