@@ -336,7 +336,7 @@ exports.wxPaymentSuccess = async(req, res) => {
 		return res.json({status: 500, error: err.message})
 	}
 }
-exports.wx_notify_url = (req, res) => {
+exports.wx_notify_url = async(req, res) => {
 	console.log("/v1/wx_notify_url");
 	try {
 		let {xml} = req.body;
