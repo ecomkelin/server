@@ -243,18 +243,14 @@ exports.wxPayment =  async (req, res) => {
 			}
 		}
 
-		// console.log(0, openid)
 		if(!openid) return res.json({status: 400, message: 'openid error'});
 
 		let {OrderId} = req.body;
 		let items_res = await getSkus_Prom(OrderId, payload);
 		if(items_res.status !== 200) return res.json(items_res);
 		let {order_items, Order} = items_res.data;
-		console.log(0, order_items);
 		let out_trade_no = Order._id;
 		let total_fee = parseInt(Order.total_sale*100);
-		console.log(222, total_fee);
-		// console.log('-------', Order._id)
 
 		/* ======== 读取服务商接口 ============= */
 		let service = 'pay.weixin.jspay';							// 7
@@ -268,7 +264,6 @@ exports.wxPayment =  async (req, res) => {
 		let mch_create_ip = '66.249.79.131';						// 3
 		// let notify_url = process.env.NOTIFY_URL						// 6 	https://unioncityitaly.com
 		let nonce_str = uuidv4().replace(/-/g, '').substr(0,16);	// 5  	1277e4e29f4240d2
-		// console.log(222, notify_url)
 		let stringA = 'body='+body
 			stringA += '&is_raw='+is_raw
 			stringA += '&mch_create_ip='+mch_create_ip
@@ -301,7 +296,6 @@ exports.wxPayment =  async (req, res) => {
 		    <sign>${sign}</sign>
 		</xml>
 		`
-		console.log(111, xmls);
 		let result = await axios.post(
 			'https://pay.wepayez.com/pay/gateway', 
 			xmls, 
@@ -312,7 +306,6 @@ exports.wxPayment =  async (req, res) => {
 
 		let {data} = result;
 		let pay_info = data.split('pay_info');
-		console.log(222, pay_info);
 		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败 1"});
 		pay_info = pay_info[1].split('><![CDATA[');
 		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败 2"});
@@ -322,7 +315,7 @@ exports.wxPayment =  async (req, res) => {
 
 		Order.wx_nonce_str = nonce_str;
 		const OrderSave = await Order.save();
-		OrderSave.wx_nonce_str;
+		console.log(111, Order._id, OrderSave.wx_nonce_str);
 		if(!OrderSave) return res.json({status: 400, message: "付款失败 OrderSave Error"});
 		// console.log(pay_info)
 		return res.json({status: 200, data: {...pay_info}});
@@ -357,7 +350,7 @@ exports.wx_notify_url = async(req, res) => {
 		let {xml} = req.body;
 		let {out_trade_no, nonce_str} = xml;
 		let Order = await OrderDB.findOne({_id: out_trade_no});
-		console.log(11111, Order.wx_nonce_str);
+		console.log(222, Order._id, Order.wx_nonce_str);
 		// if(!Order) return res.json({status: 400, message: "[server] !Order"});
 
 		// Order.status = ConfOrder.status_obj.responding.num;
