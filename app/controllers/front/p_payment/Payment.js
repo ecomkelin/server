@@ -299,6 +299,7 @@ exports.wxPayment =  async (req, res) => {
 		    <sign>${sign}</sign>
 		</xml>
 		`
+		console.log(111, xmls);
 		let result = await axios.post(
 			'https://pay.wepayez.com/pay/gateway', 
 			xmls, 
@@ -318,6 +319,7 @@ exports.wxPayment =  async (req, res) => {
 
 		Order.wx_nonce_str = nonce_str;
 		const OrderSave = await Order.save();
+		OrderSave.wx_nonce_str;
 		if(!OrderSave) return res.json({status: 400, message: "付款失败 OrderSave Error"});
 		// console.log(pay_info)
 		return res.json({status: 200, data: {...pay_info}});
@@ -345,12 +347,14 @@ exports.wxPaymentSuccess = async(req, res) => {
 		return res.json({status: 500, error: err.message})
 	}
 }
+
 exports.wx_notify_url = async(req, res) => {
 	console.log("/v1/wx_notify_url");
 	try {
 		let {xml} = req.body;
 		let {out_trade_no, nonce_str} = xml;
-		// let Order = await OrderDB.findOne({_id: out_trade_no, wx_nonce_str: nonce_str});
+		let Order = await OrderDB.findOne({_id: out_trade_no});
+		console.log(11111, Order.wx_nonce_str);
 		// if(!Order) return res.json({status: 400, message: "[server] !Order"});
 
 		// Order.status = ConfOrder.status_obj.responding.num;
