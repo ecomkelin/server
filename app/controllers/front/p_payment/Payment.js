@@ -252,7 +252,7 @@ exports.wxPayment =  async (req, res) => {
 		let {order_items, Order} = items_res.data;
 		// let out_trade_no = Order._id;
 		// let total_fee = parseInt(Order.total_sale*100);
-		console.log(111, Order._id)
+		console.log('-------', Order._id)
 
 		/* ======== 读取服务商接口 ============= */
 		let service = 'pay.weixin.jspay';							// 7
@@ -266,7 +266,7 @@ exports.wxPayment =  async (req, res) => {
 		let mch_create_ip = '66.249.79.131';						// 3
 		// let notify_url = process.env.NOTIFY_URL						// 6 	https://unioncityitaly.com
 		let nonce_str = uuidv4().replace(/-/g, '').substr(0,16);	// 5  	1277e4e29f4240d2
-		console.log(222, notify_url)
+		// console.log(222, notify_url)
 		let stringA = 'body='+body
 			stringA += '&is_raw='+is_raw
 			stringA += '&mch_create_ip='+mch_create_ip
@@ -299,7 +299,6 @@ exports.wxPayment =  async (req, res) => {
     <sign>${sign}</sign>
 </xml>
 `
-console.log(333, xmls);
 		let result = await axios.post(
 			'https://pay.wepayez.com/pay/gateway', 
 			xmls, 
@@ -341,13 +340,13 @@ exports.wx_notify_url = (req, res) => {
 	console.log("/v1/wx_notify_url");
 	try {
 		const body = req.body;
-		console.log("body", body);
-		console.log("query", req.query);
-		console.log("params", req.params);
+		console.log("=======", body.xml.out_trade_no);
 		// success
 		// Order.status  = 
 		// await save();
 		return res.json('success');
+		res.header("Content-Type", "application/xml");
+		res.status(200).send('success');
 	} catch(err) {
 
 	}
