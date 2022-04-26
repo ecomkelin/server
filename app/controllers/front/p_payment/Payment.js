@@ -315,6 +315,10 @@ exports.wxPayment =  async (req, res) => {
 		pay_info = pay_info[1].split(']]><');
 		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败"});
 		pay_info=JSON.parse(pay_info[0]);
+
+		Order.wx_nonce_str = nonce_str;
+		const OrderSave = await Order.save();
+		if(!OrderSave) return res.json({status: 400, message: "付款失败 OrderSave Error"});
 		// console.log(pay_info)
 		return res.json({status: 200, data: {...pay_info}});
 	} catch (e) {
@@ -328,10 +332,11 @@ exports.wxPaymentSuccess = async(req, res) => {
 		let {OrderId} = req.body;
 		let Order = await OrderDB.findOne({_id: OrderId});
 		if(!Order) return res.json({status: 400, message: "没有找到订单"});
+		if(Order.status === ConfOrder.status_obj.responding.num) return res.json({status: 200, data: {Order}});
 		Order.status = ConfOrder.status_obj.responding.num;
 		const OrderSave = await Order.save();
 		if(!OrderSave) return res.json({status: 400, message: "[server] wxPaymentSuccess OrderSave Error"});
-		return res.json({ status: 200 })
+		return res.json({ status: 200, data: {Order} });
 	} catch(err) {
 		return res.json({status: 500, error: err.message})
 	}
@@ -340,8 +345,9 @@ exports.wx_notify_url = async(req, res) => {
 	console.log("/v1/wx_notify_url");
 	try {
 		let {xml} = req.body;
-		let OrderId = xml.out_trade_no;
-		let Order = await OrderDB.findOne({_id: OrderId});
+		let {out_trade_no, nonce_str} = xml;
+		let Order = await OrderDB.findOne({_id: out_trade_no, wx_nonce_str: nonce_str});
+		if(!Order) return res.json({status: 400, message: "[server] !Order"});
 
 		Order.status = ConfOrder.status_obj.responding.num;
 		const OrderSave = await Order.save();
@@ -352,27 +358,6 @@ exports.wx_notify_url = async(req, res) => {
 	} catch(err) {
 		res.header("Content-Type", "application/xml");
 		return res.status(500).send('fail');
-	}
-}
-exports.wxCheckout = async(req, res) => {
-	console.log("/v1/wxCheckout");
-	try {
-		const paypal_orderId = req.body.paypal_orderId;
-		const OrderId = req.body.OrderId;
-
-		const Order = await OrderDB.findOne({_id: OrderId});
-		if(!Order) return res.json({status: 400, message: "[server] 没有找到此订单"});
-		/* ====== 微信验证 ===== */
-		// notify_url 
-		// out_trade_no
-		/* ====== 微信验证 ===== */
-		Order.status = ConfOrder.status_obj.responding.num;
-		const OrderSave = await Order.save();
-		if(!OrderSave) return res.json({status: 400, message: "[server] wxCheckout OrderSave Error"});
-		return res.json({ status: 200 })
-	} catch (error) {
-		console.log("wxCheckout error:   -------", error);
-		return res.json({ status: 400, message: "付款失败" });
 	}
 }
 
