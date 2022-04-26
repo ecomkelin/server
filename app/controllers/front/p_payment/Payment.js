@@ -349,8 +349,9 @@ exports.wx_notify_url = async(req, res) => {
 	try {
 		let {xml} = req.body;
 		let {out_trade_no, nonce_str} = xml;
+		console.log(222, out_trade_no, nonce_str)
 		let Order = await OrderDB.findOne({_id: out_trade_no});
-		console.log(222, Order._id, Order.wx_nonce_str);
+		console.log(333, Order._id, Order.wx_nonce_str);
 		// if(!Order) return res.json({status: 400, message: "[server] !Order"});
 
 		// Order.status = ConfOrder.status_obj.responding.num;
