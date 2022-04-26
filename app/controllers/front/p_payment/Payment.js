@@ -250,8 +250,10 @@ exports.wxPayment =  async (req, res) => {
 		let items_res = await getSkus_Prom(OrderId, payload);
 		if(items_res.status !== 200) return res.json(items_res);
 		let {order_items, Order} = items_res.data;
+		console.log(0, order_items);
 		let out_trade_no = Order._id;
 		let total_fee = parseInt(Order.total_sale*100);
+		console.log(222, total_fee);
 		// console.log('-------', Order._id)
 
 		/* ======== 读取服务商接口 ============= */
@@ -310,11 +312,12 @@ exports.wxPayment =  async (req, res) => {
 
 		let {data} = result;
 		let pay_info = data.split('pay_info');
-		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败"});
+		console.log(222, pay_info);
+		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败 1"});
 		pay_info = pay_info[1].split('><![CDATA[');
-		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败"});
+		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败 2"});
 		pay_info = pay_info[1].split(']]><');
-		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败"});
+		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败 3"});
 		pay_info=JSON.parse(pay_info[0]);
 
 		Order.wx_nonce_str = nonce_str;
