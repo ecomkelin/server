@@ -344,9 +344,8 @@ exports.wx_notify_url = (req, res) => {
 		// success
 		// Order.status  = 
 		// await save();
-		return res.json('success');
 		res.header("Content-Type", "application/xml");
-		res.status(200).send('success');
+		return res.status(200).send('success');
 	} catch(err) {
 
 	}
