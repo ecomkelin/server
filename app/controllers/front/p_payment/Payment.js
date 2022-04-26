@@ -243,7 +243,7 @@ exports.wxPayment =  async (req, res) => {
 			}
 		}
 
-		console.log(111, openid)
+		console.log(0, openid)
 		if(!openid) return res.json({status: 400, message: 'openid error'});
 
 		let {OrderId} = req.body;
@@ -252,6 +252,7 @@ exports.wxPayment =  async (req, res) => {
 		let {order_items, Order} = items_res.data;
 		// let out_trade_no = Order._id;
 		// let total_fee = parseInt(Order.total_sale*100);
+		console.log(111, Order._id)
 
 		/* ======== 读取服务商接口 ============= */
 		let service = 'pay.weixin.jspay';							// 7
