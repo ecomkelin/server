@@ -332,11 +332,15 @@ exports.wxPaymentSuccess = async(req, res) => {
 		let {OrderId} = req.body;
 		let Order = await OrderDB.findOne({_id: OrderId});
 		if(!Order) return res.json({status: 400, message: "没有找到订单"});
-		if(Order.status === ConfOrder.status_obj.responding.num) return res.json({status: 200, data: {Order}});
+		// if(Order.status === ConfOrder.status_obj.responding.num) return res.json({status: 200});
+
+		/* === 前端权限 === */
 		Order.status = ConfOrder.status_obj.responding.num;
 		const OrderSave = await Order.save();
 		if(!OrderSave) return res.json({status: 400, message: "[server] wxPaymentSuccess OrderSave Error"});
-		return res.json({ status: 200, data: {Order} });
+		/* === 前端权限 === */
+
+		return res.json({ status: 200});
 	} catch(err) {
 		return res.json({status: 500, error: err.message})
 	}
@@ -346,12 +350,12 @@ exports.wx_notify_url = async(req, res) => {
 	try {
 		let {xml} = req.body;
 		let {out_trade_no, nonce_str} = xml;
-		let Order = await OrderDB.findOne({_id: out_trade_no, wx_nonce_str: nonce_str});
-		if(!Order) return res.json({status: 400, message: "[server] !Order"});
+		// let Order = await OrderDB.findOne({_id: out_trade_no, wx_nonce_str: nonce_str});
+		// if(!Order) return res.json({status: 400, message: "[server] !Order"});
 
-		Order.status = ConfOrder.status_obj.responding.num;
-		const OrderSave = await Order.save();
-		if(!OrderSave) return res.json({status: 400, message: "[server] wxPaymentSuccess OrderSave Error"});
+		// Order.status = ConfOrder.status_obj.responding.num;
+		// const OrderSave = await Order.save();
+		// if(!OrderSave) return res.json({status: 400, message: "[server] wx_notify_url OrderSave Error"});
 
 		res.header("Content-Type", "application/xml");
 		return res.status(200).send('success');
