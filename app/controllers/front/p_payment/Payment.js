@@ -297,7 +297,7 @@ exports.wxPayment =  async (req, res) => {
 		    <service>${service}</service>
 		    <sub_appid>${sub_appid}</sub_appid>
 		    <sub_openid>${sub_openid}</sub_openid>
-		    <total_fee>1</total_fee>
+		    <total_fee>${total_fee}</total_fee>
 		    <sign>${sign}</sign>
 		</xml>
 		`
