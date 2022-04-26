@@ -224,8 +224,6 @@ const notify_url = process.env.NOTIFY_URL;
 const MD5 = require('md5');
 const ClientDB = require('../../../models/auth/Client');
 
-const vs = 'v1';
-let trade_no = 0;
 exports.wxPayment =  async (req, res) => {
 	console.log('/v1/wxPayment');
 	try {
@@ -244,15 +242,14 @@ exports.wxPayment =  async (req, res) => {
 				break;
 			}
 		}
-		if(!openid) return res.json({status: 400, message: 'openid error'});
 
 		console.log(111, openid)
-		if(!openid) return res.json({status: 400, message: "没有传递openid"});
+		if(!openid) return res.json({status: 400, message: 'openid error'});
 
 		let {OrderId} = req.body;
-		// let items_res = await getSkus_Prom(OrderId, payload);
-		// if(items_res.status !== 200) return res.json(items_res);
-		// let {order_items, Order} = items_res.data;
+		let items_res = await getSkus_Prom(OrderId, payload);
+		if(items_res.status !== 200) return res.json(items_res);
+		let {order_items, Order} = items_res.data;
 		// let out_trade_no = Order._id;
 		// let total_fee = parseInt(Order.total_sale*100);
 
@@ -260,8 +257,7 @@ exports.wxPayment =  async (req, res) => {
 		let service = 'pay.weixin.jspay';							// 7
 		let mch_id = '124570000213';								// 4
 		let is_raw = 1;												// 2
-		trade_no++;
-		let out_trade_no = 'Order'+vs+String(trade_no);								// 11
+		let out_trade_no = Order._id;								// 11
 		let body = 'body_description';								// 1
 		let sub_openid = openid;									// 9 	oz0WQ5FKV39_48Lf4Rcyo6Ux2TrY
 		let sub_appid = process.env.WX_APPID;						// 8	wx48c5ff852226c6ff
@@ -269,7 +265,7 @@ exports.wxPayment =  async (req, res) => {
 		let mch_create_ip = '66.249.79.131';						// 3
 		// let notify_url = process.env.NOTIFY_URL						// 6 	https://unioncityitaly.com
 		let nonce_str = uuidv4().replace(/-/g, '').substr(0,16);	// 5  	1277e4e29f4240d2
-
+		console.log(222, notify_url)
 		let stringA = 'body='+body
 			stringA += '&is_raw='+is_raw
 			stringA += '&mch_create_ip='+mch_create_ip
@@ -324,6 +320,20 @@ exports.wxPayment =  async (req, res) => {
 	} catch (e) {
 		console.log("paypaylPayment error:   -------", e)
 		return res.json({ error: e.message })
+	}
+}
+exports.wxPaymentSuccess = async(req, res) => {
+	try {
+		let payload = req.payload;
+		let {OrderId} = req.body;
+		let Order = await OrderDB.findOne({_id: OrderId});
+		if(!Order) return res.json({status: 400, message: "没有找到订单"});
+		Order.status = ConfOrder.status_obj.responding.num;
+		const OrderSave = await Order.save();
+		if(!OrderSave) return res.json({status: 400, message: "[server] wxPaymentSuccess OrderSave Error"});
+		return res.json({ status: 200 })
+	} catch(err) {
+		return res.json({status: 500, error: err.message})
 	}
 }
 exports.wx_notify_url = (req, res) => {

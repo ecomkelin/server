@@ -20,6 +20,7 @@ module.exports = (app) => {
 
 	/* -------------------------------------- weixin -------------------------------------- */
 	app.post('/api/v1/wxPayment', MdAuth.path_Client,  Payment.wxPayment);
+	app.post('/api/v1/wxPaymentSuccess', MdAuth.path_Client,  Payment.wxPaymentSuccess);
 	app.post('/api/v1/wx_notify_url', xmlparser({trim: false, explicitArray: false}), Payment.wx_notify_url);
 
 };
