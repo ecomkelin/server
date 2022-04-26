@@ -299,7 +299,7 @@ exports.wxPayment =  async (req, res) => {
     <sign>${sign}</sign>
 </xml>
 `
-
+console.log(333, xmls);
 		let result = await axios.post(
 			'https://pay.wepayez.com/pay/gateway', 
 			xmls, 
