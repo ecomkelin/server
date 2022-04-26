@@ -243,26 +243,26 @@ exports.wxPayment =  async (req, res) => {
 			}
 		}
 
-		console.log(0, openid)
+		// console.log(0, openid)
 		if(!openid) return res.json({status: 400, message: 'openid error'});
 
 		let {OrderId} = req.body;
 		let items_res = await getSkus_Prom(OrderId, payload);
 		if(items_res.status !== 200) return res.json(items_res);
 		let {order_items, Order} = items_res.data;
-		// let out_trade_no = Order._id;
-		// let total_fee = parseInt(Order.total_sale*100);
-		console.log('-------', Order._id)
+		let out_trade_no = Order._id;
+		let total_fee = parseInt(Order.total_sale*100);
+		// console.log('-------', Order._id)
 
 		/* ======== 读取服务商接口 ============= */
 		let service = 'pay.weixin.jspay';							// 7
 		let mch_id = '124570000213';								// 4
 		let is_raw = 1;												// 2
-		let out_trade_no = Order._id;								// 11
+		// let out_trade_no = Order._id;								// 11
 		let body = 'body_description';								// 1
 		let sub_openid = openid;									// 9 	oz0WQ5FKV39_48Lf4Rcyo6Ux2TrY
 		let sub_appid = process.env.WX_APPID;						// 8	wx48c5ff852226c6ff
-		let total_fee = 1;											// 10
+		// let total_fee = 1;											// 10
 		let mch_create_ip = '66.249.79.131';						// 3
 		// let notify_url = process.env.NOTIFY_URL						// 6 	https://unioncityitaly.com
 		let nonce_str = uuidv4().replace(/-/g, '').substr(0,16);	// 5  	1277e4e29f4240d2
@@ -284,21 +284,21 @@ exports.wxPayment =  async (req, res) => {
 		let sign = MD5(stringSignTemp).toUpperCase();
 
 		let xmls = `
-<xml>
-    <body>${body}</body>
-    <is_raw>${is_raw}</is_raw>
-    <mch_create_ip>${mch_create_ip}</mch_create_ip>
-    <mch_id>${mch_id}</mch_id>
-    <nonce_str>${nonce_str}</nonce_str>
-    <notify_url>${notify_url}</notify_url>
-    <out_trade_no>${out_trade_no}</out_trade_no>
-    <service>${service}</service>
-    <sub_appid>${sub_appid}</sub_appid>
-    <sub_openid>${sub_openid}</sub_openid>
-    <total_fee>1</total_fee>
-    <sign>${sign}</sign>
-</xml>
-`
+		<xml>
+		    <body>${body}</body>
+		    <is_raw>${is_raw}</is_raw>
+		    <mch_create_ip>${mch_create_ip}</mch_create_ip>
+		    <mch_id>${mch_id}</mch_id>
+		    <nonce_str>${nonce_str}</nonce_str>
+		    <notify_url>${notify_url}</notify_url>
+		    <out_trade_no>${out_trade_no}</out_trade_no>
+		    <service>${service}</service>
+		    <sub_appid>${sub_appid}</sub_appid>
+		    <sub_openid>${sub_openid}</sub_openid>
+		    <total_fee>1</total_fee>
+		    <sign>${sign}</sign>
+		</xml>
+		`
 		let result = await axios.post(
 			'https://pay.wepayez.com/pay/gateway', 
 			xmls, 
@@ -339,15 +339,19 @@ exports.wxPaymentSuccess = async(req, res) => {
 exports.wx_notify_url = (req, res) => {
 	console.log("/v1/wx_notify_url");
 	try {
-		const body = req.body;
-		console.log("=======", body.xml.out_trade_no);
-		// success
-		// Order.status  = 
-		// await save();
+		let {xml} = req.body;
+		let OrderId = xml.out_trade_no;
+		let Order = await OrderDB.findOne({_id: OrderId});
+
+		Order.status = ConfOrder.status_obj.responding.num;
+		const OrderSave = await Order.save();
+		if(!OrderSave) return res.json({status: 400, message: "[server] wxPaymentSuccess OrderSave Error"});
+
 		res.header("Content-Type", "application/xml");
 		return res.status(200).send('success');
 	} catch(err) {
-
+		res.header("Content-Type", "application/xml");
+		return res.status(500).send('fail');
 	}
 }
 exports.wxCheckout = async(req, res) => {
