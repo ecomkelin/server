@@ -67,8 +67,8 @@ exports.AttrDelete = async(req, res) => {
 		const Attr = await AttrDB.findOne({_id: id, Firm: payload.Firm}, {nome: 1, Prod:1});
 		if(!Attr) return res.json({status: 400, message: "[server] 没有找到此店铺信息, 请刷新重试"});
 
-		const Sku = await SkuDB.findOne({attrs: { $elemMatch: {nome: Attr.nome}}});
-		if(Sku) return res.json({status: 400, message: "[server] 请先删除商品中对应该属性的Product"});
+		const Skus = await SkuDB.deleteMany({attrs: { $elemMatch: {nome: Attr.nome}}});
+		console.log('Skus deleteMany', Skus);
 
 		const Prod = await ProdDB.findOne({_id: Attr.Prod, Firm: payload.Firm});
 		if(!Prod) return res.json({status: 400, message: "[server] 没有找到对应的 商品"});
