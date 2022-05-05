@@ -66,14 +66,14 @@ module.exports = {
 		0: '货到付款',
 		1: 'strip',
 		2: 'paypal',
-		// 3: 'wx',
+		3: 'wx',
 		// 4: '支付宝'
 	},
 	type_paid_obj: {
 		cash:		{num: 0, 	val: '货到付款' 	},
 		strip:		{num: 1, 	val: 'strip' 	},
 		paypal:		{num: 2, 	val: 'paypal' 	},
-		// wx:			{num: 3, 	val: '微信' 		},
+		wx:			{num: 3, 	val: '微信' 		},
 		// alipay:		{num: 4, 	val: '支付宝' 	},
 	},
 

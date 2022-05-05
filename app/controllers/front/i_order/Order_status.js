@@ -242,7 +242,7 @@ const vOrder_status_place_Prom = async(id, payload) => {
 				}
 
 				// 如果不是货到付款
-				if(Order.type_paid!==0) {
+				if(Order.type_paid !== 0) {
 					// 第三方付款
 					if(0) place = false;
 				}

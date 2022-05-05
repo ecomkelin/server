@@ -43,7 +43,6 @@ const dbSchema = new Schema({
 	},
 	is_paid: {type:Boolean, default: false},
 	paypal_orderId: String,
-	wx_nonce_str: String,
 
 	type_ship: Number, // enum: ConfOrder,
 	ship_info: {

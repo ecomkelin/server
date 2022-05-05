@@ -30,6 +30,7 @@ exports.webhook = async(req, res) => {
 			const OrderId = session.metadata.OrderId;
 			const Order = await OrderDB.findOne({_id: OrderId});
 			Order.status = ConfOrder.status_obj.responding.num;
+			Order.type_paid = ConfOrder.type_paid_obj.strip.num;
 			Order.is_paid = true;
 			const OrderSave = await Order.save();
 		}
@@ -196,6 +197,8 @@ exports.paypalCheckout = async(req, res) => {
 		
 		const checkOrder = await payPalClient.client().execute(checkRequest);
 		Order.status = ConfOrder.status_obj.responding.num;
+		Order.type_paid = ConfOrder.type_paid_obj.paypal.num;
+		Order.is_paid = true;
 		const OrderSave = await Order.save();
 		if(!OrderSave) return res.json({status: 400, message: "[server] paypalCheckout OrderSave Error"});
 		return res.json({ status: 200 })
@@ -254,15 +257,15 @@ exports.wxPayment =  async (req, res) => {
 
 		/* ======== 读取服务商接口 ============= */
 		let service = 'pay.weixin.jspay';							// 7
-		let mch_id = '124570000213';								// 4
+		let mch_id = mchid;											// 4
 		let is_raw = 1;												// 2
-		// let out_trade_no = Order._id;								// 11
+		// let out_trade_no = Order._id;							// 11
 		let body = 'body_description';								// 1
 		let sub_openid = openid;									// 9 	oz0WQ5FKV39_48Lf4Rcyo6Ux2TrY
-		let sub_appid = process.env.WX_APPID;						// 8	wx48c5ff852226c6ff
-		// let total_fee = 1;											// 10
+		let sub_appid = appid;										// 8	wx48c5ff852226c6ff
+		// let total_fee = 1;										// 10
 		let mch_create_ip = '66.249.79.131';						// 3
-		// let notify_url = process.env.NOTIFY_URL						// 6 	https://unioncityitaly.com
+		// let notify_url = process.env.NOTIFY_URL					// 6 	https://unioncityitaly.com
 		let nonce_str = uuidv4().replace(/-/g, '').substr(0,16);	// 5  	1277e4e29f4240d2
 		let stringA = 'body='+body
 			stringA += '&is_raw='+is_raw
@@ -313,10 +316,6 @@ exports.wxPayment =  async (req, res) => {
 		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败 3"});
 		pay_info=JSON.parse(pay_info[0]);
 
-		Order.wx_nonce_str = nonce_str;
-		const OrderSave = await Order.save();
-		console.log(111, Order._id, OrderSave.wx_nonce_str);
-		if(!OrderSave) return res.json({status: 400, message: "付款失败 OrderSave Error"});
 		// console.log(pay_info)
 		return res.json({status: 200, data: {...pay_info}});
 	} catch (e) {
@@ -330,10 +329,11 @@ exports.wxPaymentSuccess = async(req, res) => {
 		let {OrderId} = req.body;
 		let Order = await OrderDB.findOne({_id: OrderId});
 		if(!Order) return res.json({status: 400, message: "没有找到订单"});
-		// if(Order.status === ConfOrder.status_obj.responding.num) return res.json({status: 200});
 
 		/* === 前端权限 === */
 		Order.status = ConfOrder.status_obj.responding.num;
+		Order.type_paid = ConfOrder.type_paid_obj.wx.num;
+		Order.is_paid = true;
 		const OrderSave = await Order.save();
 		if(!OrderSave) return res.json({status: 400, message: "[server] wxPaymentSuccess OrderSave Error"});
 		/* === 前端权限 === */
@@ -347,16 +347,24 @@ exports.wxPaymentSuccess = async(req, res) => {
 exports.wx_notify_url = async(req, res) => {
 	console.log("/v1/wx_notify_url");
 	try {
-		let {xml} = req.body;
-		let {out_trade_no, nonce_str} = xml;
-		console.log(222, out_trade_no, nonce_str)
-		let Order = await OrderDB.findOne({_id: out_trade_no});
-		console.log(333, Order._id, Order.wx_nonce_str);
-		// if(!Order) return res.json({status: 400, message: "[server] !Order"});
+		/* ===== 查询订单的正确性 ===== */
+		// let {xml} = req.body;
+		// let {out_trade_no , transaction_id} = xml;
+		/* *
+		let url = 'https://api.mch.weixin.qq.com/v3/pay/transactions/
+		url += out-trade-no/'+out_trade_no;
+		url += id/'+transaction_id;
+		url += +'?mchid='+appid;
 
-		// Order.status = ConfOrder.status_obj.responding.num;
-		// const OrderSave = await Order.save();
-		// if(!OrderSave) return res.json({status: 400, message: "[server] wx_notify_url OrderSave Error"});
+		let result = await axios.get(url);
+		let OrderId = result.out-trade-no;
+		let Order = await OrderDB.findOne({_id: OrderId});
+		if(!Order) return res.json({status: 400, message: "没有找到到Order"});
+		Order.status = ConfOrder.status_obj.responding.num;
+		let OrderSave = await Order.save();
+		if(!OrderSave) return res.json({status: 400, message: "业务更改失败"});
+		*/
+		/* ===== 查询订单的正确性 ===== */
 
 		res.header("Content-Type", "application/xml");
 		return res.status(200).send('success');
