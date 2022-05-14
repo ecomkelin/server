@@ -79,6 +79,7 @@ const Order_status_complete = async(req, res, id, payload) => {
 		if(!Order) return res.json({status: 400, message: "没有找到此订单"});
 
 		Order.status = ConfOrder.status_obj.completed.num;
+		Order.is_paid = true;
 		Order.User_Dver = payload._id;
 		const OrderSave = await Order.save();
 		return res.json({status: 200, message: "[server] 配送完成"});

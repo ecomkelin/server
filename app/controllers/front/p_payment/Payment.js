@@ -575,3 +575,40 @@ const getSkus_Prom = (OrderId, payload) => {
 		}
 	})
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+exports.payAfter =  async (req, res) => {
+	console.log("/v1/payAfter");
+	try {
+		const payload = req.payload;
+		const OrderId = req.body.OrderId;
+		const Order = await OrderDB.findOne({_id: OrderId, Client: payload._id});
+
+
+		Order.type_paid = ConfOrder.type_paid_obj.cash.num;
+		const OrderSave = await Order.save();
+
+		return res.json({status: 200, data: {OrderSave}});
+	} catch (e) {
+		console.log("paypaylPayment error:   -------", e)
+		return res.json({ error: e.message })
+	}
+}

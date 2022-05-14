@@ -23,4 +23,6 @@ module.exports = (app) => {
 	app.post('/api/v1/wxPaymentSuccess', MdAuth.path_Client,  Payment.wxPaymentSuccess);
 	app.post('/api/v1/wx_notify_url', xmlparser({trim: false, explicitArray: false}), Payment.wx_notify_url);
 
+	/* -------------------------------------- payAfter -------------------------------------- */
+	app.post('/api/v1/payAfter', MdAuth.path_Client,  Payment.payAfter);
 };
