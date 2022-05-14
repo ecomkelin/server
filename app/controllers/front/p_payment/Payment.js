@@ -602,13 +602,13 @@ exports.payAfter =  async (req, res) => {
 		const OrderId = req.body.OrderId;
 		const Order = await OrderDB.findOne({_id: OrderId, Client: payload._id});
 
-
 		Order.type_paid = ConfOrder.type_paid_obj.cash.num;
+		Order.status = ConfOrder.status_obj.responding.num;
 		const OrderSave = await Order.save();
 
 		return res.json({status: 200, data: {OrderSave}});
 	} catch (e) {
-		console.log("paypaylPayment error:   -------", e)
+		console.log("payAfter error:   -------", e)
 		return res.json({ error: e.message })
 	}
 }
