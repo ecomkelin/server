@@ -8,6 +8,9 @@ const vProd_path_Func = (pathObj, payload, queryObj) => {
 	// pathObj.is_usable = 1;
 
 	if(!queryObj) return;
+	if(queryObj.is_discount && (queryObj.is_discount == 1 ||queryObj.is_discount === 'true')) {
+		pathObj.is_discount = true;
+	}
 	if(queryObj.Shops) {
 		const ids = MdFilter.getArray_ObjectId_Func(queryObj.Shops);
 		pathObj.Shop = {$in: ids};
