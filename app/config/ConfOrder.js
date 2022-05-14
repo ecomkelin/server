@@ -61,7 +61,7 @@ module.exports = {
 	},
 
 	// 付款方式
-	type_paid_Arrs: [0, 1, 2],
+	type_paid_Arrs: [0, 1, 2, 3],
 	type_paid: {
 		0: '货到付款',
 		1: 'strip',

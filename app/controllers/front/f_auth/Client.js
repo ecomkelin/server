@@ -128,9 +128,12 @@ exports.vClientPut = async(req, res) => {
 				if(String(Client.addrs[i]._id) === addr_sort._id) break;
 			}
 			if(i !== Client.addrs.length) {
+				console.log(111, Client.addrs[i])
 				const addr = {...Client.addrs[i]};
+				console.log(222, addr);
 				Client.addrs.splice(i, 1);
 				Client.addrs.splice(numTh, 0, addr);
+				console.log(333, Client.addrs)
 			}
 		} else if(req.body.addr_del) {
 			const id = req.body.addr_del.addrId;
