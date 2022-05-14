@@ -247,14 +247,14 @@ exports.wxPayment =  async (req, res) => {
 		}
 
 		if(!openid) return res.json({status: 400, message: 'openid error'});
-
+		console.log(111, openid)
 		let {OrderId} = req.body;
 		let items_res = await getSkus_Prom(OrderId, payload);
 		if(items_res.status !== 200) return res.json(items_res);
 		let {order_items, Order} = items_res.data;
 		let out_trade_no = Order._id;
 		let total_fee = parseInt(Order.total_sale*100);
-
+		console.log(222, total_fee)
 		/* ======== 读取服务商接口 ============= */
 		let service = 'pay.weixin.jspay';							// 7
 		let mch_id = mchid;											// 4
@@ -282,7 +282,7 @@ exports.wxPayment =  async (req, res) => {
 		let key = '8534c0fa8924251a5d279e25e61e33f7';
 		let stringSignTemp = stringA+'&key='+key;
 		let sign = MD5(stringSignTemp).toUpperCase();
-
+		console.log(333, sign);
 		let xmls = `
 		<xml>
 		    <body>${body}</body>
@@ -316,7 +316,7 @@ exports.wxPayment =  async (req, res) => {
 		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败 3"});
 		pay_info=JSON.parse(pay_info[0]);
 
-		// console.log(pay_info)
+		console.log(444, pay_info)
 		return res.json({status: 200, data: {...pay_info}});
 	} catch (e) {
 		console.log("paypaylPayment error:   -------", e)
