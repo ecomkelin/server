@@ -128,12 +128,17 @@ exports.vClientPut = async(req, res) => {
 				if(String(Client.addrs[i]._id) === addr_sort._id) break;
 			}
 			if(i !== Client.addrs.length) {
-				console.log(111, Client.addrs[i])
-				const addr = {...Client.addrs[i]};
-				console.log(222, addr);
+
+				const addr = {};
+				addr.Cita = Client.addrs[i].Cita;
+				addr.name = Client.addrs[i].name;
+				addr.address = Client.addrs[i].address;
+				addr.postcode = Client.addrs[i].postcode;
+				addr.phone = Client.addrs[i].phone;
+				addr.note = Client.addrs[i].note;
+
 				Client.addrs.splice(i, 1);
 				Client.addrs.splice(numTh, 0, addr);
-				console.log(333, Client.addrs)
 			}
 		} else if(req.body.addr_del) {
 			const id = req.body.addr_del.addrId;
