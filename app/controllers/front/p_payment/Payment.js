@@ -306,14 +306,20 @@ exports.wxPayment =  async (req, res) => {
 				headers: {'Content-Type': 'text/xml'}
 			}
 		);
-		console.log(444, result);
 		let {data} = result;
+		console.log(444, data);
 		let pay_info = data.split('pay_info');
+		console.log(1)
 		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败 1"});
+		console.log(2)
 		pay_info = pay_info[1].split('><![CDATA[');
+		console.log(3)
 		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败 2"});
+		console.log(4)
 		pay_info = pay_info[1].split(']]><');
+		console.log(5)
 		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败 3"});
+		console.log(6)
 		pay_info=JSON.parse(pay_info[0]);
 
 		console.log(555, pay_info)
