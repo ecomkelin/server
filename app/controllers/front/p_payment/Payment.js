@@ -224,6 +224,7 @@ const { v4: uuidv4 } = require('uuid');
 const appid = process.env.WX_APPID;
 const mchid = process.env.WX_MCHID_XXX;
 const mchip = process.env.MCH_IP;
+const shop_key = process.env.WX_SHOP_KEY;
 const notify_url = process.env.NOTIFY_URL;
 const MD5 = require('md5');
 const ClientDB = require('../../../models/auth/Client');
@@ -279,7 +280,7 @@ exports.wxPayment =  async (req, res) => {
 			stringA += '&sub_openid='+sub_openid
 			stringA += '&total_fee='+total_fee;
 
-		let key = '8534c0fa8924251a5d279e25e61e33f7';
+		let key = shop_key;
 		let stringSignTemp = stringA+'&key='+key;
 		let sign = MD5(stringSignTemp).toUpperCase();
 		console.log(111, 'stringSignTemp', stringSignTemp);
