@@ -248,7 +248,6 @@ exports.wxPayment =  async (req, res) => {
 		}
 
 		if(!openid) return res.json({status: 400, message: 'openid error'});
-		console.log(111, openid)
 		let {OrderId} = req.body;
 		let items_res = await getSkus_Prom(OrderId, payload);
 		if(items_res.status !== 200) return res.json(items_res);
@@ -283,7 +282,7 @@ exports.wxPayment =  async (req, res) => {
 		let key = '8534c0fa8924251a5d279e25e61e33f7';
 		let stringSignTemp = stringA+'&key='+key;
 		let sign = MD5(stringSignTemp).toUpperCase();
-		console.log(333, sign);
+		console.log(111, 'stringSignTemp', stringSignTemp);
 		let xmls = `
 		<xml>
 		    <body>${body}</body>
@@ -300,6 +299,8 @@ exports.wxPayment =  async (req, res) => {
 		    <sign>${sign}</sign>
 		</xml>
 		`
+		console.log(222, 'xmlTemp', xmls);
+
 		let result = await axios.post(
 			'https://pay.wepayez.com/pay/gateway', 
 			xmls, 
@@ -308,7 +309,7 @@ exports.wxPayment =  async (req, res) => {
 			}
 		);
 		let {data} = result;
-		console.log(444, data);
+		console.log(333, 'result.data', data);
 		let pay_info = data.split('pay_info');
 		console.log(1)
 		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败 1"});
