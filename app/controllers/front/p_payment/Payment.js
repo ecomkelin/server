@@ -223,6 +223,7 @@ const PRIMARY_PEM = fs.readFileSync(path.join(__dirname, './weixin/XXX_key.pem')
 const { v4: uuidv4 } = require('uuid');
 const appid = process.env.WX_APPID;
 const mchid = process.env.WX_MCHID_XXX;
+const mchip = process.env.MCH_IP;
 const notify_url = process.env.NOTIFY_URL;
 const MD5 = require('md5');
 const ClientDB = require('../../../models/auth/Client');
@@ -254,7 +255,7 @@ exports.wxPayment =  async (req, res) => {
 		let {order_items, Order} = items_res.data;
 		let out_trade_no = Order._id;
 		let total_fee = parseInt(Order.total_sale*100);
-		console.log(222, total_fee)
+
 		/* ======== 读取服务商接口 ============= */
 		let service = 'pay.weixin.jspay';							// 7
 		let mch_id = mchid;											// 4
@@ -264,7 +265,7 @@ exports.wxPayment =  async (req, res) => {
 		let sub_openid = openid;									// 9 	oz0WQ5FKV39_48Lf4Rcyo6Ux2TrY
 		let sub_appid = appid;										// 8	wx48c5ff852226c6ff
 		// let total_fee = 1;										// 10
-		let mch_create_ip = '66.249.79.131';						// 3
+		let mch_create_ip = mchip;									// 3
 		// let notify_url = process.env.NOTIFY_URL					// 6 	https://unioncityitaly.com
 		let nonce_str = uuidv4().replace(/-/g, '').substr(0,16);	// 5  	1277e4e29f4240d2
 		let stringA = 'body='+body
