@@ -283,7 +283,7 @@ exports.wxPayment =  async (req, res) => {
 		let key = shop_key;
 		let stringSignTemp = stringA+'&key='+key;
 		let sign = MD5(stringSignTemp).toUpperCase();
-		console.log(111, 'stringSignTemp', stringSignTemp);
+		// console.log(111, 'stringSignTemp', stringSignTemp);
 		let xmls = `
 		<xml>
 		    <body>${body}</body>
@@ -300,7 +300,7 @@ exports.wxPayment =  async (req, res) => {
 		    <sign>${sign}</sign>
 		</xml>
 		`
-		console.log(222, 'xmlTemp', xmls);
+		// console.log(222, 'xmlTemp', xmls);
 
 		let result = await axios.post(
 			'https://pay.wepayez.com/pay/gateway', 
@@ -310,22 +310,15 @@ exports.wxPayment =  async (req, res) => {
 			}
 		);
 		let {data} = result;
-		console.log(333, 'result.data', data);
+		// console.log(333, 'result.data', data);
 		let pay_info = data.split('pay_info');
-		console.log(1)
 		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败 1"});
-		console.log(2)
 		pay_info = pay_info[1].split('><![CDATA[');
-		console.log(3)
 		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败 2"});
-		console.log(4)
 		pay_info = pay_info[1].split(']]><');
-		console.log(5)
 		if(pay_info.length < 2) return res.json({status: 400, message: "付款失败 3"});
-		console.log(6)
 		pay_info=JSON.parse(pay_info[0]);
 
-		console.log(555, pay_info)
 		return res.json({status: 200, data: {...pay_info}});
 	} catch (e) {
 		console.log("paypaylPayment error:   -------", e)
