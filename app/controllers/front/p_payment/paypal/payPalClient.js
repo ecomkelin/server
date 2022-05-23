@@ -2,13 +2,14 @@ const checkoutNodeJssdk = require('@paypal/checkout-server-sdk');
 
 
 const environment = () => {
-    let clientId = process.env.PAYPAL_CLIENT_ID || 'PAYPAL-SANDBOX-CLIENT-ID';
-    let clientSecret = process.env.PAYPAL_CLIENT_SECRET || 'PAYPAL-SANDBOX-CLIENT-SECRET';
-    console.log("clientId", clientId)
-    console.log("clientSecret", clientSecret)
-    return new checkoutNodeJssdk.core.SandboxEnvironment(
+    let clientId = process.env.PAYPAL_CLIENT_ID;
+    let clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+    return new checkoutNodeJssdk.core.ProductionEnvironment(
         clientId, clientSecret
     );
+    // return new checkoutNodeJssdk.core.SandboxEnvironment(
+    //     clientId, clientSecret
+    // );
 }
 
 
