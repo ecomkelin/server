@@ -80,7 +80,7 @@ exports.stripePayment = async(req, res) => {
 
 		const stripeSession = await Stripe.checkout.sessions.create({
 			line_items,
-			shipping_rates: ["shr_1JpCbzJIPg2MUXJXFTAgCaFt"],
+			// shipping_rates: ["shr_1JpCbzJIPg2MUXJXFTAgCaFt"],
 			// shipping_address_collection: {
 			// 	allowed_countries: ["IT"]
 			// },
