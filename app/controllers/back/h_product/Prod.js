@@ -358,3 +358,76 @@ exports.Prod = async(req, res) => {
 		return res.json({status: 500, message: "[服务器错误: Prod]"});
 	}
 }
+
+exports.ProdAdjustment = async(req, res) => {
+	console.log("ProdAdjustment")
+	try {
+		const payload = req.payload;
+
+		let id = req.params.id;
+
+		let Prd = await ProdDB.findOne({_id: id})
+			.populate("Skus");
+		if(!Prd) return res.json({status: 400, message: "[server] 没有找到此商品信息"});
+		if(!Prd.Skus || Prd.Skus < 1) return res.json({status: 400, message: "[server] 商品没有Sku请联系 程序管理员"});
+		let SkuDefault = Prd.Skus[0];
+		if(SkuDefault.attrs && SkuDefault.attrs.length > 0) return res.json({status: 400, message: "[server] 商品SkuDefault错误"});
+
+		const Prod = await ProdDB.findOne({_id: id});
+
+		if(Prd.Skus.length !== Prod.Skus.length) {
+			Prod.Skus = [];
+			for(let i=0; i<Prd.Skus.length; i++) {
+				Prod.Skus.push(Prd.Skus[i]._id);
+			}
+		}
+		if(Prod.Skus.length === 1) {
+			Prod.is_simple = true;
+
+			Prod.price_min = Prod.price_max = SkuDefault.price_sale;
+			Prod.is_discount = SkuDefault.is_discount;
+			Prod.is_sell = SkuDefault.is_sell;
+			Prod.is_usable = SkuDefault.is_usable;
+		} else {
+			Prod.is_simple = false;
+			// 如果 Prod 为多规格产品 则需要跳过 attrs为空的 Sku
+			SkuDefault = Prd.Skus.filter((item) => {
+				return !item.attrs || item.attrs.length == 0;
+			});
+			if(SkuDefault.length != 1) return res.json({status: 400, message: "[server] 商品SkuDefault错误 您的数据错误 需要删除此产品修复"});
+			const SkusAttrs = Prd.Skus.filter((item) => {
+				return item.attrs && item.attrs.length > 0;
+			});
+
+			if(SkusAttrs.length < 1) return res.json({status: 400, message: "[server] 商品Sku错误"});
+			let price_min,price_max,is_discount, is_sell, is_usable;
+			for(let i=0; i<SkusAttrs.length; i++) {
+				const sk = SkusAttrs[i];
+				if(i==0) {
+					price_min = sk.price_sale;
+					price_max = sk.price_sale;
+					is_discount = sk.is_discount;
+					is_sell = sk.is_sell;
+					is_usable = sk.is_usable;
+				} else {
+					if(price_min>sk.price_sale) price_min = sk.price_sale;
+					if(price_max<sk.price_sale) price_max = sk.price_sale;
+					is_discount += sk.is_discount;
+					is_sell += sk.is_sell;
+					is_usable += sk.is_usable;
+				}
+			}
+
+			Prod.price_min = price_min;
+			Prod.price_max = price_max;
+			Prod.is_discount = is_discount ? true: false;
+			Prod.is_sell = is_sell ? true: false;
+			Prod.is_usable = is_usable ? true: false;
+		}
+		const ProdSave = await Prod.save();
+		return res.json({status: 200});
+	} catch(error) {
+		console.log(error);
+		return res.json({status: 500, message: "[服务器错误: Prod]"});
+	}
+}

@@ -1,3 +1,4 @@
+0.1.23	ProdAdjustment
 0.1.22	PayPal 测试版改为上线版 sandbox
 0.1.21	Stripe 支付去掉运费
 0.1.2	Bug

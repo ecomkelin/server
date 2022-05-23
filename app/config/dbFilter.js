@@ -18,7 +18,7 @@ exports.limitSelect = (dbName, payload) => {
 exports.limitPopulate = (popStr, payload, dbName) => {
 	try{
 		if(!popStr) return null;	// 如果 字符串 为空 则返回空
-		const populate = JSON.parse(popStr);	// 获取 populate 对象
+		let populate = JSON.parse(popStr);	// 获取 populate 对象
 		if(dbName === 'Prod') {
 		}
 		recursivePop(populate, payload, dbName);		// 根据回调 筛选去掉不可返回的populate 中的 select
