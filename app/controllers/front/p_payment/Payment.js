@@ -321,7 +321,7 @@ exports.wxPayment =  async (req, res) => {
 
 		return res.json({status: 200, data: {...pay_info}});
 	} catch (e) {
-		console.log("paypaylPayment error:   -------", e)
+		console.log("wxPayment error:   -------", e)
 		return res.json({ error: e.message })
 	}
 }
@@ -502,7 +502,7 @@ exports.wxPayment_b =  async (req, res) => {
 			
 		}})
 	} catch (e) {
-		console.log("paypaylPayment error:   -------", e)
+		console.log("wxPayment_b error:   -------", e)
 		return res.json({ error: e.message })
 	}
 }
