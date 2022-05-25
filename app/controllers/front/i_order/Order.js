@@ -125,11 +125,11 @@ exports.vOrderPost = async(req, res) => {
 
 				obj_OrderSku.attrs = "";
 				if(Sku.attrs) Sku.attrs.forEach(attr => obj_OrderSku.attrs += `${attr.nome}:${attr.option},`);
-				obj_OrderSku.price_sale = Sku.price_sale;
+				obj_OrderSku.price_sale = parseFloat(Sku.price_sale.toFixed(2));
 				if(isNaN(obj_OrderSku.quantity)) continue;
 				obj_OrderSku.quantity = parseInt(obj_OrderSku.quantity);
 				if(obj_OrderSku.quantity < 1) continue;
-				obj_OrderSku.price_regular = Sku.price_regular;
+				obj_OrderSku.price_regular = parseFloat(Sku.price_regular.toFixed(2));
 				const _OrderSku = new OrderSkuDB(obj_OrderSku);
 				const OSkuSave = await _OrderSku.save();
 				if(!OSkuSave) continue;

@@ -57,7 +57,7 @@ exports.stripePayment = async(req, res) => {
 		if(items_res.status !== 200) return res.json(items_res);
 		const {Shop, order_items} = items_res.data;
 		const line_items = order_items.map( item => {
-			const unit_amount = parseInt(item.price_sale * 100);
+			const unit_amount = parseInt(parseFloat(item.price_sale.toFixed(2)) * 100);
 			return {
 				price_data: {
 					currency: process.env.CURRENCY,
