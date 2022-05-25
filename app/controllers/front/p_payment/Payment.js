@@ -41,7 +41,7 @@ exports.webhook = async(req, res) => {
 }
 
 exports.stripePayment = async(req, res) => {
-	console.log("/v1/create-checkout-session")
+	console.log("/v1/create-checkout-session");
 	try{
 		const payload = req.payload;
 		const OrderId = req.body.OrderId;
@@ -150,7 +150,7 @@ exports.paypalPayment =  async (req, res) => {
 		const purchase_units = [{
 			amount: {
 				currency_code: process.env.CURRENCY,
-				value: orderPayValue,
+				value: Number(orderPayValue.toFixed(2)),
 				breakdown: {
 					item_total: {
 						currency_code: process.env.CURRENCY,
