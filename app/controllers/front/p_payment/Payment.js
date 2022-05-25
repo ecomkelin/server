@@ -150,11 +150,11 @@ exports.paypalPayment =  async (req, res) => {
 		const purchase_units = [{
 			amount: {
 				currency_code: process.env.CURRENCY,
-				value: Number(orderPayValue.toFixed(2)),
+				value: parseFloat(orderPayValue.toFixed(2)),
 				breakdown: {
 					item_total: {
 						currency_code: process.env.CURRENCY,
-						value: orderPayValue,
+						value: parseFloat(orderPayValue.toFixed(2)),
 					},
 				},
 			},
