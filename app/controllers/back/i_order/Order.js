@@ -5,6 +5,8 @@ const ConfOrder = require('../../../config/ConfOrder');
 const MdFilter = require('../../../middle/middleFilter');
 const MdSafe = require('../../../middle/middleSafe');
 const OrderDB = require('../../../models/order/Order');
+const OrderSkuDB = require('../../../models/order/OrderSku');
+const OrderProdDB = require('../../../models/order/OrderProd');
 const CitaDB = require('../../../models/address/Cita');
 
 exports.OrderPut = async(req, res) => {
@@ -65,8 +67,8 @@ exports.OrderDelete = async(req, res) => {
 
 		return res.json({status: 200, message: "[server] 删除成功"});
 	} catch(error) {
-		console.log("/b1/OrderPut", error);
-		return res.json({status: 500, message: "[服务器错误: OrderPut]"});
+		console.log("/b1/OrderDelete", error);
+		return res.json({status: 500, message: "[服务器错误: OrderDelete]"});
 	}
 }
 
