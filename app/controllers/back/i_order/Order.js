@@ -51,9 +51,6 @@ exports.OrderDelete = async(req, res) => {
 
 		const id = req.params.id;		// 所要更改的Order的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
-		
-		const force = req.query.force;
-		if(force !== payload.code) return res.json({status: 400, message: "[server] 请传递force的值为本人code"});
 
 		const pathObj = {_id: id, is_hide_client: true, Firm: payload.Firm};
 		if(payload.Shop) pathObj.Shop = payload.Shop;
