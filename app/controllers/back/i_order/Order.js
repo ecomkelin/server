@@ -53,6 +53,7 @@ exports.OrderDelete = async(req, res) => {
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
 
 		const pathObj = {_id: id, Firm: payload.Firm};
+		// const pathObj = {_id: id, is_hide_client: true, Firm: payload.Firm};
 		if(payload.Shop) pathObj.Shop = payload.Shop;
 
 		const Order = await OrderDB.findOne(pathObj);
