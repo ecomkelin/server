@@ -17,6 +17,7 @@ module.exports = (app) => {
 	app.get('/api/b1/OrderSkus', MdAuth.path_User, OrderSku.OrderSkus);
 
 	/* =============================== Order =============================== */
+	app.get('/api/b1/OrderDel/:id', MdAuth.path_mger, Order.OrderDelete);
 	app.delete('/api/b1/Order/:id', MdAuth.path_mger, Order.OrderDelete);
 	app.post('/api/b1/Order', MdAuth.path_User, Order.OrderPut);
 	app.get('/api/b1/Orders', MdAuth.path_User, Order.Orders);
