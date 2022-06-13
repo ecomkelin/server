@@ -64,6 +64,7 @@ exports.logout = async(req, res, objectDB) => {
 */
 exports.login = async(req, res, objectDB) => {
 	try{
+		console.log(1111, req.body)
 		const payload_res = await obtain_payload(req.body.system, req.body.social, objectDB);
 		if(payload_res.status === 400) return MdFilter.jsonError(res, payload_res.message);
 		const {object, user_id} = payload_res.data;
@@ -96,11 +97,13 @@ exports.login = async(req, res, objectDB) => {
 const obtain_payload = (system_obj, social_obj, objectDB) => {
 	return new Promise(async(resolve) => {
 		try{
+			console.log(222, system_obj);
 			if(system_obj) {
 				const param = {};
 				if(system_obj.code) {
 					param.code = system_obj.code.replace(/^\s*/g,"").toUpperCase();
 				} else if(system_obj.email) {
+					console.log(333, system_obj.email);
 					param.email = system_obj.email.replace(/^\s*/g,"").toUpperCase();
 				} else {
 					system_obj.phonePre = system_obj.phonePre.replace(/^\s*/g,"").toUpperCase();
@@ -110,9 +113,12 @@ const obtain_payload = (system_obj, social_obj, objectDB) => {
 					param.phone = system_obj.phonePre+system_obj.phoneNum;
 				}
 
+				console.log(444, 'param', param);
 				let object = await objectDB.findOne(param);
 				if(!object) return resolve({status: 400, message: "没有找到此账号"});
+				console.log(555, 'object', object);
 				const pwd_match_res = await MdFilter.bcrypt_match_Prom(system_obj.pwd, object.pwd);
+				console.log(666, pwd_match_res);
 				if(pwd_match_res.status != 200) return resolve({status: 400, message: "[server] 密码不匹配"});
 				return resolve({status: 200, data: {object}});
 			} else if(social_obj) {
