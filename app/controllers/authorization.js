@@ -248,6 +248,50 @@ exports.register = async(req, res) => {
 	}
 }
 
+/* 重置密码 */
+exports.resetPassword = async(req, res) => {
+	try {
+		let obj = null;
+		let to = null;
+		// const {email, phonePre, phoneNum, pwd, opt} = req.body;
+		const pathSame = {};	// 检查是否有相同的账号
+		if(req.body.email) {		// 邮箱注册
+			to = req.body.email.replace(/^\s*/g,"").toUpperCase();
+			obj = {email: to};
+			pathSame.email = to;
+		} else {					// 手机注册
+			const phonePre = MdFilter.get_phonePre_Func(req.body.phonePre);
+			if(!phonePre) return MdFilter.jsonError(res, "phonePre 错误");
+			const phoneNum = req.body.phoneNum.replace(/^\s*/g,"").toUpperCase();
+			to = phonePre+phoneNum;
+			obj = {phone: to};
+			obj.phonePre = phonePre;
+			obj.phoneNum = phoneNum;
+			obj.phone = phoneNum;
+			pathSame.phone = to;
+		}
+		const vrifyChecks_res = await verifyChecks_Prom(to, req.body.otp);	// 把注册邮箱或手机 连同验证码 验证
+		if(vrifyChecks_res.status !== 200) return MdFilter.jsonError(res, "验证不成功");
+
+		// 如果验证成功 则检查数据库 是否已有此邮箱或手机的账户
+		const object = await ClientDB.findOne(pathSame);	
+		if(!object) return MdFilter.jsonError(res, "您还没有注册, 请转到注册页面");
+
+		const pwd = req.body.pwd.replace(/(\s*$)/g, "").replace( /^\s*/, '');
+		const errorInfo = MdFilter.Stint_Match_objs(StintClient, req.body, ['pwd']);
+		if(errorInfo) return MdFilter.jsonError(res, errorInfo);
+		object.pwd = await MdFilter.encrypt_tProm(pwd);			// 密码加密
+
+
+		objSave = await object.save();
+		if(!objSave) return MdFilter.jsonError(res, "重置密码 数据库保存失败");
+		return res.json({status: 200, data: {object: objSave}});
+	} catch(error) {
+		console.log("/v1/register", error);
+		return res.json({status: 500, message: "[服务器错误: register]"});
+	}
+}
+
 
 
 

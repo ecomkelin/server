@@ -1,3 +1,4 @@
+0.1.26	重置密码
 0.1.25	Order删除
 0.1.24	Paypal支付问题
 0.1.23	ProdAdjustment

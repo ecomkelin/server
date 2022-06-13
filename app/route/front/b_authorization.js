@@ -28,6 +28,12 @@ module.exports = (app) => {
 		Authorization.register(req, res);
 	});
 
+	/* 重置密码 */
+	app.post('/api/v1/resetPassword', (req, res) => {
+		console.log('/v1/resetPassword');
+		Authorization.resetPassword(req, res);
+	});
+
 	/* 关联第三方账号 */
 	app.put('/api/v1/relSocial', MdAuth.path_Client, (req, res) => {
 		console.log('/v1/relSocial');
