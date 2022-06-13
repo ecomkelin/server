@@ -64,7 +64,6 @@ exports.logout = async(req, res, objectDB) => {
 */
 exports.login = async(req, res, objectDB) => {
 	try{
-		console.log(1111, req.body)
 		const payload_res = await obtain_payload(req.body.system, req.body.social, objectDB);
 		if(payload_res.status === 400) return MdFilter.jsonError(res, payload_res.message);
 		const {object, user_id} = payload_res.data;
@@ -97,13 +96,11 @@ exports.login = async(req, res, objectDB) => {
 const obtain_payload = (system_obj, social_obj, objectDB) => {
 	return new Promise(async(resolve) => {
 		try{
-			console.log(222, system_obj);
 			if(system_obj) {
 				const param = {};
 				if(system_obj.code) {
 					param.code = system_obj.code.replace(/^\s*/g,"").toUpperCase();
 				} else if(system_obj.email) {
-					console.log(333, system_obj.email);
 					param.email = system_obj.email.replace(/^\s*/g,"").toUpperCase();
 				} else {
 					system_obj.phonePre = system_obj.phonePre.replace(/^\s*/g,"").toUpperCase();
@@ -113,12 +110,9 @@ const obtain_payload = (system_obj, social_obj, objectDB) => {
 					param.phone = system_obj.phonePre+system_obj.phoneNum;
 				}
 
-				console.log(444, 'param', param);
 				let object = await objectDB.findOne(param);
 				if(!object) return resolve({status: 400, message: "没有找到此账号"});
-				console.log(555, 'object', object);
 				const pwd_match_res = await MdFilter.bcrypt_match_Prom(system_obj.pwd, object.pwd);
-				console.log(666, pwd_match_res);
 				if(pwd_match_res.status != 200) return resolve({status: 400, message: "[server] 密码不匹配"});
 				return resolve({status: 200, data: {object}});
 			} else if(social_obj) {
@@ -215,7 +209,6 @@ exports.register = async(req, res) => {
 			to = req.body.email.replace(/^\s*/g,"").toUpperCase();
 			obj = {email: to};
 			pathSame.email = to;
-			console.log('register email ------', to);
 		} else {					// 手机注册
 			const phonePre = MdFilter.get_phonePre_Func(req.body.phonePre);
 			if(!phonePre) return MdFilter.jsonError(res, "phonePre 错误");
@@ -226,7 +219,6 @@ exports.register = async(req, res) => {
 			obj.phoneNum = phoneNum;
 			obj.phone = phoneNum;
 			pathSame.phone = to;
-			console.log('register phone ======', to);
 		}
 		const vrifyChecks_res = await verifyChecks_Prom(to, req.body.otp);	// 把注册邮箱或手机 连同验证码 验证
 		if(vrifyChecks_res.status !== 200) return MdFilter.jsonError(res, "验证不成功");
@@ -238,7 +230,7 @@ exports.register = async(req, res) => {
 		const code_result = await generate_codeClient_Prom();		// 自动生成账户编号
 		if(code_result.status !== 200) return MdFilter.jsonError(res, code_result.message);
 		obj.code = code_result.data.code;
-		console.log('Client code 1111', obj.code)
+
 		const pwd = req.body.pwd.replace(/(\s*$)/g, "").replace( /^\s*/, '');
 		const errorInfo = MdFilter.Stint_Match_objs(StintClient, req.body, ['pwd']);
 		if(errorInfo) return MdFilter.jsonError(res, errorInfo);
@@ -249,7 +241,6 @@ exports.register = async(req, res) => {
 		const _object = new ClientDB(obj);
 		objSave = await _object.save();
 		if(!objSave) return MdFilter.jsonError(res, "创建用户失败");
-		console.log('注册成功', objSave);
 		return res.json({status: 200, data: {object: objSave}});
 	} catch(error) {
 		console.log("/v1/register", error);
