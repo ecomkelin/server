@@ -209,6 +209,7 @@ exports.register = async(req, res) => {
 			to = req.body.email.replace(/^\s*/g,"").toUpperCase();
 			obj = {email: to};
 			pathSame.email = to;
+			console.log('register email ------', to);
 		} else {					// 手机注册
 			const phonePre = MdFilter.get_phonePre_Func(req.body.phonePre);
 			if(!phonePre) return MdFilter.jsonError(res, "phonePre 错误");
@@ -219,6 +220,7 @@ exports.register = async(req, res) => {
 			obj.phoneNum = phoneNum;
 			obj.phone = phoneNum;
 			pathSame.phone = to;
+			console.log('register phone ======', to);
 		}
 		const vrifyChecks_res = await verifyChecks_Prom(to, req.body.otp);	// 把注册邮箱或手机 连同验证码 验证
 		if(vrifyChecks_res.status !== 200) return MdFilter.jsonError(res, "验证不成功");
@@ -230,7 +232,7 @@ exports.register = async(req, res) => {
 		const code_result = await generate_codeClient_Prom();		// 自动生成账户编号
 		if(code_result.status !== 200) return MdFilter.jsonError(res, code_result.message);
 		obj.code = code_result.data.code;
-
+		console.log('Client code 1111', obj.code)
 		const pwd = req.body.pwd.replace(/(\s*$)/g, "").replace( /^\s*/, '');
 		const errorInfo = MdFilter.Stint_Match_objs(StintClient, req.body, ['pwd']);
 		if(errorInfo) return MdFilter.jsonError(res, errorInfo);
@@ -241,6 +243,7 @@ exports.register = async(req, res) => {
 		const _object = new ClientDB(obj);
 		objSave = await _object.save();
 		if(!objSave) return MdFilter.jsonError(res, "创建用户失败");
+		console.log('注册成功', objSave);
 		return res.json({status: 200, data: {object: objSave}});
 	} catch(error) {
 		console.log("/v1/register", error);
