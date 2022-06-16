@@ -11,6 +11,8 @@ const dbSchema = new Schema({
 
 	status: Number,										// enum: ConfOrder;
 	is_hide_client: {type: Boolean, default: false}, 	// 客户是否可见, 客户删除状态下， 商家可删除
+	is_gray: {type: Boolean, default: false},
+	note: String,
 
 	type_Order: Number, 						// 只读 enum: [1, -1] 采购 销售
 

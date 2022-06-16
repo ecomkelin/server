@@ -17,25 +17,16 @@ exports.OrderPut = async(req, res) => {
 
 		const id = req.params.id;		// 所要更改的Order的id
 		if(!MdFilter.is_ObjectId_Func(id)) return res.json({status: 400, message: "[server] 请传递正确的数据 _id"});
+		const obj = req.body.general;
+		if(!obj) return res.json({status: 400, message: "[server] 请传递正确的数据 OrderPut 参数 general"});
 
-		const Order = await OrderDB.findOne({_id: id, User: payload._id, status: ConfOrder.status_obj.placing.num})
-			.populate({path: "Shop", select: "serve_Citas"});
+		const Order = await OrderDB.findOne({_id: id});
 		if(!Order) return res.json({status: 400, message: "[server] 没有找到此订单信息, 请刷新重试"});
 
-		if(req.body.ship_info) {
-			const ship_info = req.body.ship_info;
-			let i=0;
-			for(; i<Order.serve_Citas.length; i++) {
-				const serve_Cita = Order.serve_Citas[i];
-				if(ship_info.Cita === String(serve_Cita.Cita)) break;
-			}
-			if(i === Order.serve_Citas.length) return res.json({status: 400, message: "[server] 此城市不在服务区"});
-			const Cita = await CitaDB.findOne({_id: ship_info.Cita}, {code: 1, nome:1});
-			if(!Cita) return res.json({status: 400, message: "[server] 没有找到此城市"});
-			ship_info.city = Cita.code;
+		if(obj.is_gray == 1 || obj.is_gray === 'true') Order.is_gray = true;
+		if(obj.is_gray == 0 || obj.is_gray === 'false') Order.is_gray = false;
 
-			Order.ship_info = ship_info;
-		}
+		if(obj.note) Order.note = obj.note;
 
 		const objSave = await Order.save();
 		return res.json({status: 200, message: "[server] 修改成功", data: {object: objSave}});
