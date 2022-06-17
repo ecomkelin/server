@@ -5,7 +5,7 @@ const ProdDB = require('../../../models/product/Prod');
 const _ = require('underscore');
 
 const vProd_path_Func = (pathObj, payload, queryObj) => {
-	pathObj.is_usable = true;
+	// pathObj.is_usable = true;
 
 	if(!queryObj) return;
 	if(queryObj.is_discount && (queryObj.is_discount == 1 ||queryObj.is_discount === 'true')) {
