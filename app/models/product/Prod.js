@@ -33,7 +33,7 @@ const dbSchema = new Schema({
 	// Tags: [{type: ObjectId, ref: 'Tag'}],
 	sort: Number,
 
-	is_usable: { type: Boolean, default: false },
+	is_usable: { type: Boolean, default: true },
 
 	Attrs: [{type: ObjectId, ref: "Attr"}],			// 只读 [由 Attr 决定] 公司层面是否可用
 

@@ -139,7 +139,6 @@ const Prod_save_Prom = async(obj, payload, Pd) => {
 		try {
 			obj.is_usable = (obj.is_usable == 1 || obj.is_usable === true || obj.is_usable === 'true') ? true: false;
 			obj.Shop = payload.Shop;
-			obj.is_usable = false;
 			obj.Skus = [];
 
 			obj.Firm = payload.Firm;
