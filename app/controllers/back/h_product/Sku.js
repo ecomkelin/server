@@ -204,7 +204,7 @@ exports.SkuPut = async(req, res) => {
 		if(obj.purchase_note) Sku.purchase_note = obj.purchase_note;
 		Sku.is_controlStock = (obj.is_controlStock == 1 || obj.is_controlStock === true || obj.is_controlStock === 'true') ? true : false;
 		Sku.allow_backorder = (obj.allow_backorder == 1 || obj.allow_backorder === true || obj.allow_backorder === 'true') ? true : false;
-		Sku.is_usable = (obj.is_usable == 0 || obj.is_usable === false || obj.is_usable === "false") ? false : true;
+		Sku.is_usable = (obj.is_usable == 1 || obj.is_usable === true || obj.is_usable === "true") ? true : false;
 		
 		Sku.User_upd = payload._id;
 
@@ -240,7 +240,6 @@ const Prod_save_post_Prom = (id) => {
 				Prod.price_min = Prod.price_max = SkuDefault.price_sale;
 				Prod.is_discount = SkuDefault.is_discount;
 				Prod.is_sell = SkuDefault.is_sell;
-				Prod.is_usable = SkuDefault.is_usable;
 			} else {
 				// 如果 Prod 为多规格产品 则需要跳过 attrs为空的 Sku
 				const SkuDefault = Prod.Skus.filter((item) => {
@@ -252,7 +251,7 @@ const Prod_save_post_Prom = (id) => {
 				});
 
 				if(SkusAttrs.length < 1) return resolve({status: 400, message: "[server] 商品Sku错误"});
-				let price_min,price_max,is_discount, is_sell, is_usable;
+				let price_min,price_max,is_discount, is_sell;
 				for(let i=0; i<SkusAttrs.length; i++) {
 					const sk = SkusAttrs[i];
 					if(i==0) {
@@ -260,13 +259,11 @@ const Prod_save_post_Prom = (id) => {
 						price_max = sk.price_sale;
 						is_discount = sk.is_discount;
 						is_sell = sk.is_sell;
-						is_usable = sk.is_usable;
 					} else {
 						if(price_min>sk.price_sale) price_min = sk.price_sale;
 						if(price_max<sk.price_sale) price_max = sk.price_sale;
 						is_discount += sk.is_discount;
 						is_sell += sk.is_sell;
-						is_usable += sk.is_usable;
 					}
 				}
 
@@ -274,7 +271,6 @@ const Prod_save_post_Prom = (id) => {
 				Prod.price_max = price_max;
 				Prod.is_discount = is_discount ? true: false;
 				Prod.is_sell = is_sell ? true: false;
-				Prod.is_usable = is_usable ? true: false;
 			}
 			const ProdSave = await Prod.save();
 			resolve({status: 200, data: {object: ProdSave}});
