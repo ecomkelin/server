@@ -204,7 +204,7 @@ exports.SkuPut = async(req, res) => {
 		if(obj.purchase_note) Sku.purchase_note = obj.purchase_note;
 		Sku.is_controlStock = (obj.is_controlStock == 1 || obj.is_controlStock === true || obj.is_controlStock === 'true') ? true : false;
 		Sku.allow_backorder = (obj.allow_backorder == 1 || obj.allow_backorder === true || obj.allow_backorder === 'true') ? true : false;
-		Sku.is_usable = (obj.is_usable == 1 || obj.is_usable === true || obj.is_usable === "true") ? true : false;
+		Sku.is_usable = (obj.is_usable == 0 || obj.is_usable === false || obj.is_usable === "false") ? false : true;
 		
 		Sku.User_upd = payload._id;
 
