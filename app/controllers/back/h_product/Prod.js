@@ -137,7 +137,7 @@ const Pd_to_Prod = (Pd) => {
 const Prod_save_Prom = async(obj, payload, Pd) => {
 	return new Promise(async(resolve) => {
 		try {
-			obj.is_usable = (obj.is_usable == 1 || obj.is_usable === true || obj.is_usable === 'true') ? true: false;
+			obj.is_usable = (obj.is_usable == 0 || obj.is_usable === false || obj.is_usable === 'false') ? false: true;
 			obj.Shop = payload.Shop;
 			obj.Skus = [];
 
@@ -150,7 +150,7 @@ const Prod_save_Prom = async(obj, payload, Pd) => {
 			obj_Sku.Pd = obj.Pd;
 			obj_Sku.Prod = _object._id;
 			obj_Sku.attrs = null;
-			obj_Sku.is_usable = false;
+			obj_Sku.is_usable = true;
 			obj_Sku.price_regular = obj.price_regular
 			obj_Sku.price_sale = obj.price_sale
 			obj_Sku.Firm = obj.Firm
