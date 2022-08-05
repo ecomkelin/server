@@ -162,6 +162,16 @@ const Shop_general = async(res, obj, Shop, payload) => {
 			await MdFiles.rmPicture(Shop.img_url);
 		}
 
+		if(obj.is_usable) {
+			if(obj.is_usable == 1 || obj.is_usable === 'true') {
+				obj.is_usable = true;
+			} else if(obj.is_usable == 0 || obj.is_usable === 'false') {
+				obj.is_usable = false;
+			} else {
+				return res.json({status: 400, message: '[server] is_usable 数据传输错误'});
+			}
+		}
+
 		obj.User_upd = payload._id;
 		const _object = _.extend(Shop, obj);
 
